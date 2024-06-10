@@ -75,19 +75,19 @@ class _HomePageState extends State<HomePage> {
                         onTap: _changeImage,
                         // child: Image.asset(cactusPath, width: 300),
                         child: ShaderMask(
-                                shaderCallback: (Rect bounds) {
-                                  return LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [Colors.white, Colors.grey],
-                                      stops: [0.5, 0.9]).createShader(bounds);
-                                },
-                                blendMode: BlendMode.srcATop,
-                                child: Image.asset(
-                                  'whiteCactus.png',
-                                  width: 300,
-                                ),
-                              ),
+                          shaderCallback: (Rect bounds) {
+                            return LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.transparent, AppColors.water],
+                                stops: [0.8, 0.8]).createShader(bounds);
+                          },
+                          blendMode: BlendMode.srcATop,
+                          child: Image.asset(
+                            'whiteCactus.png',
+                            width: 300,
+                          ),
+                        ),
                       )
                     ],
                   ),
