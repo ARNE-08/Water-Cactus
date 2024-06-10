@@ -1,7 +1,4 @@
-import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 
@@ -12,44 +9,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String cactusPath = 'whiteCactus.png';
-  ui.Image? cactusImage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadImage(cactusPath);
-  }
-
-  Future<void> _loadImage(String path) async {
-    final data = await rootBundle.load(path);
-    final List<int> bytes = data.buffer.asUint8List();
-    final Completer<ui.Image> completer = Completer();
-    ui.decodeImageFromList(Uint8List.fromList(bytes), (ui.Image img) {
-      setState(() {
-        cactusImage = img;
-      });
-      completer.complete(img);
-    });
-    await completer.future;
-  }
 
   void _changeImage() {
+    print('Changing image');
     setState(() {
-      cactusPath = cactusPath == 'assets/whiteCactus.png'
-          ? 'assets/Cactus.png'
-          : 'assets/whiteCactus.png';
+      cactusPath =
+          cactusPath == 'whiteCactus.png' ? 'Cactus.png' : 'whiteCactus.png';
     });
-    _loadImage(cactusPath);
+    print('Image changed to $cactusPath');
   }
-
-  // void _changeImage() {
-  //   print('Changing image');
-  //   setState(() {
-  //     cactusPath =
-  //         cactusPath == 'whiteCactus.png' ? 'Cactus.png' : 'whiteCactus.png';
-  //   });
-  //   print('Image changed to $cactusPath');
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -106,20 +74,17 @@ class _HomePageState extends State<HomePage> {
                       GestureDetector(
                         onTap: _changeImage,
                         // child: Image.asset(cactusPath, width: 300),
-                        child: cactusImage == null
-                            ? CircularProgressIndicator()
-                            : ShaderMask(
+                        child: ShaderMask(
                                 shaderCallback: (Rect bounds) {
-                                  return ImageShader(
-                                    cactusImage!,
-                                    TileMode.clamp,
-                                    TileMode.clamp,
-                                    Matrix4.identity().storage,
-                                  );
+                                  return LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [Colors.white, Colors.grey],
+                                      stops: [0.5, 0.9]).createShader(bounds);
                                 },
                                 blendMode: BlendMode.srcATop,
                                 child: Image.asset(
-                                  'background.png',
+                                  'whiteCactus.png',
                                   width: 300,
                                 ),
                               ),
