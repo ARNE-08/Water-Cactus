@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/screen/auth/login.dart';
 import 'package:watercactus_frontend/screen/auth/signup.dart';
+import 'package:watercactus_frontend/screen/profile/waterunit.dart';
 import 'package:watercactus_frontend/screen/startup/start.dart';
 
 void main() {
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => StartPage(),
         '/login': (context) => LoginPage(),
         '/signup':(context) => SignupPage(),
+        '/unit':(context) => UnitPage(),
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watercactus_frontend/widget/button.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
@@ -68,19 +69,38 @@ class StartPage extends StatelessWidget {
                   SizedBox(height: 40),
                   MyElevatedButton(
                     onPressed: () {
-                      // Your onPressed function here
+                      Navigator.pushNamed(context, '/signup');
                     },
                     text: 'Get started!',
                     width: 310, // Increased width for the button
                   ),
                   SizedBox(height: 20),
-                  Text(
-                    'Already a user? Login',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: 15,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    child: Text.rich(
+                      TextSpan(
+                        text: 'Already a user? ',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontSize: 15,
+                          ),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Login',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Color.fromRGBO(10, 105, 216, 1),
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ],

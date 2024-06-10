@@ -328,6 +328,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.1"
+  widget_mask:
+    dependency: "direct main"
+    description:
+      name: widget_mask
+      sha256: aa1687439caad231e182e224a4f69c026695b4a44e907d49cbba59d4242212a2
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   win32:
     dependency: transitive
     description:
