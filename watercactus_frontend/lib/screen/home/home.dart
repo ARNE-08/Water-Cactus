@@ -3,20 +3,38 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   String cactusPath = 'whiteCactus.png';
+  bool showShaderMask = true;
 
-  void _changeImage() {
-    print('Changing image');
-    setState(() {
-      cactusPath =
-          cactusPath == 'whiteCactus.png' ? 'Cactus.png' : 'whiteCactus.png';
-    });
-    print('Image changed to $cactusPath');
+  Widget buildOriginalImage() {
+    return Image.asset(
+      'Cactus.png',
+      width: 300,
+    );
+  }
+
+  Widget buildShaderMaskImage() {
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.transparent, Colors.blue],
+          stops: [0.2, 0.2], // Adjusted stops to fill 80% with blue
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.srcATop,
+      child: Image.asset(
+        'whiteCactus.png',
+        width: 300,
+      ),
+    );
   }
 
   @override
@@ -72,22 +90,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 20),
                       GestureDetector(
-                        onTap: _changeImage,
-                        // child: Image.asset(cactusPath, width: 300),
-                        child: ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [Colors.transparent, AppColors.water],
-                                stops: [0.8, 0.8]).createShader(bounds);
-                          },
-                          blendMode: BlendMode.srcATop,
-                          child: Image.asset(
-                            'whiteCactus.png',
-                            width: 300,
-                          ),
-                        ),
+                        onTap: () {
+                          setState(() {
+                            showShaderMask = !showShaderMask;
+                          });
+                        },
+                        child: showShaderMask ? buildShaderMaskImage() : buildOriginalImage(),
                       )
                     ],
                   ),
