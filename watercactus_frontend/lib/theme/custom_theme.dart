@@ -43,7 +43,6 @@ class CustomTheme {
             MaterialStateProperty.all<double>(0), // Remove the elevation here
       ),
     ),
-    textTheme: CustomTextTheme().textTheme,
     expansionTileTheme: const ExpansionTileThemeData(
       shape: Border(),
       backgroundColor: Colors.white,
@@ -51,56 +50,44 @@ class CustomTheme {
   );
 }
 
-class CustomTextTheme {
-  final Map<String, TextStyle> _customTextStyles = {
-    'poppins1': GoogleFonts.poppins(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 24,
-        color: Colors.black,
-      ),
+class CustomTextStyle {
+  static final TextStyle poppins1 = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 24,
+      color: AppColors.black,
     ),
-    'poppins2': GoogleFonts.poppins(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w500,
-        fontSize: 12,
-        color: Colors.black,
-      ),
-    ),
-    'poppins3': GoogleFonts.poppins(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 10,
-        color: AppColors.grey,
-      ),
-    ),
-    'poppins4': GoogleFonts.poppins(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w400,
-        fontSize: 10,
-        color: AppColors.grey,
-      ),
-    ),
-    'baloo1': GoogleFonts.balooThambi2(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w800,
-        fontSize: 20,
-        color: AppColors.darkGrey,
-      ),
-    ),
-    // Add more custom text styles as needed
-  };
+  );
 
-  TextTheme get textTheme => _buildTextTheme();
+  static final TextStyle poppins2 = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w500,
+      fontSize: 12,
+      color: AppColors.black,
+    ),
+  );
 
-  TextTheme _buildTextTheme() {
-    return TextTheme(
-      headlineLarge: _customTextStyles['poppins1'],
-      bodyLarge: _customTextStyles['poppins2'],
-      bodyMedium: _customTextStyles['poppins3'],
-      bodySmall: _customTextStyles['poppins4'],
-      headlineMedium: _customTextStyles['baloo1'],
-      // Add more mappings here
-    );
-  }
+  static final TextStyle poppins3 = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 10,
+      color: AppColors.grey,
+    ),
+  );
+
+  static final TextStyle poppins4 = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w400,
+      fontSize: 10,
+      color: AppColors.grey,
+    ),
+  );
+
+  static final TextStyle baloo1 = GoogleFonts.balooThambi2(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      color: AppColors.darkGrey,
+    ),
+  );
 }

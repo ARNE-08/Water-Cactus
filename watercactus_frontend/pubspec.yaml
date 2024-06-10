@@ -62,6 +62,15 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/Cactus.png
+    - assets/beverageIcons/water.png
+    - assets/beverageIcons/tea.png
+    - assets/beverageIcons/coffee.png
+    - assets/beverageIcons/juice.png
+    - assets/beverageIcons/milk.png
+    - assets/beverageIcons/soda.png
+    - assets/beverageIcons/beer.png
+    - assets/beverageIcons/wine.png
+    - assets/beverageIcons/add.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
