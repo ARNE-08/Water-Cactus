@@ -62,6 +62,7 @@ flutter:
   assets:
     - assets/Cactus.png
     - assets/whiteCactus.png
+
     - assets/beverageIcons/water.png
     - assets/beverageIcons/tea.png
     - assets/beverageIcons/coffee.png
@@ -73,6 +74,15 @@ flutter:
     - assets/beverageIcons/add.png
     - assets/GlassOfWater.png
     - assets/trophy.png
+
+    - assets/beverages/Water.png
+    - assets/beverages/Tea.png
+    - assets/beverages/Coffee.png
+    - assets/beverages/Juice.png
+    - assets/beverages/Milk.png
+    - assets/beverages/Soda.png
+    - assets/beverages/Beer.png
+    - assets/beverages/Wine.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

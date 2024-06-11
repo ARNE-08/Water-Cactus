@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
+import 'package:watercactus_frontend/screen/home/logWater.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,6 +40,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+  final double screenWidth = MediaQuery.of(context).size.width;
+
     List<String> imagePaths = [
       'beverageIcons/water.png',
       'beverageIcons/tea.png',
@@ -95,7 +98,9 @@ class _HomePageState extends State<HomePage> {
                             showShaderMask = !showShaderMask;
                           });
                         },
-                        child: showShaderMask ? buildShaderMaskImage() : buildOriginalImage(),
+                        child: showShaderMask
+                            ? buildShaderMaskImage()
+                            : buildOriginalImage(),
                       )
                     ],
                   ),
@@ -124,31 +129,78 @@ class _HomePageState extends State<HomePage> {
                         width: double.infinity,
                         // color: AppColors.blue,
                         child: ListView.builder(
-                          // defaultPosition: 50,
                           key: const PageStorageKey('beverageList'),
                           scrollDirection: Axis.horizontal,
                           itemCount: 9,
                           itemBuilder: (context, index) {
-                            return Padding(
-                              padding: EdgeInsets.all(20.0),
-                              child: Column(children: [
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage(imagePaths[index]),
-                                      fit: BoxFit.contain,
+                            return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LogWaterPage(
+                                        beverageIndex: index,
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.all(20.0),
+                                  child: Column(
+                                    children: [
+                                      if (index == 0)
+                                        Row(
+                                          children: [
+                                            SizedBox(width: (screenWidth / 2) - 45,),
+                                            Column(
+                                              children: [
+                                                // SizedBox(width: 10.0), // Add spacing between blue box and content
+                                                Container(
+                                                  width: 50,
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image: AssetImage(
+                                                          imagePaths[index]),
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 10),
+                                                Text(
+                                                  beverageNames[index],
+                                                  style: CustomTextStyle.poppins3,
+                                                ),
+                                              ],
+                                            ),
+                                          ]
+                                        )
+                                      else
+                                        Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                              Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image:
+                                                      AssetImage(imagePaths[index]),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            Text(
+                                              beverageNames[index],
+                                              style: CustomTextStyle.poppins3,
+                                            ),
+                                          ]
+                                        ),
+                                      // SizedBox(height: 10.0),
+                                    ],
                                   ),
-                                ),
-                                SizedBox(height: 10.0),
-                                Text(
-                                  beverageNames[index],
-                                  style: CustomTextStyle.poppins3,
-                                ),
-                              ]),
-                            );
+                                ));
                           },
                         ),
                       ),
