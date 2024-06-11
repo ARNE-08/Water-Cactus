@@ -64,7 +64,6 @@ flutter:
   assets:
     - assets/Cactus.png
     - assets/whiteCactus.png
-    - assets/background.png
     - assets/beverageIcons/water.png
     - assets/beverageIcons/tea.png
     - assets/beverageIcons/coffee.png

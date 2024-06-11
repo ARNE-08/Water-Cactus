@@ -1,55 +1,41 @@
-import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   String cactusPath = 'whiteCactus.png';
-  ui.Image? cactusImage;
+  bool showShaderMask = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadImage(cactusPath);
+  Widget buildOriginalImage() {
+    return Image.asset(
+      'Cactus.png',
+      width: 300,
+    );
   }
 
-  Future<void> _loadImage(String path) async {
-    final data = await rootBundle.load(path);
-    final List<int> bytes = data.buffer.asUint8List();
-    final Completer<ui.Image> completer = Completer();
-    ui.decodeImageFromList(Uint8List.fromList(bytes), (ui.Image img) {
-      setState(() {
-        cactusImage = img;
-      });
-      completer.complete(img);
-    });
-    await completer.future;
+  Widget buildShaderMaskImage() {
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.transparent, Colors.blue],
+          stops: [0.2, 0.2], // Adjusted stops to fill 80% with blue
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.srcATop,
+      child: Image.asset(
+        'whiteCactus.png',
+        width: 300,
+      ),
+    );
   }
-
-  void _changeImage() {
-    setState(() {
-      cactusPath = cactusPath == 'assets/whiteCactus.png'
-          ? 'assets/Cactus.png'
-          : 'assets/whiteCactus.png';
-    });
-    _loadImage(cactusPath);
-  }
-
-  // void _changeImage() {
-  //   print('Changing image');
-  //   setState(() {
-  //     cactusPath =
-  //         cactusPath == 'whiteCactus.png' ? 'Cactus.png' : 'whiteCactus.png';
-  //   });
-  //   print('Image changed to $cactusPath');
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -104,25 +90,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 20),
                       GestureDetector(
-                        onTap: _changeImage,
-                        // child: Image.asset(cactusPath, width: 300),
-                        child: cactusImage == null
-                            ? CircularProgressIndicator()
-                            : ShaderMask(
-                                shaderCallback: (Rect bounds) {
-                                  return ImageShader(
-                                    cactusImage!,
-                                    TileMode.clamp,
-                                    TileMode.clamp,
-                                    Matrix4.identity().storage,
-                                  );
-                                },
-                                blendMode: BlendMode.srcATop,
-                                child: Image.asset(
-                                  'background.png',
-                                  width: 300,
-                                ),
-                              ),
+                        onTap: () {
+                          setState(() {
+                            showShaderMask = !showShaderMask;
+                          });
+                        },
+                        child: showShaderMask ? buildShaderMaskImage() : buildOriginalImage(),
                       )
                     ],
                   ),
