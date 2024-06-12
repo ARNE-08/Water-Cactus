@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
   @override
   State<StatefulWidget> createState() => _StatisticPageState();
 }
+
+final List<String> imagePaths = [
+  'assets/week.png',
+  'assets/month.png',
+  'assets/average.png',
+  'assets/frequency.png',
+];
+
+final List<String> texts = [
+  'Weekly Average',
+  'Monthly Average',
+  'Average Completion',
+  'Drink Frequency',
+];
 
 class _StatisticPageState extends State<StatisticPage> {
   @override
@@ -26,7 +41,7 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: 200.0,
+                height: index == 4 ? 280.0 : 200.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
@@ -85,42 +100,159 @@ class _StatisticPageState extends State<StatisticPage> {
                             ),
                           ],
                         )
-                        : index == 2
+                      : index == 1
                           ? Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
                                 children: [
-                                  Text(
-                                    'Last 7 Days Goal Achieve',
-                                    style: CustomTextStyle.poppins3,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: PieChart(
+                                        PieChartData(
+                                          sections: [
+                                            PieChartSectionData(
+                                              value: 20,
+                                              title: '',
+                                              color: Colors.blue,
+                                              radius: 10,
+                                            ),
+                                          ].any((section) => section.value != 0)
+                                              ? [
+                                                  PieChartSectionData(
+                                                    value: 10,
+                                                    title: '',
+                                                    color: Colors.blue,
+                                                    radius: 10,
+                                                  ),
+                                                  // Add other sections as needed
+                                                ]
+                                              : [
+                                                  PieChartSectionData(
+                                                    value: 1,
+                                                    title: '',
+                                                    color: Colors.grey,
+                                                    radius: 10,
+                                                  ),
+                                                ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  
-                                  
                                 ],
                               ),
-                          )
-                           : index == 4
-                          ? Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Drink Water Report',
-                                    style: CustomTextStyle.poppins3,
+                            )
+                          : index == 2
+                              ? Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Last 7 Days Goal Achieve',
+                                        style: CustomTextStyle.poppins3,
+                                      ),
+                                    ],
                                   ),
-                                  
-                                  
-                                ],
-                              ),
-                          )
-                      : Text(
-                          'Chart ${index + 1}',
-                          style: CustomTextStyle.poppins3,
-                        ),
+                                )
+                              : index == 3
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: Column(
+                                        children: [
+                                          SizedBox(height: 20),
+                                          Expanded(
+                                            child: BarChart(
+                                              BarChartData(
+                                                barGroups: [
+                                                  BarChartGroupData(
+                                                    x: 0,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                        toY: 8,
+                                                        color: Colors
+                                                            .lightBlueAccent,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 1,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                        toY: 10,
+                                                        color: Colors
+                                                            .lightBlueAccent,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 2,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                        toY: 14,
+                                                        color: Colors
+                                                            .lightBlueAccent,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  BarChartGroupData(
+                                                    x: 3,
+                                                    barRods: [
+                                                      BarChartRodData(
+                                                        toY: 15,
+                                                        color: Colors
+                                                            .lightBlueAccent,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : index == 4
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            'Drink Water Report',
+                                            style: CustomTextStyle.poppins3,
+                                          ),
+                                          SizedBox(height: 20), // Add some space below the title
+                                          Column(
+                                            children: List.generate(4, (partIndex) {
+                                              return Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        imagePaths[partIndex],
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        texts[partIndex],
+                                                        style: CustomTextStyle.poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  // Add divider below each row except the last one
+                                                  if (partIndex < 3) Divider(),
+                                                ],
+                                              );
+                                            }),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Text(
+                                      'Chart ${index + 1}',
+                                      style: CustomTextStyle.poppins3,
+                                    ),
                 ),
-                
               );
             }),
           ),

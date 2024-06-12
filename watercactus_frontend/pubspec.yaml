@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
   widget_mask: ^0.1.0
-
+  fl_chart: ^0.68.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -74,6 +74,10 @@ flutter:
     - assets/beverageIcons/add.png
     - assets/GlassOfWater.png
     - assets/trophy.png
+    - assets/week.png
+    - assets/month.png
+    - assets/average.png
+    - assets/frequency.png
 
     - assets/beverages/Water.png
     - assets/beverages/Tea.png
