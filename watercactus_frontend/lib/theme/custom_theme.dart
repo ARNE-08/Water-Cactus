@@ -15,7 +15,7 @@ class CustomTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(
-          AppColors.lightBlue,
+          AppColors.water,
         ),
         foregroundColor: MaterialStateProperty.all<Color>(
           AppColors.white,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
+import 'package:watercactus_frontend/widget/numpad.dart';
 
 class LogWaterPage extends StatefulWidget {
   final int beverageIndex;
@@ -14,6 +15,8 @@ class LogWaterPage extends StatefulWidget {
 class _LogWaterPageState extends State<LogWaterPage> {
   String cactusPath = 'whiteCactus.png';
   bool showShaderMask = true;
+  String _selectedNumber = "0";
+
   List<String> imagePath = [
     'beverages/Water.png',
     'beverages/Tea.png',
@@ -35,6 +38,58 @@ class _LogWaterPageState extends State<LogWaterPage> {
     const Color.fromRGBO(239, 239, 249, 1),
     const Color.fromRGBO(233, 151, 156, 1),
   ];
+
+  int selectedOptionIndex = 1;
+  final ScrollController _controller = ScrollController();
+  List<String> options = [
+    '',
+    '100ml',
+    '200ml',
+    '300ml',
+    // ''
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.addListener(_onScroll);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+  double center = _controller.position.viewportDimension / 2;
+  double minDistance = double.infinity;
+  int newSelectedIndex = selectedOptionIndex;
+
+  for (int index = 0; index < options.length; index++) {
+    double itemExtent = 120.0; // Adjust according to the size of your items
+    double itemCenter = index * itemExtent + itemExtent / 2;
+
+    double distance = (_controller.offset + center - itemCenter).abs();
+    if (distance < minDistance) {
+      minDistance = distance;
+      newSelectedIndex = index;
+    }
+  }
+
+  setState(() {
+    selectedOptionIndex = newSelectedIndex;
+  });
+}
+  void _onItemTab(int index) {
+    print(index);
+    setState( () {
+      selectedOptionIndex = index;
+    }
+    );
+  }
 
   Widget buildOriginalImage() {
     return Image.asset(
@@ -61,9 +116,25 @@ class _LogWaterPageState extends State<LogWaterPage> {
     );
   }
 
+  void _showNumberPad(BuildContext context) async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return NumberPad();
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedNumber = result;
+      });
+      print(_selectedNumber);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-  final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -105,54 +176,61 @@ class _LogWaterPageState extends State<LogWaterPage> {
                 ),
                 SizedBox(height: 50),
                 Container(
-                  height: 120,
+                  height: 220,
                   width: double.infinity,
-                  // color: AppColors.blue,
-                  child: ListView.builder(
-                    key: const PageStorageKey('beverageList'),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LogWaterPage(
-                                  beverageIndex: index,
+                  color: AppColors.lightBlue,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _controller,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: options.length,
+                          itemBuilder: (context, index) {
+                            final option = options[index];
+                            final isSelected = index == selectedOptionIndex;
+
+                            return GestureDetector(
+                              onTap: () => _onItemTab(index),
+                              child: Container(
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(horizontal: 55.0),
+                                child: Text(
+                                  option,
+                                  style: isSelected
+                                      ? CustomTextStyle.poppins1
+                                      : CustomTextStyle.poppins2,
                                 ),
                               ),
                             );
                           },
-                          child: Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: Column(
-                              children: [
-                                if (index == 0)
-                                  Row(children: [
-                                    SizedBox(
-                                      width: (screenWidth / 2) - 45,
-                                    ),
-                                    Text(
-                                      '330 ml',
-                                      style: CustomTextStyle.poppins1,
-                                    )
-                                  ])
-                                else
-                                  Column(
-                                      children: [
-                                        Text(
-                                          '330 ml',
-                                          style: CustomTextStyle.poppins3,
-                                        ),
-                                      ]),
-                                // SizedBox(height: 10.0),
-                              ],
-                            ),
-                          ));
-                    },
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          // SizedBox(width: 150),
+                          Container(
+                            width: (screenWidth / 2) - 60,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+
+                            },
+                            child: Text('+ WATER'),
+                          ),
+                          Spacer(),
+                          IconButton(
+                            onPressed: () => _showNumberPad(context),
+                             icon: Icon(Icons.dialpad, color: AppColors.black, size: 30),
+                          ),
+                          SizedBox(width: 30),
+                        ]
+                      ),
+                      SizedBox(height: 50,)
+                    ]
                   ),
                 ),
+                // SizedBox(width: screenWidth / 2), // Space to center the selected option
               ],
             ),
           ),
