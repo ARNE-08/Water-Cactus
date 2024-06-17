@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
 import 'package:watercactus_frontend/widget/button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignupPage extends StatelessWidget {
   @override
@@ -72,7 +75,32 @@ class SignupPage extends StatelessWidget {
   }
 }
 
+
 class SignupBox extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final storage = FlutterSecureStorage();
+
+  Future<void> _signup(BuildContext context) async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/signup'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final token = jsonResponse['token'];
+      await storage.write(key: 'jwt_token', value: token);
+      Navigator.pushNamed(context, '/unit');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Signup failed')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -108,9 +136,10 @@ class SignupBox extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  prefixIcon: Icon(Icons.person), // User icon
+                  prefixIcon: Icon(Icons.mail), // User icon
                 ),
               ),
             ),
@@ -118,6 +147,7 @@ class SignupBox extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextFormField(
+                controller: _passwordController,
                 decoration: InputDecoration(
                   hintText: 'Password',
                   prefixIcon: Icon(Icons.lock), // Lock icon
@@ -130,7 +160,7 @@ class SignupBox extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: MyElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/unit');
+                  _signup(context);
                 },
                 text: 'Register',
                 width: 310, // Increased width for the button

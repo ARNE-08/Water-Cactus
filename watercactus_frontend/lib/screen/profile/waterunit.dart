@@ -63,6 +63,8 @@ class UnitPage extends StatelessWidget {
                   SizedBox(height: 40),
                   MyElevatedButton(
                     onPressed: () {
+                      Navigator.pushNamed(context, '/goal-calculation');
+    
                     },
                     text: 'oz (ounces)',
                     width: 275,
@@ -72,6 +74,7 @@ class UnitPage extends StatelessWidget {
                   SizedBox(height: 20),
                   MyElevatedButton(
                     onPressed: () {
+                      Navigator.pushNamed(context, '/goal-calculation');
                     },
                     text: 'ml (milliliters)',
                     width: 275,
