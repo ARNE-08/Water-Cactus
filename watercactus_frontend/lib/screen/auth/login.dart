@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
 import 'package:watercactus_frontend/widget/button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -73,6 +76,35 @@ class LoginPage extends StatelessWidget {
 }
 
 class LoginBox extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final storage = FlutterSecureStorage();
+
+  Future<void> _signin(BuildContext context) async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success']) {
+        final token = jsonResponse['data']['token'];
+        await storage.write(key: 'jwt_token', value: token);
+        print("Token stored successfully");
+        Navigator.pushNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${jsonResponse['error']}')));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: Server error')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -108,6 +140,7 @@ class LoginBox extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Email',
                   prefixIcon: Icon(Icons.person), // User icon
@@ -118,6 +151,7 @@ class LoginBox extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextFormField(
+                controller: _passwordController,
                 decoration: InputDecoration(
                   hintText: 'Password',
                   prefixIcon: Icon(Icons.lock), // Lock icon
@@ -130,7 +164,7 @@ class LoginBox extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: MyElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/home');
+                  _signin(context);
                 },
                 text: 'LOGIN',
                 width: 310, // Increased width for the button
@@ -139,7 +173,7 @@ class LoginBox extends StatelessWidget {
             SizedBox(height: 20),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/login');
+                Navigator.pushNamed(context, '/signup');
               },
               child: Text.rich(
                 TextSpan(

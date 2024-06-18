@@ -93,7 +93,8 @@ class SignupBox extends StatelessWidget {
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-      final token = jsonResponse['token'];
+      final token = jsonResponse['data']['token'];
+      print(token);
       await storage.write(key: 'jwt_token', value: token);
       Navigator.pushNamed(context, '/unit');
     } else {
