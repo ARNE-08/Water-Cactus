@@ -156,61 +156,196 @@ class _StatisticPageState extends State<StatisticPage> {
                                 )
                               : index == 3
                                   ? Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(height: 20),
-                                          Expanded(
-                                            child: BarChart(
-                                              BarChartData(
-                                                barGroups: [
-                                                  BarChartGroupData(
-                                                    x: 0,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 8,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 1,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 10,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 2,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 14,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 3,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 15,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
+  padding: const EdgeInsets.all(20.0),
+  child: Column(
+    children: [
+      SizedBox(height: 20),
+      Expanded(
+        child: BarChart(
+          BarChartData(
+            barGroups: [
+              BarChartGroupData(
+                x: 0,
+                barRods: [
+                  BarChartRodData(
+                    toY: 8,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 1,
+                barRods: [
+                  BarChartRodData(
+                    toY: 10,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 2,
+                barRods: [
+                  BarChartRodData(
+                    toY: 14,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 3,
+                barRods: [
+                  BarChartRodData(
+                    toY: 15,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 4,
+                barRods: [
+                  BarChartRodData(
+                    toY: 9,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 5,
+                barRods: [
+                  BarChartRodData(
+                    toY: 13,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 6,
+                barRods: [
+                  BarChartRodData(
+                    toY: 11,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 7,
+                barRods: [
+                  BarChartRodData(
+                    toY: 12,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 8,
+                barRods: [
+                  BarChartRodData(
+                    toY: 14,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 9,
+                barRods: [
+                  BarChartRodData(
+                    toY: 10,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 10,
+                barRods: [
+                  BarChartRodData(
+                    toY: 7,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 11,
+                barRods: [
+                  BarChartRodData(
+                    toY: 11,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              ),
+            ],
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (double value, TitleMeta meta) {
+                    const style = TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    );
+                    Widget text;
+                    switch (value.toInt()) {
+                      case 0:
+                        text = Text('Ja', style: style);
+                        break;
+                      case 1:
+                        text = Text('Fe', style: style);
+                        break;
+                      case 2:
+                        text = Text('Ma', style: style);
+                        break;
+                      case 3:
+                        text = Text('Ap', style: style);
+                        break;
+                      case 4:
+                        text = Text('Ma', style: style);
+                        break;
+                      case 5:
+                        text = Text('Ju', style: style);
+                        break;
+                      case 6:
+                        text = Text('Ju', style: style);
+                        break;
+                      case 7:
+                        text = Text('Au', style: style);
+                        break;
+                      case 8:
+                        text = Text('Se', style: style);
+                        break;
+                      case 9:
+                        text = Text('Oc', style: style);
+                        break;
+                      case 10:
+                        text = Text('No', style: style);
+                        break;
+                      case 11:
+                        text = Text('De', style: style);
+                        break;
+                      default:
+                        text = Text('', style: style);
+                        break;
+                    }
+                    return SideTitleWidget(
+                      axisSide: meta.axisSide,
+                      space: 4,
+                      child: text,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+)
+
                                   : index == 4
                                   ? Padding(
                                       padding: const EdgeInsets.all(16),

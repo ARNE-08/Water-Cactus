@@ -5,16 +5,17 @@ import 'package:watercactus_frontend/screen/home/home.dart';
 import 'package:watercactus_frontend/screen/profile/waterunit.dart';
 import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:watercactus_frontend/screen/statistic/statistic.dart';
+//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final FlutterSecureStorage storage = FlutterSecureStorage();
+  //final FlutterSecureStorage storage = FlutterSecureStorage();
 
-  String? token = await storage.read(key: 'jwt_token');
-  bool isTokenStored = token != null && token.isNotEmpty;
+  // String? token = await storage.read(key: 'jwt_token');
+  // bool isTokenStored = token != null && token.isNotEmpty;
 
-  runApp(MyApp(isTokenStored: isTokenStored));
+  //runApp(MyApp(isTokenStored: isTokenStored));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,7 +29,8 @@ class MyApp extends StatelessWidget {
       title: 'WaterCactus',
       initialRoute: isTokenStored ? '/home' : '/',
       routes: {
-        '/': (context) => StartPage(),
+        '/stat': (context) => StatisticPage(),
+        //'/': (context) => StartPage(),
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignupPage(),
         '/unit': (context) => UnitPage(),
