@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:watercactus_frontend/widget/numpad.dart';
 
 class GoalPage extends StatefulWidget {
   @override
@@ -11,6 +12,23 @@ class _GoalPageState extends State<GoalPage> {
   String? _selectedActivityRate;
   String? _selectedWeather;
   TextEditingController _weightController = TextEditingController();
+  String _customGoal = "0";
+
+  void _showNumberPad(BuildContext context) async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return NumberPad(buttonText: 'CUSTOM GOAL');
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _customGoal = result;
+      });
+      print(_customGoal);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,9 +293,7 @@ class _GoalPageState extends State<GoalPage> {
                 child: Text('Next'),
               ),
               TextButton(
-                onPressed: () {
-                  // Your onPressed function here
-                },
+                onPressed: () => _showNumberPad(context),
                 child: Text(
                   'CUSTOM GOAL',
                   style: GoogleFonts.poppins(

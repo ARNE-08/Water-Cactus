@@ -119,7 +119,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final result = await showModalBottomSheet<String>(
       context: context,
       builder: (BuildContext context) {
-        return NumberPad();
+        return NumberPad(buttonText: widget.beverageName);
       },
     );
 

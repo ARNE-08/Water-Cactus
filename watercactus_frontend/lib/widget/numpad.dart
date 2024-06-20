@@ -4,6 +4,9 @@ import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 
 class NumberPad extends StatefulWidget {
+  final String buttonText;
+  NumberPad({required this.buttonText});
+
   @override
   _NumberPadState createState() => _NumberPadState();
 }
@@ -45,7 +48,8 @@ class _NumberPadState extends State<NumberPad> {
           SizedBox(height: 10),
           ElevatedButton(
             onPressed: _submit,
-            child: Text('+ WATER'),
+            //! Custom text in each page
+            child: Text('+ ${widget.buttonText}'),
           ),
           SizedBox(height: 10),
           GridView.count(
@@ -66,8 +70,7 @@ class _NumberPadState extends State<NumberPad> {
                       },
                       child: Text(
                         '${index + 1}',
-                        style: CustomTextStyle.poppins1
-                            .copyWith(color: AppColors.white, fontSize: 20.0),
+                        style: CustomTextStyle.poppins1.copyWith(color: AppColors.white, fontSize: 20.0),
                       ),
                     ),
                   );
@@ -87,8 +90,7 @@ class _NumberPadState extends State<NumberPad> {
                       },
                       child: Text(
                         '0',
-                        style: CustomTextStyle.poppins1
-                            .copyWith(color: AppColors.white, fontSize: 20),
+                        style: CustomTextStyle.poppins1.copyWith(color: AppColors.white, fontSize: 20),
                       ),
                     ),
                   ),
