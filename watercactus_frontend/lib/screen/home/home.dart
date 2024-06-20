@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: 30),
                 Container(
                   width: double.infinity,
-                  height:280,
+                  height: 290,
                   decoration: const BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.only(
@@ -121,7 +121,6 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                      SizedBox(height: 10),
-
                       Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Text(
@@ -172,7 +171,7 @@ class _HomePageState extends State<HomePage> {
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(height: 20),
+                                                SizedBox(height: 10),
                                                 Text(
                                                   beverageNames[index],
                                                   style: CustomTextStyle.poppins3,
@@ -196,14 +195,14 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(height: 20.0),
+                                            SizedBox(height: 10.0),
                                             Text(
                                               beverageNames[index],
                                               style: CustomTextStyle.poppins3,
                                             ),
                                           ]
                                         ),
-                                      // SizedBox(height: 10.0),
+
                                     ],
                                   ),
                                 ));

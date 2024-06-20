@@ -94,7 +94,7 @@ class CustomTextStyle {
   static final TextStyle baloo1 = GoogleFonts.balooThambi2(
     textStyle: const TextStyle(
       fontWeight: FontWeight.w800,
-      fontSize: 20,
+      fontSize: 24,
       color: AppColors.darkGrey,
     ),
   );
