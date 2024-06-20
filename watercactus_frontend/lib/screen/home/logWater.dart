@@ -5,8 +5,9 @@ import 'package:watercactus_frontend/widget/numpad.dart';
 
 class LogWaterPage extends StatefulWidget {
   final int beverageIndex;
+  final String beverageName;
 
-  LogWaterPage({required this.beverageIndex});
+  LogWaterPage({required this.beverageIndex, required this.beverageName});
 
   @override
   State<StatefulWidget> createState() => _LogWaterPageState();
@@ -112,6 +113,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       child: Image.asset(
         imagePath[widget.beverageIndex],
         // width: 300,
+        height: 460,
       ),
     );
   }
@@ -135,6 +137,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+    final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
+    print('color: $beverageColor');
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -174,9 +178,9 @@ class _LogWaterPageState extends State<LogWaterPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 20),
                 Container(
-                  height: 220,
+                  height: 260,
                   width: double.infinity,
                   color: AppColors.lightBlue,
                   child: Column(
@@ -199,7 +203,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                   option,
                                   style: isSelected
                                       ? CustomTextStyle.poppins1
-                                      : CustomTextStyle.poppins2,
+                                      : CustomTextStyle.poppins5,
                                 ),
                               ),
                             );
@@ -210,13 +214,17 @@ class _LogWaterPageState extends State<LogWaterPage> {
                         children: [
                           // SizedBox(width: 150),
                           Container(
-                            width: (screenWidth / 2) - 60,
+                            width: (screenWidth / 2) - 80,
                           ),
                           ElevatedButton(
+                            style: ButtonStyle(
+                               fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                               backgroundColor: MaterialStateProperty.all<Color>(beverageColor ?? AppColors.grey), // Default to grey if beverageColor is null
+                            ),
                             onPressed: () {
 
                             },
-                            child: Text('+ WATER'),
+                            child: Text('+ ${widget.beverageName}'),
                           ),
                           Spacer(),
                           IconButton(

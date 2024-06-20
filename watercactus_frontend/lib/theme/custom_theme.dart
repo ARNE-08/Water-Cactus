@@ -83,6 +83,14 @@ class CustomTextStyle {
     ),
   );
 
+    static final TextStyle poppins5 = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w500,
+      fontSize: 16,
+      color: AppColors.black,
+    ),
+  );
+
   static final TextStyle baloo1 = GoogleFonts.balooThambi2(
     textStyle: const TextStyle(
       fontWeight: FontWeight.w800,

@@ -12,11 +12,22 @@ class AppColors {
 
   // beverages
   static const water = Color.fromRGBO(88, 210, 255, 1);
-  static const tea = Color.fromRGBO(216, 241, 160, 1);
+  static const tea = Color.fromRGBO(157, 198, 61, 1);
   static const coffee = Color.fromRGBO(106, 86, 61, 1);
-  static const juice = Color.fromRGBO(255, 224, 47, 1);
-  static const milk = Color.fromRGBO(229, 229, 229, 1);
-  static const soda = Color.fromRGBO(252, 79, 132, 1);
-  static const beer = Color.fromRGBO(222, 222, 244, 1);
+  static const juice = Color.fromRGBO(251, 199, 0, 1);
+  static const milk = Color.fromRGBO(155, 204, 234, 1);
+  static const soda = Color.fromRGBO(226, 35, 94, 1);
+  static const beer = Color.fromRGBO(199, 199, 255, 1);
   static const wine = Color.fromRGBO(210, 48, 58, 1);
+
+  static const Map<String, Color> beverageColors = {
+    'WATER': water,
+    'TEA': tea,
+    'COFFEE': coffee,
+    'JUICE': juice,
+    'MILK': milk,
+    'SODA': soda,
+    'BEER': beer,
+    'WINE': wine,
+  };
 }

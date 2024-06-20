@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
@@ -91,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -105,10 +107,10 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ), // Example cactus image
-                SizedBox(height: 50),
+                SizedBox(height: 30),
                 Container(
                   width: double.infinity,
-                  height: 250,
+                  height:280,
                   decoration: const BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.only(
@@ -118,14 +120,17 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Column(
                     children: [
+                     SizedBox(height: 10),
+
                       Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Text(
                             'Stay Hyrated!',
                             style: CustomTextStyle.baloo1,
                           )),
+                      SizedBox(height: 20),
                       Container(
-                        height: 120,
+                        height: 180,
                         width: double.infinity,
                         // color: AppColors.blue,
                         child: ListView.builder(
@@ -140,6 +145,7 @@ class _HomePageState extends State<HomePage> {
                                     MaterialPageRoute(
                                       builder: (context) => LogWaterPage(
                                         beverageIndex: index,
+                                        beverageName: beverageNames[index],
                                       ),
                                     ),
                                   );
@@ -166,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(height: 10),
+                                                SizedBox(height: 20),
                                                 Text(
                                                   beverageNames[index],
                                                   style: CustomTextStyle.poppins3,
@@ -190,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(height: 10.0),
+                                            SizedBox(height: 20.0),
                                             Text(
                                               beverageNames[index],
                                               style: CustomTextStyle.poppins3,
