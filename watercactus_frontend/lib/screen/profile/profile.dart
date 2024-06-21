@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/card_carousel.dart';
+import 'package:watercactus_frontend/widget/navbar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage();
@@ -87,9 +88,28 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 60,
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        actions: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+                IconButton(
+                icon: const Icon(Icons.cancel, color: AppColors.black, size: 30),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(width: 20),
+            ]
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          SizedBox(height: 20),
+          // SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.all(30.0),
             child: Row(
@@ -191,7 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/noti');
+                    Navigator.pushNamed(context, '/noti-setting');
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,

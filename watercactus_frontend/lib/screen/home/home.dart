@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/screen/home/log_water.dart';
+import 'package:watercactus_frontend/widget/navbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,6 +68,7 @@ class _HomePageState extends State<HomePage> {
     ];
 
     return Scaffold(
+      appBar: Navbar(),
       body: Stack(
         children: [
           Center(
