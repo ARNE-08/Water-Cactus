@@ -10,6 +10,7 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
 import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
+import 'package:watercactus_frontend/screen/home/add_drink.dart';
 
 
 void main() async {
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfilePage(),
         '/editProfile': (context) => EditProfilePage(),
         '/noti-setting': (context) => NotiSettingPage(),
+        '/add-drink': (context) => AddDrinkPage(),
       },
     );
   }
