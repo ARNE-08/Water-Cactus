@@ -95,17 +95,31 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                height: 100,
-                width: 100,
-                child: ClipOval(
-                  child: Image.asset(
-                      'assets/profile_page/dog.jpg',
-                      fit: BoxFit.cover,
+                Stack(
+                  children: [
+                    SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: ClipOval(
+                      child: Image.asset(
+                          'assets/profile_page/dog.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      right: -10,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/editProfile');
+                        },
+                        icon: Icon(Icons.edit_square, color: AppColors.black, size: 30),
+                      ),
+                    ),
+                  ]
                 ),
-                SizedBox(width: 20),
+                SizedBox(width: 30),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -116,12 +130,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ]
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-
-                  },
-                  icon: Icon(Icons.edit_square, color: AppColors.black, size: 25),
-                )
               ],
             ),
           ),
