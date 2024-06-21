@@ -30,7 +30,8 @@ class _NumberPadState extends State<NumberPad> {
       }
     });
   }
-    void _submit() {
+
+  void _submit() {
     Navigator.pop(context, _number);
   }
 
@@ -55,22 +56,23 @@ class _NumberPadState extends State<NumberPad> {
           GridView.count(
             crossAxisCount: 3,
             shrinkWrap: true,
-            padding:
-                const EdgeInsets.only(left: 60.0, top: 0, right: 60, bottom: 0),
+            padding: const EdgeInsets.only(left: 60.0, top: 0, right: 60, bottom: 0),
             children: List.generate(9, (index) {
                   return Container(
                     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                     // color: AppColors.blue,
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(AppColors.lightGrey),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            AppColors.lightGrey),
                       ),
                       onPressed: () {
                         _addNumber(index + 1);
                       },
                       child: Text(
                         '${index + 1}',
-                        style: CustomTextStyle.poppins1.copyWith(color: AppColors.white, fontSize: 20.0),
+                        style: CustomTextStyle.poppins1
+                            .copyWith(color: AppColors.white, fontSize: 20.0),
                       ),
                     ),
                   );
@@ -83,14 +85,16 @@ class _NumberPadState extends State<NumberPad> {
                     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(AppColors.lightGrey),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            AppColors.lightGrey),
                       ),
                       onPressed: () {
                         _addNumber(0);
                       },
                       child: Text(
                         '0',
-                        style: CustomTextStyle.poppins1.copyWith(color: AppColors.white, fontSize: 20),
+                        style: CustomTextStyle.poppins1
+                            .copyWith(color: AppColors.white, fontSize: 20),
                       ),
                     ),
                   ),
@@ -98,10 +102,15 @@ class _NumberPadState extends State<NumberPad> {
                     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 2),
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Colors.transparent),
                       ),
                       onPressed: _deleteNumber,
-                      child: Icon(Icons.backspace, color: AppColors.darkGrey, size: 30,),
+                      child: Icon(
+                        Icons.backspace,
+                        color: AppColors.darkGrey,
+                        size: 30,
+                      ),
                     ),
                   ),
                 ],
