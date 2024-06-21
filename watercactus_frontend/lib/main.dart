@@ -6,6 +6,11 @@ import 'package:watercactus_frontend/screen/profile/waterunit.dart';
 import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:watercactus_frontend/theme/custom_theme.dart';
+import 'package:watercactus_frontend/screen/profile/profile.dart';
+import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
+import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WaterCactus',
+      theme: CustomTheme.customTheme,
       initialRoute: isTokenStored ? '/home' : '/',
       routes: {
         '/': (context) => StartPage(),
@@ -33,7 +39,10 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupPage(),
         '/unit': (context) => UnitPage(),
         '/goal-calculation': (context) => GoalPage(),
-        '/home': (context) => HomePage(), // Replace with your actual HomePage widget
+        '/home': (context) => HomePage(),
+        '/profile': (context) => ProfilePage(),
+        '/editProfile': (context) => EditProfilePage(),
+        '/noti-setting': (context) => NotiSettingPage(),
       },
     );
   }
