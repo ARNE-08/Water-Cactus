@@ -5,8 +5,9 @@ import 'package:watercactus_frontend/widget/numpad.dart';
 
 class LogWaterPage extends StatefulWidget {
   final int beverageIndex;
+  final String beverageName;
 
-  LogWaterPage({required this.beverageIndex});
+  LogWaterPage({required this.beverageIndex, required this.beverageName});
 
   @override
   State<StatefulWidget> createState() => _LogWaterPageState();
@@ -14,8 +15,11 @@ class LogWaterPage extends StatefulWidget {
 
 class _LogWaterPageState extends State<LogWaterPage> {
   String cactusPath = 'whiteCactus.png';
-  bool showShaderMask = true;
   String _selectedNumber = "0";
+  double _totalDragDistance = 0.0;
+  final double _threshold = 5.0;
+  int _calculatedML = 110;
+  int _option1ML = 110;
 
   List<String> imagePath = [
     'beverages/Water.png',
@@ -41,13 +45,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
 
   int selectedOptionIndex = 1;
   final ScrollController _controller = ScrollController();
-  List<String> options = [
-    '',
-    '100ml',
-    '200ml',
-    '300ml',
-    // ''
-  ];
 
   @override
   void initState() {
@@ -64,38 +61,39 @@ class _LogWaterPageState extends State<LogWaterPage> {
   }
 
   void _onScroll() {
-  double center = _controller.position.viewportDimension / 2;
-  double minDistance = double.infinity;
-  int newSelectedIndex = selectedOptionIndex;
+    double center = _controller.position.viewportDimension / 2;
+    double minDistance = double.infinity;
+    int newSelectedIndex = selectedOptionIndex;
 
-  for (int index = 0; index < options.length; index++) {
-    double itemExtent = 120.0; // Adjust according to the size of your items
-    double itemCenter = index * itemExtent + itemExtent / 2;
+    for (int index = 0; index < 4; index++) {
+      double itemExtent = 120.0; // Adjust according to the size of your items
+      double itemCenter = index * itemExtent + itemExtent / 2;
 
-    double distance = (_controller.offset + center - itemCenter).abs();
-    if (distance < minDistance) {
-      minDistance = distance;
-      newSelectedIndex = index;
+      double distance = (_controller.offset + center - itemCenter).abs();
+      if (distance < minDistance) {
+        minDistance = distance;
+        newSelectedIndex = index;
+      }
     }
+
+    setState(() {
+      selectedOptionIndex = newSelectedIndex;
+      _calculatedML = newSelectedIndex == 0 ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
+    });
   }
 
-  setState(() {
-    selectedOptionIndex = newSelectedIndex;
-  });
-}
   void _onItemTab(int index) {
     print(index);
-    setState( () {
+    setState(() {
       selectedOptionIndex = index;
-    }
-    );
+      _calculatedML = index == 0 ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
+      _option1ML = 110;
+      // print(_calculatedML);
+    });
   }
 
-  Widget buildOriginalImage() {
-    return Image.asset(
-      'Cactus.png',
-      width: 300,
-    );
+  double get _calculatedPortion {
+    return 1 - (_calculatedML / 380);
   }
 
   Widget buildShaderMaskImage() {
@@ -105,13 +103,14 @@ class _LogWaterPageState extends State<LogWaterPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, maskColor[widget.beverageIndex]],
-          stops: [0.3, 0.3], // Adjusted stops to fill 80% with blue
+          stops: [_calculatedPortion, _calculatedPortion],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
       child: Image.asset(
         imagePath[widget.beverageIndex],
         // width: 300,
+        height: 460,
       ),
     );
   }
@@ -120,7 +119,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final result = await showModalBottomSheet<String>(
       context: context,
       builder: (BuildContext context) {
-        return NumberPad();
+        return NumberPad(buttonText: widget.beverageName);
       },
     );
 
@@ -135,6 +134,15 @@ class _LogWaterPageState extends State<LogWaterPage> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+    final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
+    print('color: $beverageColor');
+      List<String> options = [
+        '',
+        '${_option1ML.toString()} ml',
+        '80ml',
+        '330ml',
+        // ''
+      ];
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -162,73 +170,102 @@ class _LogWaterPageState extends State<LogWaterPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
-                        onTap: () {
+                        onVerticalDragUpdate: (details) {
+                            selectedOptionIndex = 1;
+                            _controller.animateTo(
+                            0,
+                            duration: const Duration(milliseconds: 50),
+                            curve: Curves.easeInOut,
+                          );
+                          // Accumulate the total drag distance
+                          _totalDragDistance += details.delta.dy;
+
+                          // Detect if the total drag distance is greater than the threshold
+                          if (_totalDragDistance < -_threshold) {
+                            setState(() {
+                              _calculatedML = (_calculatedML + 10).clamp(0, 330); // Increment by 10 and clamp between 0 and 330
+                              _option1ML = _calculatedML;
+                              _totalDragDistance = 0; // Reset the drag distance
+                              print('up: $_calculatedML');
+                            });
+                          } else if (_totalDragDistance > _threshold) {
+                            setState(() {
+                              _calculatedML = (_calculatedML - 10).clamp(0, 330); // Decrement by 10 and clamp between 0 and 330
+                              _option1ML = _calculatedML;
+                              _totalDragDistance = 0; // Reset the drag distance
+                              print('down: $_calculatedML');
+                            });
+                          }
+                        },
+                        onVerticalDragEnd: (details) {
+                          // Reset the drag distance when the drag ends
                           setState(() {
-                            showShaderMask = !showShaderMask;
+                            _totalDragDistance = 0;
+                            print(_calculatedML);
                           });
                         },
-                        child: showShaderMask
-                            ? buildShaderMaskImage()
-                            : buildOriginalImage(),
+                        child: buildShaderMaskImage(),
                       )
                     ],
                   ),
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 20),
                 Container(
-                  height: 220,
+                  height: 260,
                   width: double.infinity,
                   color: AppColors.lightBlue,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _controller,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: options.length,
-                          itemBuilder: (context, index) {
-                            final option = options[index];
-                            final isSelected = index == selectedOptionIndex;
+                  child: Column(children: [
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _controller,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: options.length,
+                        itemBuilder: (context, index) {
+                          final option = options[index];
+                          final isSelected = index == selectedOptionIndex;
 
-                            return GestureDetector(
-                              onTap: () => _onItemTab(index),
-                              child: Container(
-                                alignment: Alignment.center,
-                                padding: EdgeInsets.symmetric(horizontal: 55.0),
-                                child: Text(
-                                  option,
-                                  style: isSelected
-                                      ? CustomTextStyle.poppins1
-                                      : CustomTextStyle.poppins2,
-                                ),
+                          return GestureDetector(
+                            onTap: () => _onItemTab(index),
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(horizontal: 55.0),
+                              child: Text(
+                                option,
+                                style: isSelected
+                                    ? CustomTextStyle.poppins1
+                                    : CustomTextStyle.poppins5,
                               ),
-                            );
-                          },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Row(children: [
+                      // SizedBox(width: 150),
+                      Container(
+                        width: (screenWidth / 2) - 80,
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                          fixedSize:
+                              MaterialStateProperty.all<Size>(Size(140, 50)),
+                          backgroundColor: MaterialStateProperty.all<Color>(beverageColor ?? AppColors.grey), // Default to grey if beverageColor is null
                         ),
+                        onPressed: () {},
+                        child: Text('+ ${widget.beverageName}'),
                       ),
-                      Row(
-                        children: [
-                          // SizedBox(width: 150),
-                          Container(
-                            width: (screenWidth / 2) - 60,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-
-                            },
-                            child: Text('+ WATER'),
-                          ),
-                          Spacer(),
-                          IconButton(
-                            onPressed: () => _showNumberPad(context),
-                             icon: Icon(Icons.dialpad, color: AppColors.black, size: 30),
-                          ),
-                          SizedBox(width: 30),
-                        ]
+                      Spacer(),
+                      IconButton(
+                        onPressed: () => _showNumberPad(context),
+                        icon: Icon(Icons.dialpad,
+                            color: AppColors.black, size: 30),
                       ),
-                      SizedBox(height: 50,)
-                    ]
-                  ),
+                      SizedBox(width: 30),
+                    ]),
+                    SizedBox(
+                      height: 50,
+                    )
+                  ]),
                 ),
                 // SizedBox(width: screenWidth / 2), // Space to center the selected option
               ],
