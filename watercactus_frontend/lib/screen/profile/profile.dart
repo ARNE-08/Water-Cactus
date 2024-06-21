@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
-import 'package:watercactus_frontend/widget/cardCarousel.dart';
+import 'package:watercactus_frontend/widget/card_carousel.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage();
@@ -234,7 +234,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Container(
                         height: 1,
                         width: MediaQuery.of(context).size.width * 0.4,
-                        color: AppColors.darkGrey,                      ),
+                        color: AppColors.darkGrey,
+                      ),
                       SizedBox(height: 30),
                       GestureDetector(
                         onTap: () => _showLogoutConfirmationDialog(),
