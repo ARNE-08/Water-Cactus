@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
-import 'package:watercactus_frontend/screen/home/logWater.dart';
+import 'package:watercactus_frontend/screen/home/log_water.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
