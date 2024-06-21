@@ -10,18 +10,37 @@ class NotiSettingPage extends StatefulWidget {
 }
 
 class _NotiSettingPageState extends State<NotiSettingPage> {
-  bool _isSwitched = false;
-
-  List<String> reminderTime = [
-    '08:00 AM',
-    '12:00 PM',
-    '04:00 PM',
-    '08:00 PM',
+  List<Map<String, dynamic>> reminderTime = [
+    {'time': TimeOfDay(hour: 8, minute: 0), 'enable': false},
+    {'time': TimeOfDay(hour: 12, minute: 0), 'enable': false},
+    {'time': TimeOfDay(hour: 16, minute: 0), 'enable': false},
+    {'time': TimeOfDay(hour: 20, minute: 0), 'enable': false},
   ];
 
-  Widget buildReminder(List<String> reminderTime) {
+  Future<void> _showTimePicker(BuildContext context, int index) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: reminderTime[index]['time'],
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        reminderTime[index]['time'] = picked;
+      });
+      print(reminderTime[index]['time']);
+      print(reminderTime[index]['enable']);
+    }
+  }
+
+  Widget buildReminder(List<Map<String, dynamic>> reminderTime) {
     return Container(
-      height: reminderTime.length * 100,
+      height: reminderTime.length * 100.0,
       width: MediaQuery.of(context).size.width * 0.8,
       child: ListView.builder(
         itemCount: reminderTime.length,
@@ -36,17 +55,25 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                 border: Border.all(color: AppColors.white),
               ),
               child: Padding(
-                padding:const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(reminderTime[index], style: CustomTextStyle.poppins4.copyWith(fontSize: 20, color: Colors.black)),
+                    TextButton(
+                      onPressed: () => _showTimePicker(context, index),
+                      child: Text(
+                        reminderTime[index]['time'].format(context),
+                        style: CustomTextStyle.poppins4.copyWith(fontSize: 20, color: Colors.black),
+                      ),
+                    ),
                     Switch(
-                      value: _isSwitched,
+                      value: reminderTime[index]['enable'],
                       onChanged: (value) {
                         setState(() {
-                          _isSwitched = value;
+                          reminderTime[index]['enable'] = value;
+                          print(reminderTime[index]['enable']);
                         });
+                        // Add logic to update database or perform other actions based on `value`
                       },
                       activeTrackColor: Colors.lightBlueAccent,
                       activeColor: Colors.blue,
@@ -56,7 +83,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
               ),
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -96,11 +123,9 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                     children: [
                       Text('Reminder', style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
                       Switch(
-                        value: _isSwitched,
+                        value: false, // Placeholder for a switch value
                         onChanged: (value) {
-                          setState(() {
-                            _isSwitched = value;
-                          });
+                          // Placeholder for onChanged logic
                         },
                         activeTrackColor: Colors.lightBlueAccent,
                         activeColor: Colors.blue,
@@ -128,7 +153,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
               ElevatedButton(
                 style: ButtonStyle(
                   fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.tea), // Default to grey if beverageColor is null
+                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.tea),
                 ),
                 onPressed: () {
                   // Add your logic here
