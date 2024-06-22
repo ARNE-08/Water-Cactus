@@ -24,8 +24,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchWaterIntake();
-    fetchWaterGoal();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchWaterIntake();
+      fetchWaterGoal();
+    });
+    // fetchWaterIntake();
+    // fetchWaterGoal();
   }
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -122,6 +126,8 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching goal data: $error');
     }
   }
+
+
 
   Widget buildOriginalImage() {
     return Image.asset(
