@@ -62,6 +62,8 @@ app.post("/addUnit", require("./controller/addUnit"));
 app.post("/addGender", require("./controller/addGender"));
 app.post("/addActivityRate", require("./controller/addActivityRate"));
 app.post("/addWeight", require("./controller/addWeight"));
+app.post("/addWater", require("./controller/addWater"));
+app.post("/addTotalIntake", require("./controller/addTotalIntake"));
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

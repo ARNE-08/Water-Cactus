@@ -146,7 +146,8 @@ class _HomePageState extends State<HomePage> {
 
   double get _calculatedPercentage {
     // print('water intake: $waterIntake & daily: $dailyGoal');
-    return (waterIntake / dailyGoal) * 100;
+    double percentage = (waterIntake / dailyGoal) * 100;
+    return percentage.roundToDouble();
   }
 
   Widget buildShaderMaskImage() {
