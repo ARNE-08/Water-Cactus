@@ -56,7 +56,7 @@ module.exports = (req, res) => {
 			if (results.length === 0) {
 				res.status(204).json({ success: true, message: 'No goals found for the specified time interval' });
 			} else {
-				res.status(200).json({ success: true, goals: results });
+				res.status(200).json({ success: true, data: results });
 			}
 		})
 

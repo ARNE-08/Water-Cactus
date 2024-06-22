@@ -100,10 +100,10 @@ class _HomePageState extends State<HomePage> {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch goal data: ${response.statusCode}');
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        print('fetchedd goal data: ${fetchedGoalData['goals']}');
+        print('fetchedd goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         setState(() {
-          List<dynamic> dynamicList = fetchedGoalData['goals'];
+          List<dynamic> dynamicList = fetchedGoalData['data'];
           print(dynamicList);
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoal: $dailyGoal');
