@@ -18,45 +18,24 @@ import 'package:watercactus_frontend/screen/home/add_drink.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-
-  // Initialize Flutter Secure Storage
   final FlutterSecureStorage storage = FlutterSecureStorage();
   String? token = await storage.read(key: 'jwt_token');
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => TokenProvider(),
+      create: (context) => TokenProvider()..updateToken(token ?? ''),
       child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  Future<String?> _getToken() async {
-    final FlutterSecureStorage storage = FlutterSecureStorage();
-    return await storage.read(key: 'jwt_token');
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WaterCactus',
       theme: CustomTheme.customTheme,
-      home: FutureBuilder<String?>(
-        future: _getToken(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Or any loading widget
-          } else {
-            String? token = snapshot.data;
-            Provider.of<TokenProvider>(context, listen: false).updateToken(token ?? '');
-            return _determineStartPage(context);
-          }
-        },
-      ),
+      home: _determineStartPage(context),
       routes: {
         '/stat': (context) => StatisticPage(),
         '/start': (context) => StartPage(),
