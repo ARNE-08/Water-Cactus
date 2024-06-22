@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -26,6 +28,10 @@ final List<String> texts = [
 class _StatisticPageState extends State<StatisticPage> {
   @override
   Widget build(BuildContext context) {
+    String? token = Provider.of<TokenProvider>(context).token;
+    if (token == null || token.isEmpty) {
+      Navigator.pushNamed(context, '/login');
+    }
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
@@ -48,7 +54,7 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: index == 4 ? 280.0 : (index == 2 ? 320.0 : 200.0),
+                height: (index == 4) ? 280.0 : (index == 2 || index == 1) ? 320.0 : 200.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
@@ -122,16 +128,16 @@ class _StatisticPageState extends State<StatisticPage> {
                                             PieChartData(
                                               sections: [
                                                 PieChartSectionData(
-                                                  value: 20,
+                                                  value: 0,
                                                   title: '',
                                                   color: Colors.blue,
-                                                  radius: 10,
+                                                  radius: 15,
                                                 ),
                                               ].any((section) =>
                                                       section.value != 0)
                                                   ? [
                                                       PieChartSectionData(
-                                                        value: 10,
+                                                        value: 1,
                                                         title: '',
                                                         color: Colors.blue,
                                                         radius: 15,
@@ -143,16 +149,17 @@ class _StatisticPageState extends State<StatisticPage> {
                                                         value: 1,
                                                         title: '',
                                                         color: Colors.grey,
-                                                        radius: 10,
+                                                        radius: 15,
                                                       ),
                                                     ],
                                               centerSpaceRadius:
-                                                  60, // Adjust this value as needed
+                                                  120, // Adjust this value as needed
                                             ),
                                           ),
                                           Text(
                                             '0/3100ml',
-                                            style: CustomTextStyle.poppins3,
+                                            style: 
+                                                CustomTextStyle.poppins3.copyWith(fontSize: 18),
                                           ),
                                         ],
                                       ),
@@ -171,7 +178,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                       Center(
                                         child: Text(
                                           'Last 7 Days Goal Achieve',
-                                          style: CustomTextStyle.poppins3,
+                                          style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
                                         ),
                                       ),
                                       SizedBox(height: 20),
@@ -244,7 +251,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][index],
-                                                  style: CustomTextStyle.poppins3,
+                                                  style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
                                                 ),
                                               ],
                                             ),
@@ -321,7 +328,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][adjustedIndex],
-                                                  style: CustomTextStyle.poppins3,
+                                                  style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
                                                 ),
                                               ],
                                             ),
@@ -554,7 +561,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             children: [
                                               Text(
                                                 'Drink Water Report',
-                                                style: CustomTextStyle.poppins3,
+                                                style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
                                               ),
                                               SizedBox(
                                                   height:
