@@ -28,26 +28,90 @@ final List<String> texts = [
 ];
 
 class _StatisticPageState extends State<StatisticPage> {
-  int waterIntake = 0;
-  int dailyGoal = 1;
-
+  double waterIntake = 0;
+  double dailyGoal = 1;
+  List<Map<String, dynamic>> weeklyWaterIntake = [];
 
   @override
   void initState() {
     super.initState();
     fetchWaterIntake();
     fetchWaterGoal();
+    fetchWeeklyWaterIntake();
   }
+
+  void fetchWeeklyWaterIntake() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+
+    try {
+      for (int i = 6; i >= 0; i--) {
+        final currentDate = now.subtract(Duration(days: i));
+        final startDate =
+            DateTime(currentDate.year, currentDate.month, currentDate.day)
+                .toIso8601String()
+                .split('T')
+                .first;
+        final endDate = DateTime(currentDate.year, currentDate.month,
+                currentDate.day, 23, 59, 59)
+            .toIso8601String()
+            .split('T')
+            .first;
+
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/getWater'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> fetchedWaterData =
+              json.decode(response.body);
+          List<dynamic> dynamicList = fetchedWaterData['data'];
+          setState(() {
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake':
+                  dynamicList.isNotEmpty ? dynamicList[0]['total_intake'] : 0,
+            });
+          });
+        } else if (response.statusCode == 204) {
+          setState(() {
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': 0,
+            });
+          });
+        } else {
+          print(
+              'Failed to fetch water data for ${currentDate.day}/${currentDate.month}: ${response.statusCode}');
+        }
+      }
+    } catch (error) {
+      print('Error fetching weekly water data: $error');
+    }
+  }
+
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
-    final startDate =
-        DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
     final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
         .toIso8601String()
         .split('T')
         .first;
     try {
+      // Make the HTTP POST request
+      print('Tokenn: $token');
       final response = await http.post(
         Uri.parse('http://localhost:3000/getWater'),
         headers: {
@@ -60,74 +124,86 @@ class _StatisticPageState extends State<StatisticPage> {
         }),
       );
 
+      // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
-        final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
+        // Parse the JSON response directly into a list of maps
+        // print('Succeed to fetch water data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedWaterData =
+            json.decode(response.body);
+        print('fetchedd water data: ${fetchedWaterData['data']}');
+        // Store the fetched data in the list
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
-          waterIntake = dynamicList.isNotEmpty ? dynamicList[0]['total_intake'] : 0;
+          // print(dynamicList);
+          waterIntake = dynamicList[0]['total_intake'];
+          // print('waterIntake: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
           waterIntake = 0;
         });
       } else {
+        // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch water data: ${response.statusCode}');
       }
     } catch (error) {
+      // Handle any errors that occur during the process
       print('Error fetching water data: $error');
     }
   }
 
   void fetchWaterGoal() async {
-  String? token = Provider.of<TokenProvider>(context, listen: false).token;
-  final now = DateTime.now();
-  final startDate =
-      DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-  final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
-      .toIso8601String()
-      .split('T')
-      .first;
-  try {
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/getGoal'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'startDate': startDate,
-        'endDate': endDate,
-      }),
-    );
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
+    try {
+      // Make the HTTP POST request
+      // print('Tokenn: $token');
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/getGoal'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-      setState(() {
-        List<dynamic> dynamicList = fetchedGoalData['data'];
-        dailyGoal = dynamicList.isNotEmpty ? dynamicList[0]['goal'] : 1;
-      });
-    } else if (response.statusCode == 204) {
-      // Handle 204 (No Content) if needed
-      setState(() {
-        dailyGoal = 1;
-      });
-    } else if (response.statusCode == 404) {
-      // Handle 404 (Not Found)
-      print('Goal data not found - 404');
-      setState(() {
-        dailyGoal = 1; // Set a default value or leave it as is
-      });
-    } else {
-      // Handle other status codes
-      print('Failed to fetch goal data: ${response.statusCode}');
-      // Optionally, you can log response.body for debugging
+      // Check if the request was successful (status code 200)
+      if (response.statusCode == 200) {
+        // Parse the JSON response directly into a list of maps
+        print('Succeed to fetch goal data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
+        print('fetchedd goal data: ${fetchedGoalData['data']}');
+        // Store the fetched data in the list
+        setState(() {
+          List<dynamic> dynamicList = fetchedGoalData['data'];
+          print(dynamicList);
+          dailyGoal = dynamicList[0]['goal'];
+          print('dailyGoal: $dailyGoal');
+        });
+      } else if (response.statusCode == 204) {
+        setState(() {
+          dailyGoal = 1;
+        });
+      } else {
+        // Handle other status codes (e.g., 400, 401, etc.)
+        print('Failed to fetch goal data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error fetching goal data: $error');
     }
-  } catch (error) {
-    // Handle any errors that occur during the process
-    print('Error fetching goal data: $error');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,10 +236,10 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: (index == 4)
+                height: (index == 4 || index == 1)
                     ? 280.0
-                    : (index == 2 || index == 1)
-                        ? 320.0
+                    : (index == 2)
+                        ? 580.0
                         : 200.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -203,7 +279,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                     '$waterIntake ml',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
-                                      color: Colors.black,
+                                      color: waterIntake >= dailyGoal ? Colors.blue : Colors.black,
                                     ),
                                   ),
                                 ],
@@ -258,25 +334,26 @@ class _StatisticPageState extends State<StatisticPage> {
                                             PieChartData(
                                               sections: [
                                                 PieChartSectionData(
-                                                  value: waterIntake.toDouble(),
+                                                  value: waterIntake,
                                                   color: Colors.blue,
-                                                  radius: 15,
+                                                  radius: 20,
                                                 ),
                                                 PieChartSectionData(
-                                                  value: dailyGoal
-                                                      .toDouble(),
+                                                  value:
+                                                      dailyGoal - waterIntake,
                                                   color: Colors.grey,
-                                                  radius: 15,
+                                                  radius: 20,
                                                 ),
                                               ],
-                                              centerSpaceRadius: 120,
+                                              centerSpaceRadius: 100,
                                             ),
                                           ),
                                           Text(
-                                            '$waterIntake / $dailyGoal ml',
-                                            style: CustomTextStyle.poppins3.copyWith(
+                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ml',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(
                                               fontSize: 18,
-                                              color: Colors.black,
+                                              color: waterIntake >= dailyGoal ? Colors.blue : Colors.black,
                                             ),
                                           ),
                                         ],
@@ -295,172 +372,82 @@ class _StatisticPageState extends State<StatisticPage> {
                                     children: [
                                       Center(
                                         child: Text(
-                                          'Last 7 Days Goal Achieve',
+                                          'Last 7 Days Water Intake',
                                           style: CustomTextStyle.poppins3
                                               .copyWith(fontSize: 12),
                                         ),
                                       ),
                                       SizedBox(height: 20),
-                                      // First row with 4 pie charts
-                                      Row(
-                                        children: List.generate(4, (index) {
-                                          final List<bool> goalAchieved = [
-                                            true,
-                                            false,
-                                            true,
-                                            true,
-                                            false,
-                                            false,
-                                            true
-                                          ];
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: weeklyWaterIntake.length,
+                                        itemBuilder: (context, index) {
+                                          // Determine if waterIntake reached dailyGoal
+                                          bool reachedGoal =
+                                              weeklyWaterIntake[index]
+                                                      ['waterIntake'] >=
+                                                  dailyGoal;
 
-                                          return Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width:
-                                                      60, // Adjust width as needed
-                                                  height:
-                                                      80, // Adjust height as needed
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      PieChart(
-                                                        PieChartData(
-                                                          sections: [
-                                                            PieChartSectionData(
-                                                              value: 100,
-                                                              title: '',
-                                                              color:
-                                                                  goalAchieved[
-                                                                          index]
-                                                                      ? Colors
-                                                                          .blue
-                                                                      : Colors
-                                                                          .grey,
-                                                              radius: 12,
-                                                            ),
-                                                          ],
-                                                          centerSpaceRadius: 20,
-                                                          sectionsSpace: 0,
-                                                        ),
-                                                        swapAnimationDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    150),
-                                                      ),
-                                                      Image.asset(
-                                                        'assets/trophy.png',
-                                                        width: 15,
-                                                        height: 15,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  [
-                                                    'S',
-                                                    'M',
-                                                    'T',
-                                                    'W',
-                                                    'T',
-                                                    'F',
-                                                    'S'
-                                                  ][index],
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
                                                   style: CustomTextStyle
                                                       .poppins3
-                                                      .copyWith(fontSize: 12),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                      SizedBox(height: 20),
-                                      // Second row with 3 pie charts
-                                      Row(
-                                        children: List.generate(3, (index) {
-                                          final List<bool> goalAchieved = [
-                                            true,
-                                            false,
-                                            true,
-                                            true,
-                                            false,
-                                            false,
-                                            true
-                                          ];
-
-                                          int adjustedIndex = index +
-                                              4; // Start index for the second row
-
-                                          return Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width:
-                                                      60, // Adjust width as needed
-                                                  height:
-                                                      80, // Adjust height as needed
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      PieChart(
-                                                        PieChartData(
-                                                          sections: [
-                                                            PieChartSectionData(
-                                                              value: 100,
-                                                              title: '',
-                                                              color: goalAchieved[
-                                                                      adjustedIndex]
-                                                                  ? Colors.blue
-                                                                  : Colors.grey,
-                                                              radius: 12,
-                                                            ),
-                                                          ],
-                                                          centerSpaceRadius: 20,
-                                                          sectionsSpace: 0,
-                                                        ),
-                                                        swapAnimationDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    150),
-                                                      ),
-                                                      Image.asset(
-                                                        'assets/trophy.png',
-                                                        width: 15,
-                                                        height: 15,
-                                                      ),
-                                                    ],
+                                                      .copyWith(
+                                                    fontSize: 12,
+                                                    color: reachedGoal
+                                                        ? Colors.blue
+                                                        : Colors.grey,
                                                   ),
                                                 ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  [
-                                                    'S',
-                                                    'M',
-                                                    'T',
-                                                    'W',
-                                                    'T',
-                                                    'F',
-                                                    'S'
-                                                  ][adjustedIndex],
-                                                  style: CustomTextStyle
-                                                      .poppins3
-                                                      .copyWith(fontSize: 12),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                        ? Colors.blue
+                                                        : Colors.grey,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Daily Goal: ${dailyGoal} ml', // Assuming dailyGoal is a member variable of _StatisticPageState
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                        ? Colors.blue
+                                                        : Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              Divider(
+                                                color: Colors
+                                                    .grey, // Adjust the color as needed
+                                                thickness:
+                                                    1.0, // Adjust the thickness as needed
+                                                height:
+                                                    0, // Make sure height is 0 to match ListTile spacing
+                                              ),
+                                            ],
                                           );
-                                        }),
+                                        },
                                       ),
                                     ],
-                                  ),
-                                )
+                                  ))
                               : index == 3
                                   ? Padding(
                                       padding: const EdgeInsets.only(
