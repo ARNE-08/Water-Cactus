@@ -1,4 +1,3 @@
-const mysql = require("mysql");
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res) => {
