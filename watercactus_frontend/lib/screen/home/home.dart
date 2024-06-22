@@ -28,8 +28,6 @@ class _HomePageState extends State<HomePage> {
       fetchWaterIntake();
       fetchWaterGoal();
     });
-    // fetchWaterIntake();
-    // fetchWaterGoal();
   }
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -174,7 +172,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
-
     List<String> imagePaths = [
       'beverageIcons/water.png',
       'beverageIcons/tea.png',
@@ -278,6 +275,7 @@ class _HomePageState extends State<HomePage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => LogWaterPage(
+                                      token: Provider.of<TokenProvider>(context, listen: false).token,
                                       beverageIndex: index,
                                       beverageName: beverageNames[index],
                                     ),
