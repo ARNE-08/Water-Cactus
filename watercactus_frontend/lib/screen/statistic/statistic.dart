@@ -24,6 +24,8 @@ final List<String> texts = [
   'Average Completion',
   'Drink Frequency',
 ];
+const double idealWaterIntake = 1000;
+const double waterIntakeGoal = 3100;
 
 class _StatisticPageState extends State<StatisticPage> {
   @override
@@ -54,7 +56,11 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: (index == 4) ? 280.0 : (index == 2 || index == 1) ? 320.0 : 200.0,
+                height: (index == 4)
+                    ? 280.0
+                    : (index == 2 || index == 1)
+                        ? 320.0
+                        : 200.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
@@ -73,18 +79,46 @@ class _StatisticPageState extends State<StatisticPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Row(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.asset(
-                                    'assets/GlassOfWater.png',
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  Text(
-                                    'Ideal Water Intake',
-                                    style: CustomTextStyle.poppins3,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/GlassOfWater.png',
+                                        width: 60,
+                                        height: 60,
+                                      ),
+                                      SizedBox(width: 8.0),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Ideal Water Intake',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                          SizedBox(height: 10.0),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 25.0),
+                                            child: Text(
+                                              '$idealWaterIntake ml', // Replace this with the variable for actual data
+                                              style: CustomTextStyle.poppins3
+                                                  .copyWith(
+                                                      fontSize: 12,
+                                                      color: Colors.black),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -95,18 +129,46 @@ class _StatisticPageState extends State<StatisticPage> {
                               color: Colors.black,
                             ),
                             Expanded(
-                              child: Row(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.asset(
-                                    'assets/trophy.png',
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  Text(
-                                    'Water Intake Goal',
-                                    style: CustomTextStyle.poppins3,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/trophy.png',
+                                        width: 60,
+                                        height: 60,
+                                      ),
+                                      SizedBox(width: 8.0),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Water Intake Goal',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                          SizedBox(height: 10.0),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 25.0),
+                                            child: Text(
+                                              '$waterIntakeGoal ml', // Replace this with the variable for actual data
+                                              style: CustomTextStyle.poppins3
+                                                  .copyWith(
+                                                      fontSize: 12,
+                                                      color: Colors.black),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -124,42 +186,35 @@ class _StatisticPageState extends State<StatisticPage> {
                                       child: Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          PieChart(
-                                            PieChartData(
-                                              sections: [
-                                                PieChartSectionData(
-                                                  value: 0,
-                                                  title: '',
-                                                  color: Colors.blue,
-                                                  radius: 15,
-                                                ),
-                                              ].any((section) =>
-                                                      section.value != 0)
-                                                  ? [
-                                                      PieChartSectionData(
-                                                        value: 1,
-                                                        title: '',
-                                                        color: Colors.blue,
-                                                        radius: 15,
-                                                      ),
-                                                      // Add other sections as needed
-                                                    ]
-                                                  : [
-                                                      PieChartSectionData(
-                                                        value: 1,
-                                                        title: '',
-                                                        color: Colors.grey,
-                                                        radius: 15,
-                                                      ),
-                                                    ],
-                                              centerSpaceRadius:
-                                                  120, // Adjust this value as needed
-                                            ),
-                                          ),
+                                          PieChart(PieChartData(
+                                            sections: [
+                                              // Section for the achieved water intake (blue)
+                                              PieChartSectionData(
+                                                value: idealWaterIntake,
+                                                title:
+                                                    '', // You can optionally set a title for the section
+                                                color: Colors.blue,
+                                                radius: 15,
+                                              ),
+                                              // Section for the remaining water intake to reach the goal (grey)
+                                              PieChartSectionData(
+                                                value: waterIntakeGoal -
+                                                    idealWaterIntake,
+                                                title:
+                                                    '', // You can optionally set a title for the section
+                                                color: Colors.grey,
+                                                radius: 15,
+                                              ),
+                                            ],
+                                            centerSpaceRadius:
+                                                120, // Adjust this value as needed
+                                          )),
                                           Text(
-                                            '0/3100ml',
-                                            style: 
-                                                CustomTextStyle.poppins3.copyWith(fontSize: 18),
+                                            '$idealWaterIntake / $waterIntakeGoal ml',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(
+                                                    fontSize: 18,
+                                                    color: Colors.black),
                                           ),
                                         ],
                                       ),
@@ -178,7 +233,8 @@ class _StatisticPageState extends State<StatisticPage> {
                                       Center(
                                         child: Text(
                                           'Last 7 Days Goal Achieve',
-                                          style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
+                                          style: CustomTextStyle.poppins3
+                                              .copyWith(fontSize: 12),
                                         ),
                                       ),
                                       SizedBox(height: 20),
@@ -251,7 +307,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][index],
-                                                  style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
+                                                  style: CustomTextStyle
+                                                      .poppins3
+                                                      .copyWith(fontSize: 12),
                                                 ),
                                               ],
                                             ),
@@ -328,7 +386,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][adjustedIndex],
-                                                  style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
+                                                  style: CustomTextStyle
+                                                      .poppins3
+                                                      .copyWith(fontSize: 12),
                                                 ),
                                               ],
                                             ),
@@ -482,60 +542,72 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       getTitlesWidget:
                                                           (double value,
                                                               TitleMeta meta) {
-                                                       
                                                         Widget text;
                                                         switch (value.toInt()) {
                                                           case 0:
                                                             text = Text('Ja',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 1:
                                                             text = Text('Fe',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 2:
                                                             text = Text('Ma',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 3:
                                                             text = Text('Ap',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 4:
                                                             text = Text('Ma',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 5:
                                                             text = Text('Ju',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 6:
                                                             text = Text('Ju',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 7:
                                                             text = Text('Au',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 8:
                                                             text = Text('Se',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 9:
                                                             text = Text('Oc',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 10:
                                                             text = Text('No',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           case 11:
                                                             text = Text('De',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                           default:
                                                             text = Text('',
-                                                                style: CustomTextStyle.poppins3);
+                                                                style: CustomTextStyle
+                                                                    .poppins3);
                                                             break;
                                                         }
                                                         return SideTitleWidget(
@@ -561,7 +633,8 @@ class _StatisticPageState extends State<StatisticPage> {
                                             children: [
                                               Text(
                                                 'Drink Water Report',
-                                                style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
+                                                style: CustomTextStyle.poppins3
+                                                    .copyWith(fontSize: 12),
                                               ),
                                               SizedBox(
                                                   height:
