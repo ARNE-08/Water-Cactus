@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/screen/home/log_water.dart';
 import 'package:watercactus_frontend/widget/navbar.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
@@ -18,126 +13,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String cactusPath = 'whiteCactus.png';
   bool showShaderMask = true;
-  int waterIntake = 0;
-  int dailyGoal = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchWaterIntake();
-      fetchWaterGoal();
-    });
-    // fetchWaterIntake();
-    // fetchWaterGoal();
-  }
-  void fetchWaterIntake() async {
-    String? token = Provider.of<TokenProvider>(context, listen: false).token;
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
-    try {
-      // Make the HTTP POST request
-      print('Tokenn: $token');
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/getWater'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
-      );
-
-      // Check if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // Parse the JSON response directly into a list of maps
-        // print('Succeed to fetch water data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
-        print('fetchedd water data: ${fetchedWaterData['data']}');
-        // Store the fetched data in the list
-        setState(() {
-          List<dynamic> dynamicList = fetchedWaterData['data'];
-          // print(dynamicList);
-          waterIntake = dynamicList[0]['total_intake'];
-          // print('waterIntake: $waterIntake');
-        });
-      } else if (response.statusCode == 204) {
-        setState(() {
-          waterIntake = 0;
-        });
-      }
-      else {
-        // Handle other status codes (e.g., 400, 401, etc.)
-        print('Failed to fetch water data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Handle any errors that occur during the process
-      print('Error fetching water data: $error');
-    }
-  }
-
-  void fetchWaterGoal() async {
-    String? token = Provider.of<TokenProvider>(context, listen: false).token;
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
-    try {
-      // Make the HTTP POST request
-      // print('Tokenn: $token');
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/getGoal'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
-      );
-
-      // Check if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // Parse the JSON response directly into a list of maps
-        print('Succeed to fetch goal data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        print('fetchedd goal data: ${fetchedGoalData['data']}');
-        // Store the fetched data in the list
-        setState(() {
-          List<dynamic> dynamicList = fetchedGoalData['data'];
-          print(dynamicList);
-          dailyGoal = dynamicList[0]['goal'];
-          print('dailyGoal: $dailyGoal');
-        });
-      } else if (response.statusCode == 204) {
-        setState(() {
-         dailyGoal = 1;
-        });
-      }
-      else {
-        // Handle other status codes (e.g., 400, 401, etc.)
-        print('Failed to fetch goal data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Handle any errors that occur during the process
-      print('Error fetching goal data: $error');
-    }
-  }
-
-
 
   Widget buildOriginalImage() {
     return Image.asset(
       'Cactus.png',
       width: 300,
     );
-  }
-
-  double get _calculatedPortion {
-    return 1 - (waterIntake / dailyGoal);
   }
 
   Widget buildShaderMaskImage() {
@@ -147,7 +28,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, Colors.blue],
-          stops: [_calculatedPortion, _calculatedPortion],
+          stops: [0.2, 0.2], // Adjusted stops to fill 80% with blue
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
@@ -158,11 +39,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//! build context
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-
 
     List<String> imagePaths = [
       'beverageIcons/water.png',
@@ -207,13 +86,12 @@ class _HomePageState extends State<HomePage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: '$waterIntake ml\n',
+                                text: '0 ml\n',
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
-                                text: '0% of your daily target\n',
-                                style: CustomTextStyle.poppins4,
-                              ),
+                                  text: '0% of your daily target\n',
+                                  style: CustomTextStyle.poppins4),
                             ],
                           ),
                         ),
@@ -231,7 +109,8 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                ),
+                ), // Example cactus image
+                // SizedBox(height: 30),
                 Container(
                   width: double.infinity,
                   height: 290,
@@ -246,90 +125,89 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       SizedBox(height: 10),
                       Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          'Stay Hydrated!',
-                          style: CustomTextStyle.baloo1,
-                        ),
-                      ),
+                          padding: const EdgeInsets.all(20.0),
+                          child: Text(
+                            'Stay Hyrated!',
+                            style: CustomTextStyle.baloo1,
+                          )),
                       SizedBox(height: 20),
                       Container(
                         height: 180,
                         width: double.infinity,
+                        // color: AppColors.blue,
                         child: ListView.builder(
                           key: const PageStorageKey('beverageList'),
                           scrollDirection: Axis.horizontal,
                           itemCount: 9,
                           itemBuilder: (context, index) {
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LogWaterPage(
-                                      beverageIndex: index,
-                                      beverageName: beverageNames[index],
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LogWaterPage(
+                                        beverageIndex: index,
+                                        beverageName: beverageNames[index],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Column(
-                                  children: [
-                                    if (index == 0)
-                                      Row(children: [
-                                        SizedBox(
-                                          width: (screenWidth / 2) - 45,
-                                        ),
-                                        Column(
-                                          children: [
-                                            Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: AssetImage(
-                                                      imagePaths[index]),
-                                                  fit: BoxFit.contain,
+                                  );
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.all(20.0),
+                                  child: Column(
+                                    children: [
+                                      if (index == 0)
+                                        Row(children: [
+                                          SizedBox(
+                                            width: (screenWidth / 2) - 45,
+                                          ),
+                                          Column(
+                                            children: [
+                                              // SizedBox(width: 10.0), // Add spacing between blue box and content
+                                              Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: AssetImage(
+                                                        imagePaths[index]),
+                                                    fit: BoxFit.contain,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(height: 10),
-                                            Text(
-                                              beverageNames[index],
-                                              style: CustomTextStyle.poppins3,
-                                            ),
-                                          ],
-                                        ),
-                                      ])
-                                    else
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                    imagePaths[index]),
-                                                fit: BoxFit.contain,
+                                              SizedBox(height: 10),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
                                               ),
-                                            ),
+                                            ],
                                           ),
-                                          SizedBox(height: 10.0),
-                                          Text(
-                                            beverageNames[index],
-                                            style: CustomTextStyle.poppins3,
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
+                                        ])
+                                      else
+                                        Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: AssetImage(
+                                                        imagePaths[index]),
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.0),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
+                                              ),
+                                            ]),
+                                    ],
+                                  ),
+                                ));
                           },
                         ),
                       ),
