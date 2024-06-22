@@ -5,7 +5,6 @@ import 'package:watercactus_frontend/widget/button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SignupPage extends StatelessWidget {
   @override
@@ -82,14 +81,12 @@ class SignupBox extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
 
-  final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-
   Future<void> _signup(BuildContext context) async {
     final email = _emailController.text;
     final password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('$apiUrl/signup'),
+      Uri.parse('http://localhost:3000/signup'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );

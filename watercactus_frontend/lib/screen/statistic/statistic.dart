@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -24,16 +26,118 @@ final List<String> texts = [
   'Average Completion',
   'Drink Frequency',
 ];
-const double idealWaterIntake = 1000;
-const double waterIntakeGoal = 3100;
 
 class _StatisticPageState extends State<StatisticPage> {
+  int waterIntake = 0;
+  int dailyGoal = 1;
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWaterIntake();
+    fetchWaterGoal();
+  }
+  void fetchWaterIntake() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+    final startDate =
+        DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/getWater'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
+        setState(() {
+          List<dynamic> dynamicList = fetchedWaterData['data'];
+          waterIntake = dynamicList.isNotEmpty ? dynamicList[0]['total_intake'] : 0;
+        });
+      } else if (response.statusCode == 204) {
+        setState(() {
+          waterIntake = 0;
+        });
+      } else {
+        print('Failed to fetch water data: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching water data: $error');
+    }
+  }
+
+  void fetchWaterGoal() async {
+  String? token = Provider.of<TokenProvider>(context, listen: false).token;
+  final now = DateTime.now();
+  final startDate =
+      DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+  final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+      .toIso8601String()
+      .split('T')
+      .first;
+  try {
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/getGoal'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'startDate': startDate,
+        'endDate': endDate,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
+      setState(() {
+        List<dynamic> dynamicList = fetchedGoalData['data'];
+        dailyGoal = dynamicList.isNotEmpty ? dynamicList[0]['goal'] : 1;
+      });
+    } else if (response.statusCode == 204) {
+      // Handle 204 (No Content) if needed
+      setState(() {
+        dailyGoal = 1;
+      });
+    } else if (response.statusCode == 404) {
+      // Handle 404 (Not Found)
+      print('Goal data not found - 404');
+      setState(() {
+        dailyGoal = 1; // Set a default value or leave it as is
+      });
+    } else {
+      // Handle other status codes
+      print('Failed to fetch goal data: ${response.statusCode}');
+      // Optionally, you can log response.body for debugging
+    }
+  } catch (error) {
+    // Handle any errors that occur during the process
+    print('Error fetching goal data: $error');
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     String? token = Provider.of<TokenProvider>(context).token;
     if (token == null || token.isEmpty) {
+      // Redirect to login page if token is null or empty
       Navigator.pushNamed(context, '/login');
+      return Container(); // Return an empty container or loading indicator while navigating
     }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
@@ -82,43 +186,25 @@ class _StatisticPageState extends State<StatisticPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/GlassOfWater.png',
-                                        width: 60,
-                                        height: 60,
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Ideal Water Intake',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 10),
-                                          ),
-                                          SizedBox(height: 10.0),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 25.0),
-                                            child: Text(
-                                              '$idealWaterIntake ml', // Replace this with the variable for actual data
-                                              style: CustomTextStyle.poppins3
-                                                  .copyWith(
-                                                      fontSize: 12,
-                                                      color: Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  Image.asset(
+                                    'assets/GlassOfWater.png',
+                                    width: 60,
+                                    height: 60,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Ideal Water Intake',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Text(
+                                    '$waterIntake ml',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 12,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -132,43 +218,25 @@ class _StatisticPageState extends State<StatisticPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/trophy.png',
-                                        width: 60,
-                                        height: 60,
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Water Intake Goal',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 10),
-                                          ),
-                                          SizedBox(height: 10.0),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 25.0),
-                                            child: Text(
-                                              '$waterIntakeGoal ml', // Replace this with the variable for actual data
-                                              style: CustomTextStyle.poppins3
-                                                  .copyWith(
-                                                      fontSize: 12,
-                                                      color: Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  Image.asset(
+                                    'assets/trophy.png',
+                                    width: 60,
+                                    height: 60,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Water Intake Goal',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Text(
+                                    '$dailyGoal ml',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 12,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -186,35 +254,30 @@ class _StatisticPageState extends State<StatisticPage> {
                                       child: Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          PieChart(PieChartData(
-                                            sections: [
-                                              // Section for the achieved water intake (blue)
-                                              PieChartSectionData(
-                                                value: idealWaterIntake,
-                                                title:
-                                                    '', // You can optionally set a title for the section
-                                                color: Colors.blue,
-                                                radius: 15,
-                                              ),
-                                              // Section for the remaining water intake to reach the goal (grey)
-                                              PieChartSectionData(
-                                                value: waterIntakeGoal -
-                                                    idealWaterIntake,
-                                                title:
-                                                    '', // You can optionally set a title for the section
-                                                color: Colors.grey,
-                                                radius: 15,
-                                              ),
-                                            ],
-                                            centerSpaceRadius:
-                                                120, // Adjust this value as needed
-                                          )),
+                                          PieChart(
+                                            PieChartData(
+                                              sections: [
+                                                PieChartSectionData(
+                                                  value: waterIntake.toDouble(),
+                                                  color: Colors.blue,
+                                                  radius: 15,
+                                                ),
+                                                PieChartSectionData(
+                                                  value: dailyGoal
+                                                      .toDouble(),
+                                                  color: Colors.grey,
+                                                  radius: 15,
+                                                ),
+                                              ],
+                                              centerSpaceRadius: 120,
+                                            ),
+                                          ),
                                           Text(
-                                            '$idealWaterIntake / $waterIntakeGoal ml',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(
-                                                    fontSize: 18,
-                                                    color: Colors.black),
+                                            '$waterIntake / $dailyGoal ml',
+                                            style: CustomTextStyle.poppins3.copyWith(
+                                              fontSize: 18,
+                                              color: Colors.black,
+                                            ),
                                           ),
                                         ],
                                       ),
