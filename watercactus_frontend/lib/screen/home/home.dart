@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
           List<dynamic> dynamicList = fetchedWaterData['data'];
           // print(dynamicList);
           waterIntake = dynamicList[0]['total_intake'];
-          // print('waterIntake: $waterIntake');
+          print('waterIntake: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -137,10 +137,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   double get _calculatedPortion {
+    print('water intake: $waterIntake & daily: $dailyGoal');
+    if (waterIntake == dailyGoal) {
+      return 0;
+    }
     return 1 - (waterIntake / dailyGoal);
   }
 
+  double get _calculatedPercentage {
+    // print('water intake: $waterIntake & daily: $dailyGoal');
+    return (waterIntake / dailyGoal) * 100;
+  }
+
   Widget buildShaderMaskImage() {
+    // print('calculatedPortion: $_calculatedPortion');
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return LinearGradient(
@@ -211,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
-                                text: '0% of your daily target\n',
+                                text: '$_calculatedPercentage % of your daily target\n',
                                 style: CustomTextStyle.poppins4,
                               ),
                             ],

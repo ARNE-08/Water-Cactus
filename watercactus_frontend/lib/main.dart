@@ -9,7 +9,6 @@ import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
 import 'package:watercactus_frontend/screen/statistic/statistic.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';

@@ -4,7 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/card_carousel.dart';
-import 'package:watercactus_frontend/widget/navbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage();
@@ -25,6 +28,12 @@ class _ProfilePageState extends State<ProfilePage> {
       CardData(title: 'Water and Ecosystems', detail: 'Water ecosystems, including rivers, lakes, and wetlands, provide essential services such as water purification, flood regulation, and habitat for biodiversity. Protecting water ecosystems is crucial for maintaining ecological balance and sustainable development.' ),
     ];
 
+   Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    Provider.of<TokenProvider>(context, listen: false).updateToken(null);
+    Navigator.of(context).pushReplacementNamed('/start');
+  }
 
   void _showLogoutConfirmationDialog() {
     showDialog(
@@ -71,9 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: CustomTextStyle.poppins4.copyWith(color: Colors.white),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                      Navigator.pushNamed(
-                          context, '/login'); // Navigate to the login page
+                      logout();
                     },
                   ),
                 ],
