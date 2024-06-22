@@ -19,12 +19,13 @@ class _HomePageState extends State<HomePage> {
   String cactusPath = 'whiteCactus.png';
   bool showShaderMask = true;
   int waterIntake = 0;
-  List<dynamic> dynamicList = [];
+  int dailyGoal = 1;
 
   @override
   void initState() {
     super.initState();
     fetchWaterIntake();
+    fetchWaterGoal();
   }
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -49,15 +50,15 @@ class _HomePageState extends State<HomePage> {
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
-        print('Succeed to fetch water data: ${response.statusCode}');
+        // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
         print('fetchedd water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
         setState(() {
-          dynamicList = fetchedWaterData['data'];
-          print(dynamicList);
+          List<dynamic> dynamicList = fetchedWaterData['data'];
+          // print(dynamicList);
           waterIntake = dynamicList[0]['total_intake'];
-          print('waterIntake: $waterIntake');
+          // print('waterIntake: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -66,11 +67,59 @@ class _HomePageState extends State<HomePage> {
       }
       else {
         // Handle other status codes (e.g., 400, 401, etc.)
-        print('Failed to fetch mood data: ${response.statusCode}');
+        print('Failed to fetch water data: ${response.statusCode}');
       }
     } catch (error) {
       // Handle any errors that occur during the process
-      print('Error fetching mood data: $error');
+      print('Error fetching water data: $error');
+    }
+  }
+
+  void fetchWaterGoal() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
+    try {
+      // Make the HTTP POST request
+      // print('Tokenn: $token');
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/getGoal'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      // Check if the request was successful (status code 200)
+      if (response.statusCode == 200) {
+        // Parse the JSON response directly into a list of maps
+        print('Succeed to fetch goal data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
+        print('fetchedd goal data: ${fetchedGoalData['goals']}');
+        // Store the fetched data in the list
+        setState(() {
+          List<dynamic> dynamicList = fetchedGoalData['goals'];
+          print(dynamicList);
+          dailyGoal = dynamicList[0]['goal'];
+          print('dailyGoal: $dailyGoal');
+        });
+      } else if (response.statusCode == 204) {
+        setState(() {
+         dailyGoal = 1;
+        });
+      }
+      else {
+        // Handle other status codes (e.g., 400, 401, etc.)
+        print('Failed to fetch goal data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error fetching goal data: $error');
     }
   }
 
@@ -81,6 +130,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  double get _calculatedPortion {
+    return 1 - (waterIntake / dailyGoal);
+  }
+
   Widget buildShaderMaskImage() {
     return ShaderMask(
       shaderCallback: (Rect bounds) {
@@ -88,7 +141,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, Colors.blue],
-          stops: [0.2, 0.2],
+          stops: [_calculatedPortion, _calculatedPortion],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
