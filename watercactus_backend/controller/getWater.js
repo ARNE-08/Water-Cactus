@@ -44,36 +44,55 @@ module.exports = (req, res) => {
             });
         }
 
-        // Query to fetch total_intake from water_stat for the current user and specified date interval
-        const sql = `
-            SELECT stat_date, total_intake
-            FROM water_stat
-            WHERE user_id = ?
-                AND stat_date >= ?
-                AND stat_date <= ?;
-        `;
+        // Connect to MySQL database
+        const connection = mysql.createConnection({
+            host: process.env.DATABASE_URL,
+            port: process.env.DB_PORT,
+            user: process.env.DATABASE_USER,
+            password: process.env.PASSWORD,
+            database: process.env.DATABASE_NAME,
+        });
 
-        connection.query(sql, [id, startDate, endDate], (err, results) => {
+        connection.connect((err) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error retrieving water intake",
+                    message: "Database connection error",
                     error: err.message,
                 });
             }
 
-            if (results.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "No water intake data found for the specified date range",
-                });
-            }
+            // Query to fetch total_intake from water_stat for the current user and specified date interval
+            const sql = `
+                SELECT stat_date, total_intake
+                FROM water_stat
+                WHERE user_id = ?
+                    AND stat_date >= ?
+                    AND stat_date <= ?;
+            `;
 
-            // Return the fetched results
-            return res.status(200).json({
-                success: true,
-                message: "Water intake data retrieved successfully",
-                data: results,
+            connection.query(sql, [id, startDate, endDate], (err, results) => {
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "Error retrieving water intake",
+                        error: err.message,
+                    });
+                }
+
+                if (results.length === 0) {
+                    return res.status(204).json({
+                        success: true,
+                        message: "No water intake data found for the specified date range",
+                    });
+                }
+
+                // Return the fetched results
+                return res.status(200).json({
+                    success: true,
+                    message: "Water intake data retrieved successfully",
+                    data: results,
+                });
             });
         });
     });

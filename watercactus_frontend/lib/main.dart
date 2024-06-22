@@ -19,7 +19,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
 
@@ -29,19 +29,35 @@ Future<void> main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => TokenProvider()..updateToken(token ?? ''),
+      create: (context) => TokenProvider(),
       child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  Future<String?> _getToken() async {
+    final FlutterSecureStorage storage = FlutterSecureStorage();
+    return await storage.read(key: 'jwt_token');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WaterCactus',
       theme: CustomTheme.customTheme,
-      home: _determineStartPage(context),
+      home: FutureBuilder<String?>(
+        future: _getToken(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Or any loading widget
+          } else {
+            String? token = snapshot.data;
+            Provider.of<TokenProvider>(context, listen: false).updateToken(token ?? '');
+            return _determineStartPage(context);
+          }
+        },
+      ),
       routes: {
         '/stat': (context) => StatisticPage(),
         '/start': (context) => StartPage(),

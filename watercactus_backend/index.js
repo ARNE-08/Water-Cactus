@@ -38,6 +38,7 @@ app.get("/", (req, res) => {
 app.post("/signup", require("./controller/signup"));
 app.post("/login", require("./controller/login"));
 app.post("/getWater", require("./controller/getWater"));
+app.post("/getGoal", require("./controller/getGoal"));
 app.post("/addUnit", require("./controller/addUnit"));
 app.post("/addGender", require("./controller/addGender"));
 app.post("/addActivityRate", require("./controller/addActivityRate"));
