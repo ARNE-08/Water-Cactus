@@ -144,7 +144,7 @@ class _GoalPageState extends State<GoalPage> {
                 controller: _weightController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: 'Weight',
+                  hintText: 'Weight (kg)',
                   hintStyle: GoogleFonts.balooThambi2(
                     textStyle: TextStyle(
                       fontSize: 22,

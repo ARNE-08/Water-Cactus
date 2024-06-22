@@ -1,9 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
 import 'package:watercactus_frontend/widget/button.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UnitPage extends StatelessWidget {
+  Future<void> sendUnit(BuildContext context, String unit) async {
+    String? token = Provider.of<TokenProvider>(context).token;
+    final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
+    final response = await http.post(
+      Uri.parse('$apiUrl/addUnit'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'unit': unit}),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pushNamed(context, '/goal-calculation');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to set unit')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height + 600;
@@ -63,23 +91,22 @@ class UnitPage extends StatelessWidget {
                   SizedBox(height: 40),
                   MyElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/goal-calculation');
-    
+                      sendUnit(context, 'oz');
                     },
                     text: 'oz (ounces)',
                     width: 275,
                     height: 65, // Increased width for the button
-                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1)
+                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
                   ),
                   SizedBox(height: 20),
                   MyElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/goal-calculation');
+                      sendUnit(context, 'ml');
                     },
                     text: 'ml (milliliters)',
                     width: 275,
                     height: 65, // Increased width for the button
-                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1)
+                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
                   ),
                 ],
               ),

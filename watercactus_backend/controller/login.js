@@ -37,7 +37,6 @@ module.exports = (req, res) => {
                         },
                         process.env.SECRET_KEY
                     );
-					console.log(token);
 
                     return res.status(200).json({
                         success: true,
