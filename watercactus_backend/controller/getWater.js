@@ -63,7 +63,7 @@ module.exports = (req, res) => {
             }
 
             if (results.length === 0) {
-                return res.status(404).json({
+                return res.status(204).json({
                     success: false,
                     message: "No water intake data found for the specified date range",
                 });

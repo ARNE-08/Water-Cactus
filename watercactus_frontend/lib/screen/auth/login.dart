@@ -5,6 +5,9 @@ import 'package:watercactus_frontend/widget/button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -95,7 +98,13 @@ class LoginBox extends StatelessWidget {
       if (jsonResponse['success']) {
         final token = jsonResponse['data']['token'];
         await storage.write(key: 'jwt_token', value: token);
-        print("Token stored successfully");
+
+        // Update the token in the provider
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Provider.of<TokenProvider>(context, listen: false).updateToken(token);
+        });
+
+        print("Token stored and provider updated successfully");
         Navigator.pushNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${jsonResponse['error']}')));
