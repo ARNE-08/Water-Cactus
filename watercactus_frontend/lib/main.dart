@@ -15,10 +15,15 @@ import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
 import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Flutter Secure Storage
   final FlutterSecureStorage storage = FlutterSecureStorage();
   String? token = await storage.read(key: 'jwt_token');
 
