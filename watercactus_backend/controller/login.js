@@ -33,7 +33,6 @@ module.exports = (req, res) => {
                 if (valid) {
                     const token = jwt.sign(
                         {
-                            email: rows[0].email,
 							id: rows[0].id,
                         },
                         process.env.SECRET_KEY

@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
 
         // email does not exist, proceed with registration
         var insertQuery = mysql.format(
-            "INSERT INTO cactus_user (email, hashed_password, remind_time) VALUES (?, ?, '09:00:00')",
+            "INSERT INTO cactus_user (email, hashed_password) VALUES (?, ?)",
             [email, hash1]
         );
 
@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
                 });
             }
 
-            const token = jwt.sign({ email }, process.env.SECRET_KEY);
+            const token = jwt.sign({ id: rows.insertId }, process.env.SECRET_KEY);
             return res.status(200).json({ 
                 success: true,
                 data: { token },
