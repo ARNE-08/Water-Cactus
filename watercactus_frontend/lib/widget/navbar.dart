@@ -22,7 +22,7 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
                 IconButton(
                   icon: Icon(Icons.equalizer, color: AppColors.black, size: 35),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/noti-setting');
+                    Navigator.pushNamed(context, '/stat');
                   },
                 ),
                 GestureDetector(
