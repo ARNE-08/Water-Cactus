@@ -40,10 +40,10 @@ function convertWaterUnit(weight, unit) {
 
   weight = parseFloat(weight);
 
-  if (unit.toLowerCase() === 'ml') {
+  if (unit.toLowerCase() === "ml") {
     const convertedWeight = weight / conversionFactor;
     return `${convertedWeight.toFixed(2)}`;
-  } else if (unit.toLowerCase() === 'oz') {
+  } else if (unit.toLowerCase() === "oz") {
     const convertedWeight = weight * conversionFactor;
     return `${convertedWeight.toFixed(2)}`;
   } else {
@@ -57,6 +57,7 @@ function convertWaterUnit(weight, unit) {
 app.post("/signup", require("./controller/signup"));
 app.post("/login", require("./controller/login"));
 app.post("/getWater", require("./controller/getWater"));
+app.post("/getGoal", require("./controller/getGoal"));
 app.post("/addUnit", require("./controller/addUnit"));
 app.post("/addGender", require("./controller/addGender"));
 app.post("/addActivityRate", require("./controller/addActivityRate"));
