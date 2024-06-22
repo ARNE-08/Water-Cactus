@@ -28,11 +28,18 @@ class _StatisticPageState extends State<StatisticPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Statistic',
-          style: CustomTextStyle.poppins3,
-        ),
-        backgroundColor: Color.fromRGBO(172, 230, 255, 1),
+        toolbarHeight: 100,
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cancel, color: AppColors.black, size: 30),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 20),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -237,11 +244,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][index],
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                  ),
+                                                  style: CustomTextStyle.poppins3,
                                                 ),
                                               ],
                                             ),
@@ -261,7 +264,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             false,
                                             true
                                           ];
-                                       
+
                                           int adjustedIndex = index +
                                               4; // Start index for the second row
 
@@ -318,11 +321,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     'F',
                                                     'S'
                                                   ][adjustedIndex],
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                  ),
+                                                  style: CustomTextStyle.poppins3,
                                                 ),
                                               ],
                                             ),
@@ -334,7 +333,8 @@ class _StatisticPageState extends State<StatisticPage> {
                                 )
                               : index == 3
                                   ? Padding(
-                                      padding: const EdgeInsets.all(20.0),
+                                      padding: const EdgeInsets.only(
+                                          left: 36.0, right: 16.0, bottom: 16),
                                       child: Column(
                                         children: [
                                           SizedBox(height: 20),
@@ -466,7 +466,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                 titlesData: FlTitlesData(
                                                   leftTitles: AxisTitles(
                                                     sideTitles: SideTitles(
-                                                      showTitles: true,
+                                                      showTitles: false,
                                                     ),
                                                   ),
                                                   bottomTitles: AxisTitles(
@@ -475,65 +475,60 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       getTitlesWidget:
                                                           (double value,
                                                               TitleMeta meta) {
-                                                        const style = TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 14,
-                                                        );
+                                                       
                                                         Widget text;
                                                         switch (value.toInt()) {
                                                           case 0:
                                                             text = Text('Ja',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 1:
                                                             text = Text('Fe',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 2:
                                                             text = Text('Ma',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 3:
                                                             text = Text('Ap',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 4:
                                                             text = Text('Ma',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 5:
                                                             text = Text('Ju',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 6:
                                                             text = Text('Ju',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 7:
                                                             text = Text('Au',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 8:
                                                             text = Text('Se',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 9:
                                                             text = Text('Oc',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 10:
                                                             text = Text('No',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           case 11:
                                                             text = Text('De',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                           default:
                                                             text = Text('',
-                                                                style: style);
+                                                                style: CustomTextStyle.poppins3);
                                                             break;
                                                         }
                                                         return SideTitleWidget(
