@@ -93,8 +93,10 @@ class LoginBox extends StatelessWidget {
       body: jsonEncode({'email': email, 'password': password}),
     );
 
+    print("response: ${response.body}");
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
+      print(jsonResponse);
       if (jsonResponse['success']) {
         final token = jsonResponse['data']['token'];
         await storage.write(key: 'jwt_token', value: token);
