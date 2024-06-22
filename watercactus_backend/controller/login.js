@@ -33,10 +33,12 @@ module.exports = (req, res) => {
                 if (valid) {
                     const token = jwt.sign(
                         {
-                            email
+                            email: rows[0].email,
+							id: rows[0].id,
                         },
                         process.env.SECRET_KEY
                     );
+					console.log(token);
 
                     return res.status(200).json({
                         success: true,
