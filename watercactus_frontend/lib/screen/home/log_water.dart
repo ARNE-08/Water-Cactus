@@ -22,25 +22,25 @@ class _LogWaterPageState extends State<LogWaterPage> {
   int _option1ML = 110;
 
   List<String> imagePath = [
-    'beverages/Water.png',
-    'beverages/Tea.png',
-    'beverages/Coffee.png',
-    'beverages/Juice.png',
-    'beverages/Milk.png',
-    'beverages/Soda.png',
-    'beverages/Beer.png',
-    'beverages/Wine.png',
+    'EmptyBeverages/empty1.png',
+    'EmptyBeverages/empty2.png',
+    'EmptyBeverages/empty3.png',
+    'EmptyBeverages/empty4.png',
+    'EmptyBeverages/empty5.png',
+    'EmptyBeverages/empty6.png',
+    'EmptyBeverages/empty7.png',
+    'EmptyBeverages/empty8.png',
   ];
 
   List<Color> maskColor = [
-    const Color.fromRGBO(229, 247, 254, 1),
-    const Color.fromRGBO(235, 248, 207, 1),
-    const Color.fromRGBO(236, 229, 221, 1),
-    const Color.fromRGBO(255, 239, 151, 1),
-    const Color.fromRGBO(242, 242, 242, 1),
-    const Color.fromRGBO(253, 167, 193, 1),
-    const Color.fromRGBO(239, 239, 249, 1),
-    const Color.fromRGBO(233, 151, 156, 1),
+    AppColors.water,
+    AppColors.tea,
+    AppColors.coffee,
+    AppColors.juice,
+    AppColors.milk,
+    AppColors.soda,
+    AppColors.beer,
+    AppColors.wine,
   ];
 
   int selectedOptionIndex = 1;
@@ -88,29 +88,31 @@ class _LogWaterPageState extends State<LogWaterPage> {
       selectedOptionIndex = index;
       _calculatedML = index == 0 ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
       _option1ML = 110;
-      // print(_calculatedML);
     });
   }
 
   double get _calculatedPortion {
-    return 1 - (_calculatedML / 380);
+    return 1 - (_calculatedML / 330);
   }
 
   Widget buildShaderMaskImage() {
-    return ShaderMask(
-      shaderCallback: (Rect bounds) {
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.transparent, maskColor[widget.beverageIndex]],
-          stops: [_calculatedPortion, _calculatedPortion],
-        ).createShader(bounds);
-      },
-      blendMode: BlendMode.srcATop,
-      child: Image.asset(
-        imagePath[widget.beverageIndex],
-        // width: 300,
-        height: 460,
+    return Container(
+      height: 400,
+      width: 350,
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.transparent, maskColor[widget.beverageIndex]],
+            stops: [_calculatedPortion, _calculatedPortion],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.srcATop,
+        child: Image.asset(
+          imagePath[widget.beverageIndex],
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -166,47 +168,50 @@ class _LogWaterPageState extends State<LogWaterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onVerticalDragUpdate: (details) {
-                            selectedOptionIndex = 1;
-                            _controller.animateTo(
-                            0,
-                            duration: const Duration(milliseconds: 50),
-                            curve: Curves.easeInOut,
-                          );
-                          // Accumulate the total drag distance
-                          _totalDragDistance += details.delta.dy;
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        SizedBox(height: 100),
+                        GestureDetector(
+                          onVerticalDragUpdate: (details) {
+                              selectedOptionIndex = 1;
+                              _controller.animateTo(
+                              0,
+                              duration: const Duration(milliseconds: 50),
+                              curve: Curves.easeInOut,
+                            );
+                            // Accumulate the total drag distance
+                            _totalDragDistance += details.delta.dy;
 
-                          // Detect if the total drag distance is greater than the threshold
-                          if (_totalDragDistance < -_threshold) {
+                            // Detect if the total drag distance is greater than the threshold
+                            if (_totalDragDistance < -_threshold) {
+                              setState(() {
+                                _calculatedML = (_calculatedML + 10).clamp(0, 330); // Increment by 10 and clamp between 0 and 330
+                                _option1ML = _calculatedML;
+                                _totalDragDistance = 0; // Reset the drag distance
+                                print('up: $_calculatedML');
+                              });
+                            } else if (_totalDragDistance > _threshold) {
+                              setState(() {
+                                _calculatedML = (_calculatedML - 10).clamp(0, 330); // Decrement by 10 and clamp between 0 and 330
+                                _option1ML = _calculatedML;
+                                _totalDragDistance = 0; // Reset the drag distance
+                                print('down: $_calculatedML');
+                              });
+                            }
+                          },
+                          onVerticalDragEnd: (details) {
+                            // Reset the drag distance when the drag ends
                             setState(() {
-                              _calculatedML = (_calculatedML + 10).clamp(0, 330); // Increment by 10 and clamp between 0 and 330
-                              _option1ML = _calculatedML;
-                              _totalDragDistance = 0; // Reset the drag distance
-                              print('up: $_calculatedML');
+                              _totalDragDistance = 0;
+                              print(_calculatedML);
                             });
-                          } else if (_totalDragDistance > _threshold) {
-                            setState(() {
-                              _calculatedML = (_calculatedML - 10).clamp(0, 330); // Decrement by 10 and clamp between 0 and 330
-                              _option1ML = _calculatedML;
-                              _totalDragDistance = 0; // Reset the drag distance
-                              print('down: $_calculatedML');
-                            });
-                          }
-                        },
-                        onVerticalDragEnd: (details) {
-                          // Reset the drag distance when the drag ends
-                          setState(() {
-                            _totalDragDistance = 0;
-                            print(_calculatedML);
-                          });
-                        },
-                        child: buildShaderMaskImage(),
-                      )
-                    ],
+                          },
+                          child: buildShaderMaskImage(),
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
