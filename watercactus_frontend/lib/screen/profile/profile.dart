@@ -187,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/goal');
+                    Navigator.pushNamed(context, '/goal-calculation');
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,

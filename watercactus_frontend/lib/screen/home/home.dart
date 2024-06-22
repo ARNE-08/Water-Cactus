@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-  final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     List<String> imagePaths = [
       'beverageIcons/water.png',
@@ -76,38 +76,41 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '0 ml\n',
-                              style: CustomTextStyle.poppins1,
-                            ),
-                            TextSpan(
-                                text: '0% of your daily target\n',
-                                style: CustomTextStyle.poppins4),
-                          ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 40),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '0 ml\n',
+                                style: CustomTextStyle.poppins1,
+                              ),
+                              TextSpan(
+                                  text: '0% of your daily target\n',
+                                  style: CustomTextStyle.poppins4),
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            showShaderMask = !showShaderMask;
-                          });
-                        },
-                        child: showShaderMask
-                            ? buildShaderMaskImage()
-                            : buildOriginalImage(),
-                      )
-                    ],
+                        SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              showShaderMask = !showShaderMask;
+                            });
+                          },
+                          child: showShaderMask
+                              ? buildShaderMaskImage()
+                              : buildOriginalImage(),
+                        )
+                      ],
+                    ),
                   ),
                 ), // Example cactus image
-                SizedBox(height: 30),
+                // SizedBox(height: 30),
                 Container(
                   width: double.infinity,
                   height: 290,
@@ -120,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Column(
                     children: [
-                     SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Text(
@@ -154,55 +157,54 @@ class _HomePageState extends State<HomePage> {
                                   child: Column(
                                     children: [
                                       if (index == 0)
-                                        Row(
-                                          children: [
-                                            SizedBox(width: (screenWidth / 2) - 45,),
-                                            Column(
-                                              children: [
-                                                // SizedBox(width: 10.0), // Add spacing between blue box and content
-                                                Container(
-                                                  width: 50,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    image: DecorationImage(
-                                                      image: AssetImage(
-                                                          imagePaths[index]),
-                                                      fit: BoxFit.contain,
-                                                    ),
+                                        Row(children: [
+                                          SizedBox(
+                                            width: (screenWidth / 2) - 45,
+                                          ),
+                                          Column(
+                                            children: [
+                                              // SizedBox(width: 10.0), // Add spacing between blue box and content
+                                              Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: AssetImage(
+                                                        imagePaths[index]),
+                                                    fit: BoxFit.contain,
                                                   ),
                                                 ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  beverageNames[index],
-                                                  style: CustomTextStyle.poppins3,
-                                                ),
-                                              ],
-                                            ),
-                                          ]
-                                        )
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
+                                              ),
+                                            ],
+                                          ),
+                                        ])
                                       else
                                         Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
                                               Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image:
-                                                      AssetImage(imagePaths[index]),
-                                                  fit: BoxFit.contain,
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: AssetImage(
+                                                        imagePaths[index]),
+                                                    fit: BoxFit.contain,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(height: 10.0),
-                                            Text(
-                                              beverageNames[index],
-                                              style: CustomTextStyle.poppins3,
-                                            ),
-                                          ]
-                                        ),
-
+                                              SizedBox(height: 10.0),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
+                                              ),
+                                            ]),
                                     ],
                                   ),
                                 ));
