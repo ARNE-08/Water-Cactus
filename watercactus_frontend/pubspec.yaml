@@ -2,7 +2,7 @@ name: watercactus_frontend
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.4 <4.0.0'
+  sdk: ">=3.3.4 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,12 +33,12 @@ dependencies:
   http: ^1.2.1
   flutter_secure_storage: ^8.0.0
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
   widget_mask: ^0.1.0
+  fl_chart: ^0.68.0
   carousel_slider: ^4.2.1
 
 dev_dependencies:
@@ -57,7 +57,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -67,6 +66,43 @@ flutter:
   assets:
     - assets/Cactus.png
     - assets/whiteCactus.png
+
+    - assets/beverageIcons/water.png
+    - assets/beverageIcons/tea.png
+    - assets/beverageIcons/coffee.png
+    - assets/beverageIcons/juice.png
+    - assets/beverageIcons/milk.png
+    - assets/beverageIcons/soda.png
+    - assets/beverageIcons/beer.png
+    - assets/beverageIcons/wine.png
+    - assets/beverageIcons/add.png
+    - assets/GlassOfWater.png
+    - assets/trophy.png
+    - assets/week.png
+    - assets/month.png
+    - assets/average.png
+    - assets/frequency.png
+
+    - assets/beverages/Water.png
+    - assets/beverages/Tea.png
+    - assets/beverages/Coffee.png
+    - assets/beverages/Juice.png
+    - assets/beverages/Milk.png
+    - assets/beverages/Soda.png
+    - assets/beverages/Beer.png
+    - assets/beverages/Wine.png
+
+    - assets/numbers/1.png
+    - assets/numbers/2.png
+    - assets/numbers/3.png
+    - assets/numbers/4.png
+    - assets/numbers/5.png
+    - assets/numbers/6.png
+    - assets/numbers/7.png
+    - assets/numbers/8.png
+    - assets/numbers/9.png
+    - assets/numbers/0.png
+
     - assets/beverages/
     - assets/beverageIcons/
     - assets/numbers/
