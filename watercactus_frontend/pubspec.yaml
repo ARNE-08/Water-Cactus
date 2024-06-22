@@ -103,7 +103,11 @@ flutter:
     - assets/numbers/9.png
     - assets/numbers/0.png
 
+    - assets/beverages/
+    - assets/beverageIcons/
+    - assets/numbers/
     - assets/profile_page/
+    - assets/EmptyBeverages/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
