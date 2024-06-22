@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   http: ^1.2.1
   flutter_secure_storage: ^8.0.0
+  provider: ^6.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -82,26 +83,6 @@ flutter:
     - assets/month.png
     - assets/average.png
     - assets/frequency.png
-
-    - assets/beverages/Water.png
-    - assets/beverages/Tea.png
-    - assets/beverages/Coffee.png
-    - assets/beverages/Juice.png
-    - assets/beverages/Milk.png
-    - assets/beverages/Soda.png
-    - assets/beverages/Beer.png
-    - assets/beverages/Wine.png
-
-    - assets/numbers/1.png
-    - assets/numbers/2.png
-    - assets/numbers/3.png
-    - assets/numbers/4.png
-    - assets/numbers/5.png
-    - assets/numbers/6.png
-    - assets/numbers/7.png
-    - assets/numbers/8.png
-    - assets/numbers/9.png
-    - assets/numbers/0.png
 
     - assets/beverages/
     - assets/beverageIcons/
