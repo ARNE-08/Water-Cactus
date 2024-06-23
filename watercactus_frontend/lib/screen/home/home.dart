@@ -22,7 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-  String cactusPath = 'whiteCactus.png';
+  String cactusPath = 'assets/whiteCactus.png';
   bool showShaderMask = true;
   int waterIntake = 0;
   int dailyGoal = 1;
@@ -30,14 +30,14 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> beverageList = [];
 
   List<String> imagePath = [
-    'EmptyBeverages/empty1.png',
-    'EmptyBeverages/empty2.png',
-    'EmptyBeverages/empty3.png',
-    'EmptyBeverages/empty4.png',
-    'EmptyBeverages/empty5.png',
-    'EmptyBeverages/empty6.png',
-    'EmptyBeverages/empty7.png',
-    'EmptyBeverages/empty8.png',
+    'assets/EmptyBeverages/empty1.png',
+    'assets/EmptyBeverages/empty2.png',
+    'assets/EmptyBeverages/empty3.png',
+    'assets/EmptyBeverages/empty4.png',
+    'assets/EmptyBeverages/empty5.png',
+    'assets/EmptyBeverages/empty6.png',
+    'assets/EmptyBeverages/empty7.png',
+    'assets/EmptyBeverages/empty8.png',
   ];
 
   List<Color> maskColor = [
@@ -197,7 +197,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildOriginalImage() {
     return Image.asset(
-      'Cactus.png',
+      'assets/Cactus.png',
       width: 300,
     );
   }
@@ -228,7 +228,7 @@ class _HomePageState extends State<HomePage> {
       },
       blendMode: BlendMode.srcATop,
       child: Image.asset(
-        'whiteCactus.png',
+        'assets/whiteCactus.png',
         width: 300,
       ),
     );
@@ -258,14 +258,14 @@ class _HomePageState extends State<HomePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     List<String> imagePaths = [
-      'beverageIcons/water.png',
-      'beverageIcons/tea.png',
-      'beverageIcons/coffee.png',
-      'beverageIcons/juice.png',
-      'beverageIcons/milk.png',
-      'beverageIcons/soda.png',
-      'beverageIcons/beer.png',
-      'beverageIcons/wine.png',
+      'assets/beverageIcons/water.png',
+      'assets/beverageIcons/tea.png',
+      'assets/beverageIcons/coffee.png',
+      'assets/beverageIcons/juice.png',
+      'assets/beverageIcons/milk.png',
+      'assets/beverageIcons/soda.png',
+      'assets/beverageIcons/beer.png',
+      'assets/beverageIcons/wine.png',
     ];
 
     List<String> beverageNames = [
@@ -402,7 +402,7 @@ class _HomePageState extends State<HomePage> {
                                         height: 50,
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
-                                            image: AssetImage('beverageIcons/add.png'),
+                                            image: AssetImage('assets/beverageIcons/add.png'),
                                             fit: BoxFit.contain,
                                           ),
                                         ),

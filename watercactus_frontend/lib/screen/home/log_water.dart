@@ -22,7 +22,7 @@ class LogWaterPage extends StatefulWidget {
 
 class _LogWaterPageState extends State<LogWaterPage> {
   final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-  String cactusPath = 'whiteCactus.png';
+  String cactusPath = 'assets/whiteCactus.png';
   String _selectedNumber = "0";
   double _totalDragDistance = 0.0;
   final double _threshold = 5.0;
@@ -31,14 +31,14 @@ class _LogWaterPageState extends State<LogWaterPage> {
   int quantity = 110;
 
   List<String> imagePath = [
-    'EmptyBeverages/empty1.png',
-    'EmptyBeverages/empty2.png',
-    'EmptyBeverages/empty3.png',
-    'EmptyBeverages/empty4.png',
-    'EmptyBeverages/empty5.png',
-    'EmptyBeverages/empty6.png',
-    'EmptyBeverages/empty7.png',
-    'EmptyBeverages/empty8.png',
+    'assets/EmptyBeverages/empty1.png',
+    'assets/EmptyBeverages/empty2.png',
+    'assets/EmptyBeverages/empty3.png',
+    'assets/EmptyBeverages/empty4.png',
+    'assets/EmptyBeverages/empty5.png',
+    'assets/EmptyBeverages/empty6.png',
+    'assets/EmptyBeverages/empty7.png',
+    'assets/EmptyBeverages/empty8.png',
   ];
 
   List<Color> maskColor = [
