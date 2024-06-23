@@ -163,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/unit');
+                    Navigator.pushNamed(context, '/edit-unit');
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,

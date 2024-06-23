@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mysql = require("mysql");
-const convertWaterUnit = require("../utils");
+const convertWaterUnit = require("../utils/convertWaterUnit");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present

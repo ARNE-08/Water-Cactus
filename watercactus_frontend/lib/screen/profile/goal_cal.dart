@@ -16,10 +16,10 @@ class _GoalPageState extends State<GoalPage> {
   String? _selectedGender;
   String? _selectedActivityRate;
   TextEditingController _weightController = TextEditingController();
-  String _customGoal = "0";
   String _unit = "ml";
   String _goal = "0";
   String? token;
+  final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
   @override
   void initState() {
@@ -29,7 +29,6 @@ class _GoalPageState extends State<GoalPage> {
   }
 
   Future<void> _getUnit(String? token) async {
-    final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
     final response = await http.get(
       Uri.parse('$apiUrl/getUnit'),
@@ -97,7 +96,47 @@ class _GoalPageState extends State<GoalPage> {
       setState(() {
        _goal = '$result $_unit';
       });
-      print(_customGoal);
+    }
+  }
+
+  Future<void> _next(BuildContext context) async {
+    final weight = (_weightController.text) ?? '0.0';
+
+    if (weight.isNotEmpty) {
+      final responseWeight = await http.post(
+        Uri.parse('$apiUrl/addWeight'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'weight': weight}),
+      );
+    }
+
+    if (!(_selectedActivityRate == null)) {
+      final responseActivityRate = await http.post(
+      Uri.parse('$apiUrl/addActivityRate'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'activity': _selectedActivityRate}),
+      );
+    }
+
+    final responseGoal = await http.post(
+      Uri.parse('$apiUrl/addGoal'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'goal': _goal}),
+    );
+
+    if (responseGoal.statusCode == 200) {
+      Navigator.pushNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Signup failed')));
     }
   }
 
@@ -224,7 +263,7 @@ class _GoalPageState extends State<GoalPage> {
                             ),
                           ),
                           value: _selectedActivityRate,
-                          items: ['Low', 'Moderate', 'High']
+                          items: ['None', 'Low', 'Moderate', 'High']
                               .map((label) => DropdownMenuItem(
                                     child: Text(
                                       label,
@@ -271,22 +310,27 @@ class _GoalPageState extends State<GoalPage> {
                   Spacer(),
                   ElevatedButton(
                     onPressed: () {
-                      // Your onPressed function here
+                      _next(context);
                     },
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromRGBO(43, 96, 158, 1), // Button background color
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Adjust border radius to match the image
+                      ),
                       textStyle: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
+                          color: Colors.white, // Text color
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      elevation: 5, // Add shadow effect if needed
+                      shadowColor: Colors.black.withOpacity(0.25), // Shadow color
                     ),
                     child: Text('Next'),
                   ),
+                  SizedBox(height: 20),
                   TextButton(
                     onPressed: () => _showNumberPad(context),
                     child: Text(
@@ -295,6 +339,8 @@ class _GoalPageState extends State<GoalPage> {
                         textStyle: TextStyle(
                           fontSize: 14,
                           color: Colors.white,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white
                         ),
                       ),
                     ),
