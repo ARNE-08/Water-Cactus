@@ -81,22 +81,18 @@ class LoginBox extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
 
-  final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-
   Future<void> _signin(BuildContext context) async {
     final email = _emailController.text;
     final password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('$apiUrl/login'),
+      Uri.parse('http://localhost:3000/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    print("response: ${response.body}");
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-      print(jsonResponse);
       if (jsonResponse['success']) {
         final token = jsonResponse['data']['token'];
         await storage.write(key: 'jwt_token', value: token);

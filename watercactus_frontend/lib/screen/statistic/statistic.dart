@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -24,16 +26,346 @@ final List<String> texts = [
   'Average Completion',
   'Drink Frequency',
 ];
-const double idealWaterIntake = 1000;
-const double waterIntakeGoal = 3100;
 
 class _StatisticPageState extends State<StatisticPage> {
+  double waterIntake = 0;
+  double dailyGoal = 1;
+  List<Map<String, dynamic>> weeklyWaterIntake = [];
+  Map<String, double> monthlyWaterIntake = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWaterIntake();
+    fetchWaterGoal();
+    fetchWeeklyWaterIntake();
+    fetchMonthlyWaterIntake();
+  }
+
+  void fetchWeeklyWaterIntake() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+
+    try {
+      for (int i = 6; i >= 0; i--) {
+        final currentDate = now.subtract(Duration(days: i));
+        final startDate =
+            DateTime(currentDate.year, currentDate.month, currentDate.day)
+                .toIso8601String()
+                .split('T')
+                .first;
+        final endDate = DateTime(currentDate.year, currentDate.month,
+                currentDate.day, 23, 59, 59)
+            .toIso8601String()
+            .split('T')
+            .first;
+
+        // Fetch daily goal for the current day
+        final goalResponse = await http.post(
+          Uri.parse('http://localhost:3000/getGoal'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
+
+        // Fetch water intake data for the current day
+        final waterResponse = await http.post(
+          Uri.parse('http://localhost:3000/getWater'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
+
+        if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
+          final Map<String, dynamic> fetchedGoalData =
+              json.decode(goalResponse.body);
+          final Map<String, dynamic> fetchedWaterData =
+              json.decode(waterResponse.body);
+
+          List<dynamic> goalDataList = fetchedGoalData['data'];
+          List<dynamic> waterDataList = fetchedWaterData['data'];
+
+          double dailyGoal =
+              goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
+          double waterIntake =
+              waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
+
+          setState(() {
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': waterIntake,
+              'dailyGoal': dailyGoal,
+            });
+          });
+        } else if (goalResponse.statusCode == 204) {
+          setState(() {
+            // If no goal data found, default to 1
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': 0,
+              'dailyGoal': 1,
+            });
+          });
+        } else {
+          print(
+              'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+        }
+      }
+    } catch (error) {
+      print('Error fetching weekly water data: $error');
+    }
+  }
+
+  void fetchMonthlyWaterIntake() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+
+    for (int month = 1; month <= 12; month++) {
+      final startDate =
+          DateTime(now.year, month, 1).toIso8601String().split('T').first;
+      final endDate = DateTime(now.year, month + 1, 0, 23, 59, 59)
+          .toIso8601String()
+          .split('T')
+          .first;
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/getWater'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
+
+        print('Request for month $month: ${response.statusCode}');
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> fetchedWaterData =
+              json.decode(response.body);
+          List<dynamic> waterEntries = fetchedWaterData['data'];
+          double totalIntake = 0;
+
+          for (var entry in waterEntries) {
+            totalIntake += entry['total_intake'];
+          }
+
+          setState(() {
+            monthlyWaterIntake[
+                    '${DateTime(now.year, month).month}/${DateTime(now.year, month).year}'] =
+                totalIntake;
+          });
+        } else if (response.statusCode == 204) {
+          setState(() {
+            monthlyWaterIntake[
+                '${DateTime(now.year, month).month}/${DateTime(now.year, month).year}'] = 0;
+          });
+        } else {
+          print(
+              'Failed to fetch water data for month $month: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          // Handle other status codes as needed
+        }
+      } catch (error) {
+        print('Error fetching water data for month $month: $error');
+        // Handle any other errors that occur during the process
+      }
+    }
+  }
+
+  void fetchWaterIntake() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
+    try {
+      // Make the HTTP POST request
+      print('Tokenn: $token');
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/getWater'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      // Check if the request was successful (status code 200)
+      if (response.statusCode == 200) {
+        // Parse the JSON response directly into a list of maps
+        // print('Succeed to fetch water data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedWaterData =
+            json.decode(response.body);
+        print('fetchedd water data: ${fetchedWaterData['data']}');
+        // Store the fetched data in the list
+        setState(() {
+          List<dynamic> dynamicList = fetchedWaterData['data'];
+          // print(dynamicList);
+          waterIntake = dynamicList[0]['total_intake'];
+          // print('waterIntake: $waterIntake');
+        });
+      } else if (response.statusCode == 204) {
+        setState(() {
+          waterIntake = 0;
+        });
+      } else {
+        // Handle other status codes (e.g., 400, 401, etc.)
+        print('Failed to fetch water data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error fetching water data: $error');
+    }
+  }
+
+  void fetchWaterGoal() async {
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
+    try {
+      // Make the HTTP POST request
+      // print('Tokenn: $token');
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/getGoal'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      // Check if the request was successful (status code 200)
+      if (response.statusCode == 200) {
+        // Parse the JSON response directly into a list of maps
+        print('Succeed to fetch goal data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
+        print('fetchedd goal data: ${fetchedGoalData['data']}');
+        // Store the fetched data in the list
+        setState(() {
+          List<dynamic> dynamicList = fetchedGoalData['data'];
+          print(dynamicList);
+          dailyGoal = dynamicList[0]['goal'];
+          print('dailyGoal: $dailyGoal');
+        });
+      } else if (response.statusCode == 204) {
+        setState(() {
+          dailyGoal = 1;
+        });
+      } else {
+        // Handle other status codes (e.g., 400, 401, etc.)
+        print('Failed to fetch goal data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error fetching goal data: $error');
+    }
+  }
+
+  double calculateWeeklyAverage() {
+    if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
+
+    double totalIntake = 0;
+    for (var entry in weeklyWaterIntake) {
+      totalIntake += entry['waterIntake'];
+    }
+
+    // Calculate average
+    double weeklyAverage = totalIntake / weeklyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return weeklyAverage; // No need for toStringAsFixed(2) here
+  }
+
+  double calculateMonthlyAverage() {
+    if (monthlyWaterIntake.isEmpty)
+      return 0; // Error: 0 is an int, not a double
+
+    double totalIntake = 0;
+    monthlyWaterIntake.values.forEach((intake) {
+      totalIntake += intake;
+    });
+
+    // Calculate average
+    double monthlyAverage = totalIntake / monthlyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return monthlyAverage; // No need for toStringAsFixed(2) here
+  }
+
+  double calculateAverageCompletion() {
+    if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
+
+    double totalCompletion = 0;
+    weeklyWaterIntake.forEach((entry) {
+      double waterIntake = entry['waterIntake'];
+      double dailyGoal = entry['dailyGoal'];
+      if (dailyGoal > 0) {
+        totalCompletion += (waterIntake / dailyGoal) * 100;
+      }
+    });
+
+    // Calculate average completion
+    double averageCompletion = totalCompletion / weeklyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return averageCompletion; // No need for toStringAsFixed(2) here
+  }
+
+  int calculateDrinkFrequency() {
+    if (weeklyWaterIntake.isEmpty) return 0;
+
+    int drinkFrequency = 0;
+    weeklyWaterIntake.forEach((entry) {
+      double waterIntake = entry['waterIntake'];
+      if (waterIntake > 0) {
+        drinkFrequency++;
+      }
+    });
+
+    return drinkFrequency;
+  }
+
   @override
   Widget build(BuildContext context) {
     String? token = Provider.of<TokenProvider>(context).token;
     if (token == null || token.isEmpty) {
+      // Redirect to login page if token is null or empty
       Navigator.pushNamed(context, '/login');
+      return Container(); // Return an empty container or loading indicator while navigating
     }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
@@ -56,10 +388,10 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: (index == 4)
+                height: (index == 4 || index == 1 || index == 3)
                     ? 280.0
-                    : (index == 2 || index == 1)
-                        ? 320.0
+                    : (index == 2)
+                        ? 580.0
                         : 200.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -82,43 +414,27 @@ class _StatisticPageState extends State<StatisticPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/GlassOfWater.png',
-                                        width: 60,
-                                        height: 60,
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Ideal Water Intake',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 10),
-                                          ),
-                                          SizedBox(height: 10.0),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 25.0),
-                                            child: Text(
-                                              '$idealWaterIntake ml', // Replace this with the variable for actual data
-                                              style: CustomTextStyle.poppins3
-                                                  .copyWith(
-                                                      fontSize: 12,
-                                                      color: Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  Image.asset(
+                                    'assets/GlassOfWater.png',
+                                    width: 60,
+                                    height: 60,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Ideal Water Intake',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Text(
+                                    '$waterIntake ml',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 12,
+                                      color: waterIntake >= dailyGoal
+                                          ? Colors.blue
+                                          : Colors.black,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -132,43 +448,25 @@ class _StatisticPageState extends State<StatisticPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/trophy.png',
-                                        width: 60,
-                                        height: 60,
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Water Intake Goal',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 10),
-                                          ),
-                                          SizedBox(height: 10.0),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 25.0),
-                                            child: Text(
-                                              '$waterIntakeGoal ml', // Replace this with the variable for actual data
-                                              style: CustomTextStyle.poppins3
-                                                  .copyWith(
-                                                      fontSize: 12,
-                                                      color: Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  Image.asset(
+                                    'assets/trophy.png',
+                                    width: 60,
+                                    height: 60,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Water Intake Goal',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Text(
+                                    '$dailyGoal ml',
+                                    style: CustomTextStyle.poppins3.copyWith(
+                                      fontSize: 12,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -186,35 +484,33 @@ class _StatisticPageState extends State<StatisticPage> {
                                       child: Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          PieChart(PieChartData(
-                                            sections: [
-                                              // Section for the achieved water intake (blue)
-                                              PieChartSectionData(
-                                                value: idealWaterIntake,
-                                                title:
-                                                    '', // You can optionally set a title for the section
-                                                color: Colors.blue,
-                                                radius: 15,
-                                              ),
-                                              // Section for the remaining water intake to reach the goal (grey)
-                                              PieChartSectionData(
-                                                value: waterIntakeGoal -
-                                                    idealWaterIntake,
-                                                title:
-                                                    '', // You can optionally set a title for the section
-                                                color: Colors.grey,
-                                                radius: 15,
-                                              ),
-                                            ],
-                                            centerSpaceRadius:
-                                                120, // Adjust this value as needed
-                                          )),
+                                          PieChart(
+                                            PieChartData(
+                                              sections: [
+                                                PieChartSectionData(
+                                                  value: waterIntake,
+                                                  color: Colors.blue,
+                                                  radius: 20,
+                                                ),
+                                                PieChartSectionData(
+                                                  value:
+                                                      dailyGoal - waterIntake,
+                                                  color: Colors.grey,
+                                                  radius: 20,
+                                                ),
+                                              ],
+                                              centerSpaceRadius: 100,
+                                            ),
+                                          ),
                                           Text(
-                                            '$idealWaterIntake / $waterIntakeGoal ml',
+                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ml',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
-                                                    fontSize: 18,
-                                                    color: Colors.black),
+                                              fontSize: 18,
+                                              color: waterIntake >= dailyGoal
+                                                  ? Colors.blue
+                                                  : Colors.black,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -228,400 +524,158 @@ class _StatisticPageState extends State<StatisticPage> {
                                   padding: const EdgeInsets.all(20),
                                   child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Center(
-                                        child: Text(
-                                          'Last 7 Days Goal Achieve',
-                                          style: CustomTextStyle.poppins3
-                                              .copyWith(fontSize: 12),
-                                        ),
+                                      Text(
+                                        'Last 7 Days Water Intake',
+                                        style: CustomTextStyle.poppins3
+                                            .copyWith(fontSize: 12),
                                       ),
                                       SizedBox(height: 20),
-                                      // First row with 4 pie charts
-                                      Row(
-                                        children: List.generate(4, (index) {
-                                          final List<bool> goalAchieved = [
-                                            true,
-                                            false,
-                                            true,
-                                            true,
-                                            false,
-                                            false,
-                                            true
-                                          ];
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: weeklyWaterIntake.length,
+                                        itemBuilder: (context, index) {
+                                          double dailyGoal =
+                                              weeklyWaterIntake[index]
+                                                  ['dailyGoal'];
+                                          bool reachedGoal =
+                                              weeklyWaterIntake[index]
+                                                      ['waterIntake'] >=
+                                                  dailyGoal;
 
-                                          return Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width:
-                                                      60, // Adjust width as needed
-                                                  height:
-                                                      80, // Adjust height as needed
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      PieChart(
-                                                        PieChartData(
-                                                          sections: [
-                                                            PieChartSectionData(
-                                                              value: 100,
-                                                              title: '',
-                                                              color:
-                                                                  goalAchieved[
-                                                                          index]
-                                                                      ? Colors
-                                                                          .blue
-                                                                      : Colors
-                                                                          .grey,
-                                                              radius: 12,
-                                                            ),
-                                                          ],
-                                                          centerSpaceRadius: 20,
-                                                          sectionsSpace: 0,
-                                                        ),
-                                                        swapAnimationDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    150),
-                                                      ),
-                                                      Image.asset(
-                                                        'assets/trophy.png',
-                                                        width: 15,
-                                                        height: 15,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  [
-                                                    'S',
-                                                    'M',
-                                                    'T',
-                                                    'W',
-                                                    'T',
-                                                    'F',
-                                                    'S'
-                                                  ][index],
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
                                                   style: CustomTextStyle
                                                       .poppins3
-                                                      .copyWith(fontSize: 12),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                      SizedBox(height: 20),
-                                      // Second row with 3 pie charts
-                                      Row(
-                                        children: List.generate(3, (index) {
-                                          final List<bool> goalAchieved = [
-                                            true,
-                                            false,
-                                            true,
-                                            true,
-                                            false,
-                                            false,
-                                            true
-                                          ];
-
-                                          int adjustedIndex = index +
-                                              4; // Start index for the second row
-
-                                          return Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width:
-                                                      60, // Adjust width as needed
-                                                  height:
-                                                      80, // Adjust height as needed
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      PieChart(
-                                                        PieChartData(
-                                                          sections: [
-                                                            PieChartSectionData(
-                                                              value: 100,
-                                                              title: '',
-                                                              color: goalAchieved[
-                                                                      adjustedIndex]
-                                                                  ? Colors.blue
-                                                                  : Colors.grey,
-                                                              radius: 12,
-                                                            ),
-                                                          ],
-                                                          centerSpaceRadius: 20,
-                                                          sectionsSpace: 0,
-                                                        ),
-                                                        swapAnimationDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    150),
-                                                      ),
-                                                      Image.asset(
-                                                        'assets/trophy.png',
-                                                        width: 15,
-                                                        height: 15,
-                                                      ),
-                                                    ],
+                                                      .copyWith(
+                                                    fontSize: 12,
+                                                    color: reachedGoal
+                                                        ? Colors.blue
+                                                        : Colors.grey,
                                                   ),
                                                 ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  [
-                                                    'S',
-                                                    'M',
-                                                    'T',
-                                                    'W',
-                                                    'T',
-                                                    'F',
-                                                    'S'
-                                                  ][adjustedIndex],
-                                                  style: CustomTextStyle
-                                                      .poppins3
-                                                      .copyWith(fontSize: 12),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                            ? Colors.blue
+                                                            : Colors.grey,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ml',
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                            ? Colors.blue
+                                                            : Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              Divider(
+                                                color: Colors.grey,
+                                                thickness: 1.0,
+                                                height: 0,
+                                              ),
+                                            ],
                                           );
-                                        }),
+                                        },
                                       ),
                                     ],
                                   ),
                                 )
                               : index == 3
                                   ? Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 36.0, right: 16.0, bottom: 16),
+                                      padding: const EdgeInsets.all(16),
                                       child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          SizedBox(height: 20),
-                                          Expanded(
-                                            child: BarChart(
-                                              BarChartData(
-                                                barGroups: [
-                                                  BarChartGroupData(
-                                                    x: 0,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 8,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 1,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 10,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 2,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 14,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 3,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 15,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 4,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 9,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 5,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 13,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 6,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 11,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 7,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 12,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 8,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 14,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 9,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 10,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 10,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 7,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 11,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 11,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                                titlesData: FlTitlesData(
-                                                  leftTitles: AxisTitles(
-                                                    sideTitles: SideTitles(
-                                                      showTitles: false,
-                                                    ),
-                                                  ),
-                                                  bottomTitles: AxisTitles(
-                                                    sideTitles: SideTitles(
-                                                      showTitles: true,
-                                                      getTitlesWidget:
-                                                          (double value,
-                                                              TitleMeta meta) {
-                                                        Widget text;
-                                                        switch (value.toInt()) {
-                                                          case 0:
-                                                            text = Text('Ja',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 1:
-                                                            text = Text('Fe',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 2:
-                                                            text = Text('Ma',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 3:
-                                                            text = Text('Ap',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 4:
-                                                            text = Text('Ma',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 5:
-                                                            text = Text('Ju',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 6:
-                                                            text = Text('Ju',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 7:
-                                                            text = Text('Au',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 8:
-                                                            text = Text('Se',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 9:
-                                                            text = Text('Oc',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 10:
-                                                            text = Text('No',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 11:
-                                                            text = Text('De',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          default:
-                                                            text = Text('',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                        }
-                                                        return SideTitleWidget(
-                                                          axisSide:
-                                                              meta.axisSide,
-                                                          space: 4,
-                                                          child: text,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                          Text(
+                                            'Monthly Water Intake',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(fontSize: 12),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: monthlyWaterIntake.keys
+                                                .map((key) => Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .stretch,
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical:
+                                                                      8.0),
+                                                          child: Text(
+                                                            key,
+                                                            style:
+                                                                CustomTextStyle
+                                                                    .poppins3
+                                                                    .copyWith(
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Text(
+                                                              'Monthly Water Intake:',
+                                                              style:
+                                                                  CustomTextStyle
+                                                                      .poppins3
+                                                                      .copyWith(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              '${monthlyWaterIntake[key]} ml',
+                                                              style:
+                                                                  CustomTextStyle
+                                                                      .poppins3
+                                                                      .copyWith(
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Divider(
+                                                          color: Colors.grey,
+                                                          thickness: 0.5,
+                                                          height: 20,
+                                                        ),
+                                                      ],
+                                                    ))
+                                                .toList(),
                                           ),
                                         ],
                                       ),
@@ -630,43 +684,133 @@ class _StatisticPageState extends State<StatisticPage> {
                                       ? Padding(
                                           padding: const EdgeInsets.all(16),
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Drink Water Report',
                                                 style: CustomTextStyle.poppins3
                                                     .copyWith(fontSize: 12),
                                               ),
-                                              SizedBox(
-                                                  height:
-                                                      20), // Add some space below the title
-                                              Column(
-                                                children: List.generate(4,
-                                                    (partIndex) {
-                                                  return Column(
+                                              SizedBox(height: 20),
+
+                                              // Weekly Average
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
                                                     children: [
-                                                      Row(
-                                                        children: [
-                                                          Image.asset(
-                                                            imagePaths[
-                                                                partIndex],
-                                                            width: 40,
-                                                            height: 40,
-                                                          ),
-                                                          SizedBox(width: 8.0),
-                                                          Text(
-                                                            texts[partIndex],
-                                                            style:
-                                                                CustomTextStyle
-                                                                    .poppins3,
-                                                          ),
-                                                        ],
+                                                      Image.asset(
+                                                        'assets/week.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
                                                       ),
-                                                      // Add divider below each row except the last one
-                                                      if (partIndex < 3)
-                                                        Divider(),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Weekly Average',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
                                                     ],
-                                                  );
-                                                }),
+                                                  ),
+                                                  Text(
+                                                    '${calculateWeeklyAverage().toStringAsFixed(2)} ml',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Monthly Average
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/month.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Monthly Average',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateMonthlyAverage().toStringAsFixed(2)} ml',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Average Completion
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/average.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Average Completion',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateAverageCompletion().toStringAsFixed(2)} %',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Drink Frequency (You can display relevant data here)
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/frequency.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Drink Frequency',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateDrinkFrequency()} times',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
