@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
@@ -16,6 +17,7 @@ class AddDrinkPage extends StatefulWidget {
 
 class _AddDrinkPageState extends State<AddDrinkPage> {
   String? token;
+  final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
     try {
       print('Tokenn from add page: $token');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/addBeverage'),
+        Uri.parse('$apiUrl/addBeverage'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

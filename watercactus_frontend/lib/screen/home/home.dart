@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
   String cactusPath = 'whiteCactus.png';
   bool showShaderMask = true;
   int waterIntake = 0;
@@ -63,7 +65,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // Make the HTTP POST request
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getBeverage'),
+        Uri.parse('$apiUrl/getBeverage'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -101,7 +103,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // Make the HTTP POST request
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getWater'),
+        Uri.parse('$apiUrl/getWater'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -148,7 +150,7 @@ class _HomePageState extends State<HomePage> {
       // Make the HTTP POST request
       // print('Tokenn: $token');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getGoal'),
+        Uri.parse('$apiUrl/getGoal'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
