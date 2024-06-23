@@ -16,7 +16,7 @@ import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Load environment variables
@@ -53,7 +53,6 @@ class MyApp extends StatelessWidget {
         '/editProfile': (context) => EditProfilePage(),
         '/noti-setting': (context) => NotiSettingPage(),
         '/add-drink': (context) => AddDrinkPage(),
-        '/stat': (context) => StatisticPage(),
       },
     );
   }

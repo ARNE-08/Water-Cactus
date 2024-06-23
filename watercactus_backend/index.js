@@ -49,6 +49,7 @@ app.post("/addBeverage", require("./controller/addBeverage"));
 app.post("/getGoal", require("./controller/getGoal"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
+app.get("/getUnit", require("./controller/getUnit"));
 
 
 app.listen(port, () => {

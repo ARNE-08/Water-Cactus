@@ -7,8 +7,6 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/screen/home/log_water.dart';
 import 'package:watercactus_frontend/widget/navbar.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -214,7 +212,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildShaderMaskImage() {
-    // print('calculatedPortion: $_calculatedPortion');
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return LinearGradient(

@@ -10,4 +10,3 @@ class TokenProvider with ChangeNotifier {
     notifyListeners();
   }
 }
-

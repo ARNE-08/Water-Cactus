@@ -8,6 +8,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -82,7 +86,6 @@ class LoginBox extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
-
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
   Future<void> _signin(BuildContext context) async {
@@ -95,13 +98,14 @@ class LoginBox extends StatelessWidget {
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    print("response: ${response.body}");
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-      print(jsonResponse);
       if (jsonResponse['success']) {
         final token = jsonResponse['data']['token'];
         await storage.write(key: 'jwt_token', value: token);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Provider.of<TokenProvider>(context, listen: false).updateToken(token);
+        });
         print("Token stored successfully");
         Provider.of<TokenProvider>(context, listen: false).updateToken(token);
         Navigator.pushNamed(context, '/home');

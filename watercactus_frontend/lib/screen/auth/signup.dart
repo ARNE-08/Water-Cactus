@@ -5,6 +5,8 @@ import 'package:watercactus_frontend/widget/button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SignupPage extends StatelessWidget {
@@ -97,8 +99,13 @@ class SignupBox extends StatelessWidget {
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
       final token = jsonResponse['data']['token'];
-      print(token);
+      print("signup token ------------");
       await storage.write(key: 'jwt_token', value: token);
+      print(token);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+          Provider.of<TokenProvider>(context, listen: false).updateToken(token);
+      });
       Navigator.pushNamed(context, '/unit');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Signup failed')));
