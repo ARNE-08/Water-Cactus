@@ -6,6 +6,7 @@ import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -42,6 +43,8 @@ class _StatisticPageState extends State<StatisticPage> {
     fetchMonthlyWaterIntake();
   }
 
+  final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
   void fetchWeeklyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
@@ -62,7 +65,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
         // Fetch daily goal for the current day
         final goalResponse = await http.post(
-          Uri.parse('http://localhost:3000/getGoal'),
+          Uri.parse('$apiUrl/getGoal'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -75,7 +78,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
         // Fetch water intake data for the current day
         final waterResponse = await http.post(
-          Uri.parse('http://localhost:3000/getWater'),
+          Uri.parse('$apiUrl/getWater'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -140,7 +143,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/getWater'),
+          Uri.parse('$apiUrl/getWater'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -201,7 +204,7 @@ class _StatisticPageState extends State<StatisticPage> {
       // Make the HTTP POST request
       print('Tokenn: $token');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getWater'),
+        Uri.parse('$apiUrl/getWater'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -243,19 +246,13 @@ class _StatisticPageState extends State<StatisticPage> {
   void fetchWaterGoal() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day)
-        .toIso8601String()
-        .split('T')
-        .first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
-        .toIso8601String()
-        .split('T')
-        .first;
+    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getGoal'),
+        Uri.parse('$apiUrl/getGoal'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -265,25 +262,28 @@ class _StatisticPageState extends State<StatisticPage> {
           'endDate': endDate,
         }),
       );
-
+        // print("----------------------");
+        // print('Response status code: ${response.statusCode}');
+        // print('Response body: ${response.body}');
+        // print("----------------------");
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch goal data: ${response.statusCode}');
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        print('fetchedd goal data: ${fetchedGoalData['data']}');
+        print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
-          print(dynamicList);
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoal: $dailyGoal');
         });
       } else if (response.statusCode == 204) {
         setState(() {
-          dailyGoal = 1;
+         dailyGoal = 1;
         });
-      } else {
+      }
+      else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch goal data: ${response.statusCode}');
       }
@@ -292,6 +292,7 @@ class _StatisticPageState extends State<StatisticPage> {
       print('Error fetching goal data: $error');
     }
   }
+
 
   double calculateWeeklyAverage() {
     if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
@@ -388,11 +389,13 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: (index == 4 || index == 1 || index == 3)
+                height: (index == 4 || index == 1)
                     ? 280.0
-                    : (index == 2)
-                        ? 580.0
-                        : 200.0,
+                    : (index == 3)
+                        ? 900.0
+                        : (index == 2)
+                            ? 580.0
+                            : 150.0,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
@@ -492,6 +495,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                         value: dailyGoal,
                                                         color: Colors.blue,
                                                         radius: 20,
+                                                        showTitle: false,
                                                       ),
                                                     ]
                                                   : [
@@ -499,12 +503,14 @@ class _StatisticPageState extends State<StatisticPage> {
                                                         value: waterIntake,
                                                         color: Colors.blue,
                                                         radius: 20,
+                                                        showTitle: false,
                                                       ),
                                                       PieChartSectionData(
                                                         value: dailyGoal -
                                                             waterIntake,
                                                         color: Colors.grey,
                                                         radius: 20,
+                                                        showTitle: false,
                                                       ),
                                                     ],
                                               centerSpaceRadius: 100,
