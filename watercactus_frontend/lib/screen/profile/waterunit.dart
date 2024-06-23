@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UnitPage extends StatelessWidget {
-  Future<void> sendUnit(BuildContext context, String unit) async {
+  Future<void> _sendUnit(BuildContext context, String unit) async {
     String? token = Provider.of<TokenProvider>(context).token;
     final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
@@ -91,7 +91,7 @@ class UnitPage extends StatelessWidget {
                   SizedBox(height: 40),
                   MyElevatedButton(
                     onPressed: () {
-                      sendUnit(context, 'oz');
+                      _sendUnit(context, 'oz');
                     },
                     text: 'oz (ounces)',
                     width: 275,
@@ -101,7 +101,7 @@ class UnitPage extends StatelessWidget {
                   SizedBox(height: 20),
                   MyElevatedButton(
                     onPressed: () {
-                      sendUnit(context, 'ml');
+                      _sendUnit(context, 'ml');
                     },
                     text: 'ml (milliliters)',
                     width: 275,
