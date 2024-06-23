@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const mysql = require("mysql");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present
@@ -13,6 +14,7 @@ module.exports = (req, res) => {
 
     // Split the Authorization header to extract the token
     const token = authHeader.split(" ")[1]; // Assuming token is sent as 'Bearer <token>'
+    console.log("token: ", token);
 
     if (!token) {
         return res.status(401).json({
@@ -33,35 +35,37 @@ module.exports = (req, res) => {
         // Extract user id from decoded token
         const { id } = decodedToken;
 
-        // Query to fetch total_intake from water_stat for the current user and specified date interval
-        const sql = `
-            SELECT *
-            FROM beverage
-            WHERE user_id = 0 OR user_id = ?
-        `;
+        // Parse request body parameters
+        const { name, bottle_id, color } = req.body;
 
-        connection.query(sql, id, (err, results) => {
+        // Validate parameters
+        if (!name || !bottle_id || !color) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing data in request body",
+            });
+        }
+
+        var sql = mysql.format(
+            "insert into beverage (name, bottle_id, color, user_id) values (?, ?, ?, ?)",
+            [name, bottle_id, color, id]
+        );
+
+        connection.query(sql, (err, results) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error retrieving beverage data",
+                    message: "Error updating",
                     error: err.message,
-                });
-            }
-
-            if (results.length === 0) {
-                return res.status(204).json({
-                    success: false,
-                    message: "No beverage row found",
                 });
             }
 
             // Return the fetched results
             return res.status(200).json({
                 success: true,
-                message: "Beverage data retrieved successfully",
-                data: results,
+                message: "Add beverage successfully",
+                data: name,
             });
         });
-    });
-};
+    })
+}

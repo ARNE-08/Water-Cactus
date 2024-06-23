@@ -348,7 +348,6 @@ class _HomePageState extends State<HomePage> {
                           itemBuilder: (context, index) {
                             //! อันเก่า
                             if (index >= 0 && index < 8) {
-
                               return BeverageOriginalItem(
                                 index: index, //! for color
                                 token: token,  //! for token
@@ -362,9 +361,9 @@ class _HomePageState extends State<HomePage> {
                             }
                             else if (index >= 8 && index < beverageList.length){
                               return BeverageNewItem(
-                                index: beverageList[index]['beverage_id'], //! for adding water
-                                token: token,  //! for token
-                                beverageName: beverageList[index]['name'], //! for name
+                                index: beverageList[index]['beverage_id'],
+                                token: token,
+                                beverageName: beverageList[index]['name'],
                                 bottleIndex: beverageList[index]['bottle_id'],
                                 colorIndex: beverageList[index]['color'],
                                 screenWidth: screenWidth,
@@ -384,7 +383,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                   if (result == true) {
-                                    // fetchDrinkList();
+                                    fetchBeverage();
                                   }
                                 },
                                 child: Padding(
