@@ -475,54 +475,58 @@ class _StatisticPageState extends State<StatisticPage> {
                         )
                       : index == 1
                           ? Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  PieChart(
-                    PieChartData(
-                      sections: waterIntake > dailyGoal
-                          ? [
-                              PieChartSectionData(
-                                value: dailyGoal,
-                                color: Colors.blue,
-                                radius: 20,
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          PieChart(
+                                            PieChartData(
+                                              sections: waterIntake > dailyGoal
+                                                  ? [
+                                                      PieChartSectionData(
+                                                        value: dailyGoal,
+                                                        color: Colors.blue,
+                                                        radius: 20,
+                                                      ),
+                                                    ]
+                                                  : [
+                                                      PieChartSectionData(
+                                                        value: waterIntake,
+                                                        color: Colors.blue,
+                                                        radius: 20,
+                                                      ),
+                                                      PieChartSectionData(
+                                                        value: dailyGoal -
+                                                            waterIntake,
+                                                        color: Colors.grey,
+                                                        radius: 20,
+                                                      ),
+                                                    ],
+                                              centerSpaceRadius: 100,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ml',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(
+                                              fontSize: 18,
+                                              color: waterIntake >= dailyGoal
+                                                  ? Colors.blue
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ]
-                          : [
-                              PieChartSectionData(
-                                value: waterIntake,
-                                color: Colors.blue,
-                                radius: 20,
-                              ),
-                              PieChartSectionData(
-                                value: dailyGoal - waterIntake,
-                                color: Colors.grey,
-                                radius: 20,
-                              ),
-                            ],
-                      centerSpaceRadius: 100,
-                    ),
-                  ),
-                  Text(
-                    '${waterIntake.toStringAsFixed(0)} / $dailyGoal ml',
-                    style: CustomTextStyle.poppins3.copyWith(
-                      fontSize: 18,
-                      color: waterIntake >= dailyGoal ? Colors.blue : Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    )
+                            )
                           : index == 2
                               ? Padding(
                                   padding: const EdgeInsets.all(20),
