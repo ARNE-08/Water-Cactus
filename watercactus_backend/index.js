@@ -35,29 +35,9 @@ app.get("/", (req, res) => {
   res.send("Hello WaterCactus!");
 });
 
-function convertWaterUnit(weight, unit) {
-  const conversionFactor = 29.5735; // 1 oz = 29.5735 ml
-
-  weight = parseFloat(weight);
-
-  if (unit.toLowerCase() === 'ml') {
-    const convertedWeight = weight / conversionFactor;
-    return `${convertedWeight.toFixed(2)}`;
-  } else if (unit.toLowerCase() === 'oz') {
-    const convertedWeight = weight * conversionFactor;
-    return `${convertedWeight.toFixed(2)}`;
-  } else {
-    return 'Invalid unit. Please specify either "ml" or "oz".';
-  }
-}
-
-// Example usage
-// console.log(convertWaterUnit(500, 'ml')); // Output: "16.91 oz"
-
 app.post("/signup", require("./controller/signup"));
 app.post("/login", require("./controller/login"));
 app.post("/getWater", require("./controller/getWater"));
-app.post("/getGoal", require("./controller/getGoal"));
 app.post("/addUnit", require("./controller/addUnit"));
 app.post("/addGender", require("./controller/addGender"));
 app.post("/addActivityRate", require("./controller/addActivityRate"));
@@ -66,6 +46,9 @@ app.post("/addWater", require("./controller/addWater"));
 app.post("/addTotalIntake", require("./controller/addTotalIntake"));
 app.post("/getBeverage", require("./controller/getBeverage"));
 app.post("/addBeverage", require("./controller/addBeverage"));
+
+app.get("/getWaterGoal", require("./controller/getWaterGoal"));
+
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
