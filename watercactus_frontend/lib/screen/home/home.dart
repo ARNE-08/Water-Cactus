@@ -24,8 +24,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchWaterIntake();
-    fetchWaterGoal();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchWaterIntake();
+      fetchWaterGoal();
+    });
   }
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -134,6 +136,12 @@ class _HomePageState extends State<HomePage> {
     return 1 - (waterIntake / dailyGoal);
   }
 
+  double get _calculatedPercentage {
+    // print('water intake: $waterIntake & daily: $dailyGoal');
+    double percentage = (waterIntake / dailyGoal) * 100;
+    return percentage.roundToDouble();
+  }
+
   Widget buildShaderMaskImage() {
     return ShaderMask(
       shaderCallback: (Rect bounds) {
@@ -156,7 +164,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-
 
     List<String> imagePaths = [
       'beverageIcons/water.png',
@@ -261,6 +268,7 @@ class _HomePageState extends State<HomePage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => LogWaterPage(
+                                      token: Provider.of<TokenProvider>(context, listen: false).token,
                                       beverageIndex: index,
                                       beverageName: beverageNames[index],
                                     ),
