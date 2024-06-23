@@ -31,6 +31,7 @@ class _StatisticPageState extends State<StatisticPage> {
   double waterIntake = 0;
   double dailyGoal = 1;
   List<Map<String, dynamic>> weeklyWaterIntake = [];
+  Map<String, double> monthlyWaterIntake = {};
 
   @override
   void initState() {
@@ -38,26 +39,100 @@ class _StatisticPageState extends State<StatisticPage> {
     fetchWaterIntake();
     fetchWaterGoal();
     fetchWeeklyWaterIntake();
+    fetchMonthlyWaterIntake();
   }
 
   void fetchWeeklyWaterIntake() async {
+  String? token = Provider.of<TokenProvider>(context, listen: false).token;
+  final now = DateTime.now();
+
+  try {
+    for (int i = 6; i >= 0; i--) {
+      final currentDate = now.subtract(Duration(days: i));
+      final startDate = DateTime(currentDate.year, currentDate.month, currentDate.day)
+          .toIso8601String()
+          .split('T')
+          .first;
+      final endDate = DateTime(currentDate.year, currentDate.month, currentDate.day, 23, 59, 59)
+          .toIso8601String()
+          .split('T')
+          .first;
+
+      // Fetch daily goal for the current day
+      final goalResponse = await http.post(
+        Uri.parse('http://localhost:3000/getGoal'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      // Fetch water intake data for the current day
+      final waterResponse = await http.post(
+        Uri.parse('http://localhost:3000/getWater'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
+
+      if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
+        final Map<String, dynamic> fetchedGoalData = json.decode(goalResponse.body);
+        final Map<String, dynamic> fetchedWaterData = json.decode(waterResponse.body);
+
+        List<dynamic> goalDataList = fetchedGoalData['data'];
+        List<dynamic> waterDataList = fetchedWaterData['data'];
+
+        double dailyGoal = goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
+        double waterIntake = waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
+
+        setState(() {
+          weeklyWaterIntake.add({
+            'date': '${currentDate.day}/${currentDate.month}',
+            'waterIntake': waterIntake,
+            'dailyGoal': dailyGoal,
+          });
+        });
+      } else if (goalResponse.statusCode == 204) {
+        setState(() {
+          // If no goal data found, default to 1
+          weeklyWaterIntake.add({
+            'date': '${currentDate.day}/${currentDate.month}',
+            'waterIntake': 0,
+            'dailyGoal': 1,
+          });
+        });
+      } else {
+        print('Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+      }
+    }
+  } catch (error) {
+    print('Error fetching weekly water data: $error');
+  }
+}
+
+
+  void fetchMonthlyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
 
-    try {
-      for (int i = 6; i >= 0; i--) {
-        final currentDate = now.subtract(Duration(days: i));
-        final startDate =
-            DateTime(currentDate.year, currentDate.month, currentDate.day)
-                .toIso8601String()
-                .split('T')
-                .first;
-        final endDate = DateTime(currentDate.year, currentDate.month,
-                currentDate.day, 23, 59, 59)
-            .toIso8601String()
-            .split('T')
-            .first;
+    for (int month = 1; month <= 12; month++) {
+      final startDate =
+          DateTime(now.year, month, 1).toIso8601String().split('T').first;
+      final endDate = DateTime(now.year, month + 1, 0, 23, 59, 59)
+          .toIso8601String()
+          .split('T')
+          .first;
 
+      try {
         final response = await http.post(
           Uri.parse('http://localhost:3000/getWater'),
           headers: {
@@ -70,31 +145,38 @@ class _StatisticPageState extends State<StatisticPage> {
           }),
         );
 
+        print('Request for month $month: ${response.statusCode}');
+
         if (response.statusCode == 200) {
           final Map<String, dynamic> fetchedWaterData =
               json.decode(response.body);
-          List<dynamic> dynamicList = fetchedWaterData['data'];
+          List<dynamic> waterEntries = fetchedWaterData['data'];
+          double totalIntake = 0;
+
+          for (var entry in waterEntries) {
+            totalIntake += entry['total_intake'];
+          }
+
           setState(() {
-            weeklyWaterIntake.add({
-              'date': '${currentDate.day}/${currentDate.month}',
-              'waterIntake':
-                  dynamicList.isNotEmpty ? dynamicList[0]['total_intake'] : 0,
-            });
+            monthlyWaterIntake[
+                    '${DateTime(now.year, month).month}/${DateTime(now.year, month).year}'] =
+                totalIntake;
           });
         } else if (response.statusCode == 204) {
           setState(() {
-            weeklyWaterIntake.add({
-              'date': '${currentDate.day}/${currentDate.month}',
-              'waterIntake': 0,
-            });
+            monthlyWaterIntake[
+                '${DateTime(now.year, month).month}/${DateTime(now.year, month).year}'] = 0;
           });
         } else {
           print(
-              'Failed to fetch water data for ${currentDate.day}/${currentDate.month}: ${response.statusCode}');
+              'Failed to fetch water data for month $month: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          // Handle other status codes as needed
         }
+      } catch (error) {
+        print('Error fetching water data for month $month: $error');
+        // Handle any other errors that occur during the process
       }
-    } catch (error) {
-      print('Error fetching weekly water data: $error');
     }
   }
 
@@ -236,7 +318,7 @@ class _StatisticPageState extends State<StatisticPage> {
             children: List.generate(5, (index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                height: (index == 4 || index == 1)
+                height: (index == 4 || index == 1 || index == 3)
                     ? 280.0
                     : (index == 2)
                         ? 580.0
@@ -279,7 +361,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                     '$waterIntake ml',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
-                                      color: waterIntake >= dailyGoal ? Colors.blue : Colors.black,
+                                      color: waterIntake >= dailyGoal
+                                          ? Colors.blue
+                                          : Colors.black,
                                     ),
                                   ),
                                 ],
@@ -353,7 +437,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
                                               fontSize: 18,
-                                              color: waterIntake >= dailyGoal ? Colors.blue : Colors.black,
+                                              color: waterIntake >= dailyGoal
+                                                  ? Colors.blue
+                                                  : Colors.black,
                                             ),
                                           ),
                                         ],
@@ -364,314 +450,144 @@ class _StatisticPageState extends State<StatisticPage> {
                               ),
                             )
                           : index == 2
-                              ? Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Center(
-                                        child: Text(
-                                          'Last 7 Days Water Intake',
-                                          style: CustomTextStyle.poppins3
-                                              .copyWith(fontSize: 12),
-                                        ),
-                                      ),
-                                      SizedBox(height: 20),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: weeklyWaterIntake.length,
-                                        itemBuilder: (context, index) {
-                                          // Determine if waterIntake reached dailyGoal
-                                          bool reachedGoal =
-                                              weeklyWaterIntake[index]
-                                                      ['waterIntake'] >=
-                                                  dailyGoal;
+  ? Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Text(
+              'Last 7 Days Water Intake',
+              style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
+            ),
+          ),
+          SizedBox(height: 20),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: weeklyWaterIntake.length,
+            itemBuilder: (context, index) {
+              double dailyGoal = weeklyWaterIntake[index]['dailyGoal'];
+              bool reachedGoal = weeklyWaterIntake[index]['waterIntake'] >= dailyGoal;
 
-                                          return Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              ListTile(
-                                                title: Text(
-                                                  '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
-                                                  style: CustomTextStyle
-                                                      .poppins3
-                                                      .copyWith(
-                                                    fontSize: 12,
-                                                    color: reachedGoal
-                                                        ? Colors.blue
-                                                        : Colors.grey,
-                                                  ),
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
-                                                      style: CustomTextStyle
-                                                          .poppins3
-                                                          .copyWith(
-                                                        fontSize: 12,
-                                                        color: reachedGoal
-                                                        ? Colors.blue
-                                                        : Colors.grey,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      'Daily Goal: ${dailyGoal} ml', // Assuming dailyGoal is a member variable of _StatisticPageState
-                                                      style: CustomTextStyle
-                                                          .poppins3
-                                                          .copyWith(
-                                                        fontSize: 12,
-                                                        color: reachedGoal
-                                                        ? Colors.blue
-                                                        : Colors.grey,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Divider(
-                                                color: Colors
-                                                    .grey, // Adjust the color as needed
-                                                thickness:
-                                                    1.0, // Adjust the thickness as needed
-                                                height:
-                                                    0, // Make sure height is 0 to match ListTile spacing
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ))
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ListTile(
+                    title: Text(
+                      '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
+                      style: CustomTextStyle.poppins3.copyWith(
+                        fontSize: 12,
+                        color: reachedGoal ? Colors.blue : Colors.grey,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                          style: CustomTextStyle.poppins3.copyWith(
+                            fontSize: 12,
+                            color: reachedGoal ? Colors.blue : Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ml',
+                          style: CustomTextStyle.poppins3.copyWith(
+                            fontSize: 12,
+                            color: reachedGoal ? Colors.blue : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 0,
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    )
+
                               : index == 3
                                   ? Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 36.0, right: 16.0, bottom: 16),
+                                      padding: const EdgeInsets.all(16),
                                       child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
-                                          SizedBox(height: 20),
-                                          Expanded(
-                                            child: BarChart(
-                                              BarChartData(
-                                                barGroups: [
-                                                  BarChartGroupData(
-                                                    x: 0,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 8,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 1,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 10,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 2,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 14,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 3,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 15,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 4,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 9,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 5,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 13,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 6,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 11,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 7,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 12,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 8,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 14,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 9,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 10,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 10,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 7,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  BarChartGroupData(
-                                                    x: 11,
-                                                    barRods: [
-                                                      BarChartRodData(
-                                                        toY: 11,
-                                                        color: Colors
-                                                            .lightBlueAccent,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                                titlesData: FlTitlesData(
-                                                  leftTitles: AxisTitles(
-                                                    sideTitles: SideTitles(
-                                                      showTitles: false,
-                                                    ),
-                                                  ),
-                                                  bottomTitles: AxisTitles(
-                                                    sideTitles: SideTitles(
-                                                      showTitles: true,
-                                                      getTitlesWidget:
-                                                          (double value,
-                                                              TitleMeta meta) {
-                                                        Widget text;
-                                                        switch (value.toInt()) {
-                                                          case 0:
-                                                            text = Text('Ja',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 1:
-                                                            text = Text('Fe',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 2:
-                                                            text = Text('Ma',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 3:
-                                                            text = Text('Ap',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 4:
-                                                            text = Text('Ma',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 5:
-                                                            text = Text('Ju',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 6:
-                                                            text = Text('Ju',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 7:
-                                                            text = Text('Au',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 8:
-                                                            text = Text('Se',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 9:
-                                                            text = Text('Oc',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 10:
-                                                            text = Text('No',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          case 11:
-                                                            text = Text('De',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                          default:
-                                                            text = Text('',
-                                                                style: CustomTextStyle
-                                                                    .poppins3);
-                                                            break;
-                                                        }
-                                                        return SideTitleWidget(
-                                                          axisSide:
-                                                              meta.axisSide,
-                                                          space: 4,
-                                                          child: text,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                          Text(
+                                            'Monthly Water Intake',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(fontSize: 12),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: monthlyWaterIntake.keys
+                                                .map((key) => Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .stretch,
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical:
+                                                                      8.0),
+                                                          child: Text(
+                                                            key,
+                                                            style:
+                                                                CustomTextStyle
+                                                                    .poppins3
+                                                                    .copyWith(
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Text(
+                                                              'Monthly Water Intake:',
+                                                              style:
+                                                                  CustomTextStyle
+                                                                      .poppins3
+                                                                      .copyWith(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              '${monthlyWaterIntake[key]} ml',
+                                                              style:
+                                                                  CustomTextStyle
+                                                                      .poppins3
+                                                                      .copyWith(
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Divider(
+                                                          color: Colors.grey,
+                                                          thickness: 0.5,
+                                                          height: 20,
+                                                        ),
+                                                      ],
+                                                    ))
+                                                .toList(),
                                           ),
                                         ],
                                       ),
