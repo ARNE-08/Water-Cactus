@@ -5,6 +5,11 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/card_carousel.dart';
 import 'package:watercactus_frontend/widget/navbar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage();
@@ -14,17 +19,49 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-    final List<CardData> cardList = [ // List of CardData objects defined here
-      CardData(title: 'Water Scarcity', detail: 'Water scarcity affects more than 40% of people around the world, an alarming figure that is projected to increase with the rise of global temperatures as a consequence of climate change.' ),
-      CardData(title: 'Water Quality', detail: 'Access to clean and safe drinking water is a human right, yet billions of people still lack access to basic water services. Improving water quality is essential for human health, environmental sustainability, and economic development.' ),
-      CardData(title: 'Water and Agriculture', detail: 'Water is crucial for agriculture, which is the largest consumer of water globally. Efficient water management practices are essential to ensure food security, sustainable agricultural production, and rural development.' ),
-      CardData(title: 'Water and Climate Change', detail: 'Climate change exacerbates water-related challenges such as floods, droughts, and water scarcity. Addressing climate change impacts on water resources is essential for achieving sustainable development and resilience.' ),
-      CardData(title: 'Water and Gender Equality', detail: 'Women and girls are disproportionately affected by water scarcity and lack of access to sanitation facilities. Promoting gender equality in water management and sanitation is crucial for empowering women and achieving sustainable development goals.' ),
-      CardData(title: 'Water and Industry', detail: 'Industrial activities contribute to water pollution and water scarcity challenges. Sustainable industrial practices, including water recycling and pollution prevention measures, are essential for reducing water footprint and preserving water resources.' ),
-      CardData(title: 'Water and Health', detail: 'Access to clean water and sanitation is fundamental to human health and well-being. Improving water quality and sanitation facilities can prevent waterborne diseases and improve public health outcomes globally.' ),
-      CardData(title: 'Water and Ecosystems', detail: 'Water ecosystems, including rivers, lakes, and wetlands, provide essential services such as water purification, flood regulation, and habitat for biodiversity. Protecting water ecosystems is crucial for maintaining ecological balance and sustainable development.' ),
-    ];
+  final List<CardData> cardList = [ // List of CardData objects defined here
+    CardData(title: 'Water Scarcity', detail: 'Water scarcity affects more than 40% of people around the world, an alarming figure that is projected to increase with the rise of global temperatures as a consequence of climate change.' ),
+    CardData(title: 'Water Quality', detail: 'Access to clean and safe drinking water is a human right, yet billions of people still lack access to basic water services. Improving water quality is essential for human health, environmental sustainability, and economic development.' ),
+    CardData(title: 'Water and Agriculture', detail: 'Water is crucial for agriculture, which is the largest consumer of water globally. Efficient water management practices are essential to ensure food security, sustainable agricultural production, and rural development.' ),
+    CardData(title: 'Water and Climate Change', detail: 'Climate change exacerbates water-related challenges such as floods, droughts, and water scarcity. Addressing climate change impacts on water resources is essential for achieving sustainable development and resilience.' ),
+    CardData(title: 'Water and Gender Equality', detail: 'Women and girls are disproportionately affected by water scarcity and lack of access to sanitation facilities. Promoting gender equality in water management and sanitation is crucial for empowering women and achieving sustainable development goals.' ),
+    CardData(title: 'Water and Industry', detail: 'Industrial activities contribute to water pollution and water scarcity challenges. Sustainable industrial practices, including water recycling and pollution prevention measures, are essential for reducing water footprint and preserving water resources.' ),
+    CardData(title: 'Water and Health', detail: 'Access to clean water and sanitation is fundamental to human health and well-being. Improving water quality and sanitation facilities can prevent waterborne diseases and improve public health outcomes globally.' ),
+    CardData(title: 'Water and Ecosystems', detail: 'Water ecosystems, including rivers, lakes, and wetlands, provide essential services such as water purification, flood regulation, and habitat for biodiversity. Protecting water ecosystems is crucial for maintaining ecological balance and sustainable development.' ),
+  ];
 
+  String? token;
+  String email = "user";
+  final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
+  @override
+  void initState() {
+    super.initState();
+    token = Provider.of<TokenProvider>(context, listen: false).token;
+    _getEmail(token);
+  }
+
+  Future<void> _getEmail(String? token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getEmail'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['data']);
+      setState(() {
+        email = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch email')),
+      );
+    }
+  }
 
   void _showLogoutConfirmationDialog() {
     showDialog(
@@ -145,8 +182,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Steve Hazard', style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
-                      Text('steve@gmail.com', style: CustomTextStyle.poppins2),
+                      Text(email.split('@')[0], style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
+                      Text(email, style: CustomTextStyle.poppins2),
                     ]
                   ),
                 ),

@@ -72,7 +72,8 @@ class _GoalPageState extends State<GoalPage> {
     print("goal after convert $goal");
 
     setState(() {
-      _goal = '${goal.toStringAsFixed(2)} $_unit';
+      // _goal = '${goal.toStringAsFixed(2)} $_unit';
+      _goal = '${goal.toStringAsFixed(2)}';
     });
   }
 
@@ -197,7 +198,7 @@ class _GoalPageState extends State<GoalPage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          _goal,
+                          '$_goal $_unit',
                           style: GoogleFonts.balooThambi2(
                             textStyle: TextStyle(
                               fontSize: 64,
