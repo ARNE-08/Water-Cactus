@@ -26,7 +26,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
   final double _threshold = 5.0;
   int _calculatedML = 110;
   int _option1ML = 110;
-  int quantity = 0;
+  int quantity = 110;
 
   List<String> imagePath = [
     'EmptyBeverages/empty1.png',
@@ -68,7 +68,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
-      print('Tokenn: ${widget.token}');
+      // print('Tokenn: ${widget.token}');
       // print('beverage_id: ${widget.beverageIndex + 1}');
       // print('quantity: $quantity');
       // print('consume_at: $consumeAt');
@@ -89,7 +89,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       if (response.statusCode == 200) {
         // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedData = json.decode(response.body);
-        print('fetchedd update water data: ${fetchedData['data']}');
+        print('update water data: ${fetchedData['data']}');
         // Store the fetched data in the list
 
       } else {
@@ -107,7 +107,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final stat_date = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
-      print('Tokenn: ${widget.token}');
+      // print('stat_date: $stat_date');
+      // print('quantity: $quantity');
       final response = await http.post(
         Uri.parse('http://localhost:3000/addTotalIntake'),
         headers: {
@@ -124,7 +125,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       if (response.statusCode == 200) {
         // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedData = json.decode(response.body);
-        print('fetchedd update intake data: ${fetchedData['data']}');
+        print('update intake data: ${fetchedData['data']}');
         // Store the fetched data in the list
 
       } else {
@@ -213,8 +214,10 @@ class _LogWaterPageState extends State<LogWaterPage> {
     if (result != null) {
       setState(() {
         _selectedNumber = result;
+        quantity = int.parse(_selectedNumber);
         addWater();
         addTotalIntake();
+        Navigator.pop(context, true);
       });
       print(_selectedNumber);
     }
@@ -349,7 +352,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                         onPressed: () {
                           addWater();
                           addTotalIntake();
-                          // Navigator.pop(context);
+                          Navigator.pop(context, true);
                         },
                         child: Text('+ ${widget.beverageName}'),
                       ),

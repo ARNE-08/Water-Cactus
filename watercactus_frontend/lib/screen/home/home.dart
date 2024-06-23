@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   bool showShaderMask = true;
   int waterIntake = 0;
   int dailyGoal = 1;
+  String? token;
 
   @override
   void initState() {
@@ -27,6 +28,8 @@ class _HomePageState extends State<HomePage> {
       fetchWaterIntake();
       fetchWaterGoal();
     });
+    token = Provider.of<TokenProvider>(context, listen: false).token;
+    // print("Tokennnn: $token");
   }
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -35,7 +38,6 @@ class _HomePageState extends State<HomePage> {
     final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
-      print('Tokenn: $token');
       final response = await http.post(
         Uri.parse('http://localhost:3000/getWater'),
         headers: {
@@ -53,11 +55,10 @@ class _HomePageState extends State<HomePage> {
         // Parse the JSON response directly into a list of maps
         // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
-        print('fetchedd water data: ${fetchedWaterData['data']}');
+        print('fetched water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
-          // print(dynamicList);
           waterIntake = dynamicList[0]['total_intake'];
           // print('waterIntake: $waterIntake');
         });
@@ -101,11 +102,10 @@ class _HomePageState extends State<HomePage> {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch goal data: ${response.statusCode}');
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        print('fetchedd goal data: ${fetchedGoalData['data']}');
+        print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
-          print(dynamicList);
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoal: $dailyGoal');
         });
@@ -261,38 +261,43 @@ class _HomePageState extends State<HomePage> {
                           itemCount: 9,
                           itemBuilder: (context, index) {
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => LogWaterPage(
-                                      token: Provider.of<TokenProvider>(context, listen: false).token,
+                                      token: token,
                                       beverageIndex: index,
                                       beverageName: beverageNames[index],
                                     ),
-                                  ));
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.all(20.0),
-                                  child: Column(
-                                    children: [
-                                      if (index == 0)
-                                        Row(children: [
-                                          SizedBox(
-                                            width: (screenWidth / 2) - 45,
-                                          ),
-                                          Column(
-                                            children: [
-                                              // SizedBox(width: 10.0), // Add spacing between blue box and content
-                                              Container(
-                                                width: 50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  image: DecorationImage(
-                                                    image: AssetImage(
-                                                        imagePaths[index]),
-                                                    fit: BoxFit.contain,
-                                                  ),
+                                  ),
+                                );
+                                // print('pop result: $result');
+                                if (result == true) {
+                                  fetchWaterGoal();
+                                  fetchWaterIntake();
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    if (index == 0)
+                                      Row(children: [
+                                        SizedBox(
+                                          width: (screenWidth / 2) - 45,
+                                        ),
+                                        Column(
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: AssetImage(
+                                                      imagePaths[index]),
+                                                  fit: BoxFit.contain,
+                                                )
                                                 ),
                                               ),
                                               SizedBox(height: 10),
