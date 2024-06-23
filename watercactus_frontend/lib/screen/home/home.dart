@@ -7,9 +7,12 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/screen/home/log_water.dart';
 import 'package:watercactus_frontend/widget/navbar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
@@ -49,12 +52,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchWaterIntake();
-      fetchWaterGoal();
-      fetchBeverage();
+      token = Provider.of<TokenProvider>(context, listen: false).token;
+      // print("Tokennnn!: $token");
+      if (token != null) {
+        fetchWaterIntake();
+        fetchWaterGoal();
+        fetchBeverage();
+      }
     });
-    token = Provider.of<TokenProvider>(context, listen: false).token;
-    // print("Tokennnn: $token");
   }
 
   void fetchBeverage() async {
@@ -216,7 +221,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, Colors.blue],
-          stops: [0.2, 0.2], // Adjusted stops to fill 80% with blue
+          stops: [_calculatedPortion, _calculatedPortion],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
@@ -291,7 +296,7 @@ class _HomePageState extends State<HomePage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: '0 ml\n',
+                                text: '$waterIntake ml\n',
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
@@ -315,8 +320,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                ), // Example cactus image
-                // SizedBox(height: 30),
+                ),
                 Container(
                   width: double.infinity,
                   height: 290,
@@ -331,16 +335,16 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       SizedBox(height: 10),
                       Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text(
-                            'Stay Hyrated!',
-                            style: CustomTextStyle.baloo1,
-                          )),
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text(
+                          'Stay Hydrated!',
+                          style: CustomTextStyle.baloo1,
+                        ),
+                      ),
                       SizedBox(height: 20),
                       Container(
                         height: 180,
                         width: double.infinity,
-                        // color: AppColors.blue,
                         child: ListView.builder(
                           key: const PageStorageKey('beverageList'),  //! fix here
                           scrollDirection: Axis.horizontal,

@@ -46,6 +46,7 @@ app.post("/addWater", require("./controller/addWater"));
 app.post("/addTotalIntake", require("./controller/addTotalIntake"));
 app.post("/getBeverage", require("./controller/getBeverage"));
 app.post("/addBeverage", require("./controller/addBeverage"));
+app.post("/getGoal", require("./controller/getGoal"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 
