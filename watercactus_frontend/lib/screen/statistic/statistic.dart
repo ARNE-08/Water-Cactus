@@ -43,82 +43,88 @@ class _StatisticPageState extends State<StatisticPage> {
   }
 
   void fetchWeeklyWaterIntake() async {
-  String? token = Provider.of<TokenProvider>(context, listen: false).token;
-  final now = DateTime.now();
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
 
-  try {
-    for (int i = 6; i >= 0; i--) {
-      final currentDate = now.subtract(Duration(days: i));
-      final startDate = DateTime(currentDate.year, currentDate.month, currentDate.day)
-          .toIso8601String()
-          .split('T')
-          .first;
-      final endDate = DateTime(currentDate.year, currentDate.month, currentDate.day, 23, 59, 59)
-          .toIso8601String()
-          .split('T')
-          .first;
+    try {
+      for (int i = 6; i >= 0; i--) {
+        final currentDate = now.subtract(Duration(days: i));
+        final startDate =
+            DateTime(currentDate.year, currentDate.month, currentDate.day)
+                .toIso8601String()
+                .split('T')
+                .first;
+        final endDate = DateTime(currentDate.year, currentDate.month,
+                currentDate.day, 23, 59, 59)
+            .toIso8601String()
+            .split('T')
+            .first;
 
-      // Fetch daily goal for the current day
-      final goalResponse = await http.post(
-        Uri.parse('http://localhost:3000/getGoal'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
-      );
+        // Fetch daily goal for the current day
+        final goalResponse = await http.post(
+          Uri.parse('http://localhost:3000/getGoal'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
 
-      // Fetch water intake data for the current day
-      final waterResponse = await http.post(
-        Uri.parse('http://localhost:3000/getWater'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
-      );
+        // Fetch water intake data for the current day
+        final waterResponse = await http.post(
+          Uri.parse('http://localhost:3000/getWater'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
 
-      if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
-        final Map<String, dynamic> fetchedGoalData = json.decode(goalResponse.body);
-        final Map<String, dynamic> fetchedWaterData = json.decode(waterResponse.body);
+        if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
+          final Map<String, dynamic> fetchedGoalData =
+              json.decode(goalResponse.body);
+          final Map<String, dynamic> fetchedWaterData =
+              json.decode(waterResponse.body);
 
-        List<dynamic> goalDataList = fetchedGoalData['data'];
-        List<dynamic> waterDataList = fetchedWaterData['data'];
+          List<dynamic> goalDataList = fetchedGoalData['data'];
+          List<dynamic> waterDataList = fetchedWaterData['data'];
 
-        double dailyGoal = goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
-        double waterIntake = waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
+          double dailyGoal =
+              goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
+          double waterIntake =
+              waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
 
-        setState(() {
-          weeklyWaterIntake.add({
-            'date': '${currentDate.day}/${currentDate.month}',
-            'waterIntake': waterIntake,
-            'dailyGoal': dailyGoal,
+          setState(() {
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': waterIntake,
+              'dailyGoal': dailyGoal,
+            });
           });
-        });
-      } else if (goalResponse.statusCode == 204) {
-        setState(() {
-          // If no goal data found, default to 1
-          weeklyWaterIntake.add({
-            'date': '${currentDate.day}/${currentDate.month}',
-            'waterIntake': 0,
-            'dailyGoal': 1,
+        } else if (goalResponse.statusCode == 204) {
+          setState(() {
+            // If no goal data found, default to 1
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': 0,
+              'dailyGoal': 1,
+            });
           });
-        });
-      } else {
-        print('Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+        } else {
+          print(
+              'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+        }
       }
+    } catch (error) {
+      print('Error fetching weekly water data: $error');
     }
-  } catch (error) {
-    print('Error fetching weekly water data: $error');
   }
-}
-
 
   void fetchMonthlyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -287,6 +293,70 @@ class _StatisticPageState extends State<StatisticPage> {
     }
   }
 
+  double calculateWeeklyAverage() {
+    if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
+
+    double totalIntake = 0;
+    for (var entry in weeklyWaterIntake) {
+      totalIntake += entry['waterIntake'];
+    }
+
+    // Calculate average
+    double weeklyAverage = totalIntake / weeklyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return weeklyAverage; // No need for toStringAsFixed(2) here
+  }
+
+  double calculateMonthlyAverage() {
+    if (monthlyWaterIntake.isEmpty)
+      return 0; // Error: 0 is an int, not a double
+
+    double totalIntake = 0;
+    monthlyWaterIntake.values.forEach((intake) {
+      totalIntake += intake;
+    });
+
+    // Calculate average
+    double monthlyAverage = totalIntake / monthlyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return monthlyAverage; // No need for toStringAsFixed(2) here
+  }
+
+  double calculateAverageCompletion() {
+    if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
+
+    double totalCompletion = 0;
+    weeklyWaterIntake.forEach((entry) {
+      double waterIntake = entry['waterIntake'];
+      double dailyGoal = entry['dailyGoal'];
+      if (dailyGoal > 0) {
+        totalCompletion += (waterIntake / dailyGoal) * 100;
+      }
+    });
+
+    // Calculate average completion
+    double averageCompletion = totalCompletion / weeklyWaterIntake.length;
+
+    // Optionally, round to two decimal places
+    return averageCompletion; // No need for toStringAsFixed(2) here
+  }
+
+  int calculateDrinkFrequency() {
+    if (weeklyWaterIntake.isEmpty) return 0;
+
+    int drinkFrequency = 0;
+    weeklyWaterIntake.forEach((entry) {
+      double waterIntake = entry['waterIntake'];
+      if (waterIntake > 0) {
+        drinkFrequency++;
+      }
+    });
+
+    return drinkFrequency;
+  }
+
   @override
   Widget build(BuildContext context) {
     String? token = Provider.of<TokenProvider>(context).token;
@@ -450,76 +520,94 @@ class _StatisticPageState extends State<StatisticPage> {
                               ),
                             )
                           : index == 2
-  ? Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Text(
-              'Last 7 Days Water Intake',
-              style: CustomTextStyle.poppins3.copyWith(fontSize: 12),
-            ),
-          ),
-          SizedBox(height: 20),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: weeklyWaterIntake.length,
-            itemBuilder: (context, index) {
-              double dailyGoal = weeklyWaterIntake[index]['dailyGoal'];
-              bool reachedGoal = weeklyWaterIntake[index]['waterIntake'] >= dailyGoal;
+                              ? Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Last 7 Days Water Intake',
+                                        style: CustomTextStyle.poppins3
+                                            .copyWith(fontSize: 12),
+                                      ),
+                                      SizedBox(height: 20),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: weeklyWaterIntake.length,
+                                        itemBuilder: (context, index) {
+                                          double dailyGoal =
+                                              weeklyWaterIntake[index]
+                                                  ['dailyGoal'];
+                                          bool reachedGoal =
+                                              weeklyWaterIntake[index]
+                                                      ['waterIntake'] >=
+                                                  dailyGoal;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ListTile(
-                    title: Text(
-                      '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
-                      style: CustomTextStyle.poppins3.copyWith(
-                        fontSize: 12,
-                        color: reachedGoal ? Colors.blue : Colors.grey,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
-                          style: CustomTextStyle.poppins3.copyWith(
-                            fontSize: 12,
-                            color: reachedGoal ? Colors.blue : Colors.grey,
-                          ),
-                        ),
-                        Text(
-                          'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ml',
-                          style: CustomTextStyle.poppins3.copyWith(
-                            fontSize: 12,
-                            color: reachedGoal ? Colors.blue : Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1.0,
-                    height: 0,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    )
-
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  '${weeklyWaterIntake[index]['date']}/${DateTime.now().year}',
+                                                  style: CustomTextStyle
+                                                      .poppins3
+                                                      .copyWith(
+                                                    fontSize: 12,
+                                                    color: reachedGoal
+                                                        ? Colors.blue
+                                                        : Colors.grey,
+                                                  ),
+                                                ),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                            ? Colors.blue
+                                                            : Colors.grey,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ml',
+                                                      style: CustomTextStyle
+                                                          .poppins3
+                                                          .copyWith(
+                                                        fontSize: 12,
+                                                        color: reachedGoal
+                                                            ? Colors.blue
+                                                            : Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Divider(
+                                                color: Colors.grey,
+                                                thickness: 1.0,
+                                                height: 0,
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                )
                               : index == 3
                                   ? Padding(
                                       padding: const EdgeInsets.all(16),
                                       child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Monthly Water Intake',
@@ -596,43 +684,133 @@ class _StatisticPageState extends State<StatisticPage> {
                                       ? Padding(
                                           padding: const EdgeInsets.all(16),
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Drink Water Report',
                                                 style: CustomTextStyle.poppins3
                                                     .copyWith(fontSize: 12),
                                               ),
-                                              SizedBox(
-                                                  height:
-                                                      20), // Add some space below the title
-                                              Column(
-                                                children: List.generate(4,
-                                                    (partIndex) {
-                                                  return Column(
+                                              SizedBox(height: 20),
+
+                                              // Weekly Average
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
                                                     children: [
-                                                      Row(
-                                                        children: [
-                                                          Image.asset(
-                                                            imagePaths[
-                                                                partIndex],
-                                                            width: 40,
-                                                            height: 40,
-                                                          ),
-                                                          SizedBox(width: 8.0),
-                                                          Text(
-                                                            texts[partIndex],
-                                                            style:
-                                                                CustomTextStyle
-                                                                    .poppins3,
-                                                          ),
-                                                        ],
+                                                      Image.asset(
+                                                        'assets/week.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
                                                       ),
-                                                      // Add divider below each row except the last one
-                                                      if (partIndex < 3)
-                                                        Divider(),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Weekly Average',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
                                                     ],
-                                                  );
-                                                }),
+                                                  ),
+                                                  Text(
+                                                    '${calculateWeeklyAverage().toStringAsFixed(2)} ml',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Monthly Average
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/month.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Monthly Average',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateMonthlyAverage().toStringAsFixed(2)} ml',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Average Completion
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/average.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Average Completion',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateAverageCompletion().toStringAsFixed(2)} %',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+
+                                              // Drink Frequency (You can display relevant data here)
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/frequency.png', // Replace with your image path
+                                                        width: 40,
+                                                        height: 40,
+                                                      ),
+                                                      SizedBox(width: 8.0),
+                                                      Text(
+                                                        'Drink Frequency',
+                                                        style: CustomTextStyle
+                                                            .poppins3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    '${calculateDrinkFrequency()} times',
+                                                    style: CustomTextStyle
+                                                        .poppins3,
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
