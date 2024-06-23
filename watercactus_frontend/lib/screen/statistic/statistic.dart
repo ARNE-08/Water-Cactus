@@ -362,7 +362,7 @@ class _StatisticPageState extends State<StatisticPage> {
     String? token = Provider.of<TokenProvider>(context).token;
     if (token == null || token.isEmpty) {
       // Redirect to login page if token is null or empty
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushNamed(context, '/home');
       return Container(); // Return an empty container or loading indicator while navigating
     }
 
