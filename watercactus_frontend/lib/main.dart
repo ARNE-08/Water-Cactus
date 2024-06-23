@@ -14,7 +14,7 @@ import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
 import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
