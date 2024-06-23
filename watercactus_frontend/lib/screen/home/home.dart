@@ -6,6 +6,8 @@ import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/screen/home/log_water.dart';
 import 'package:watercactus_frontend/widget/navbar.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -186,8 +188,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
-
   Widget buildOriginalImage() {
     return Image.asset(
       'Cactus.png',
@@ -346,67 +346,76 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal,
                           itemCount: beverageList.length + 1,
                           itemBuilder: (context, index) {
-                            //! อันเก่า
-                            if (index >= 0 && index < 8) {
-
-                              return BeverageOriginalItem(
-                                index: index, //! for color
-                                token: token,  //! for token
-                                beverageNames: beverageNames, //! for name
-                                imagePaths: imagePaths,
-                                screenWidth: screenWidth,
-                                fetchWaterGoal: fetchWaterGoal,
-                                fetchWaterIntake: fetchWaterIntake,
-                              );
-                            //! อันใหม่
-                            }
-                            else if (index >= 8 && index < beverageList.length){
-                              return BeverageNewItem(
-                                index: beverageList[index]['beverage_id'], //! for adding water
-                                token: token,  //! for token
-                                beverageName: beverageList[index]['name'], //! for name
-                                bottleIndex: beverageList[index]['bottle_id'],
-                                colorIndex: beverageList[index]['color'],
-                                screenWidth: screenWidth,
-                                fetchWaterGoal: fetchWaterGoal,
-                                fetchWaterIntake: fetchWaterIntake,
-                                buildAddDrinkImage: buildAddDrinkImage,
-                              );
-                            }
-                            //! Add Water Page
-                            else if (index == beverageList.length) {
-                              return GestureDetector(
-                                onTap: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddDrinkPage(),
+                            return GestureDetector(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LogWaterPage(
+                                      token: token,
+                                      beverageIndex: index,
+                                      beverageName: beverageNames[index],
                                     ),
-                                  );
-                                  if (result == true) {
-                                    // fetchDrinkList();
-                                  }
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.all(20.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: AssetImage('beverageIcons/add.png'),
-                                            fit: BoxFit.contain,
-                                          ),
+                                  ),
+                                );
+                                // print('pop result: $result');
+                                if (result == true) {
+                                  fetchWaterGoal();
+                                  fetchWaterIntake();
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    if (index == 0)
+                                      Row(children: [
+                                        SizedBox(
+                                          width: (screenWidth / 2) - 45,
                                         ),
-                                      ),
-                                      SizedBox(height: 10.0),
-                                      Text(
-                                        'ADD',
-                                        style: CustomTextStyle.poppins3,
-                                      ),
+                                        Column(
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: AssetImage(
+                                                      imagePaths[index]),
+                                                  fit: BoxFit.contain,
+                                                )
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
+                                              ),
+                                            ],
+                                          ),
+                                        ])
+                                      else
+                                        Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: AssetImage(
+                                                        imagePaths[index]),
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.0),
+                                              Text(
+                                                beverageNames[index],
+                                                style: CustomTextStyle.poppins3,
+                                              ),
+                                            ]),
                                     ],
                                   ),
                                 ),

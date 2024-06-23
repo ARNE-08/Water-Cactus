@@ -47,7 +47,7 @@ app.post("/addTotalIntake", require("./controller/addTotalIntake"));
 app.post("/getBeverage", require("./controller/getBeverage"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
-app.post("/getGoal", require("./controller/getGoal"));
+app.get("/getUnit", require("./controller/getUnit"));
 
 
 app.listen(port, () => {

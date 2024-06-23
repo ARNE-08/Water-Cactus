@@ -5,15 +5,23 @@ import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
 import 'package:watercactus_frontend/widget/button.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
-import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class UnitPage extends StatelessWidget {
-  Future<void> _sendUnit(BuildContext context, String unit) async {
-    String? token = Provider.of<TokenProvider>(context).token;
-    final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+class UnitPage extends StatefulWidget {
+  @override
+  _UnitPageState createState() => _UnitPageState();
+}
 
+class _UnitPageState extends State<UnitPage> {
+  Future<String?> getToken() async {
+    return Provider.of<TokenProvider>(context, listen: false).token;
+  }
+
+  Future<void> _sendUnit(BuildContext context, String unit, String token) async {
+    final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+    
+    print("Sending unit with token: $token");
     final response = await http.post(
       Uri.parse('$apiUrl/addUnit'),
       headers: {
@@ -56,59 +64,73 @@ class UnitPage extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
+              child: FutureBuilder<String?>(
+                future: getToken(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data == null) {
+                    return Text('No token found');
+                  } else {
+                    final token = snapshot.data!;
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextSpan(
-                          text: 'What\'s your\n',
-                          style: GoogleFonts.balooThambi2(
-                            textStyle: TextStyle(
-                              fontSize: 55,
-                              fontWeight: FontWeight.w800,
-                              height: 0.9, // Adjust this value to bring the lines closer
-                              color: Color.fromRGBO(43, 96, 158, 1),
-                            ),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'What\'s your\n',
+                                style: GoogleFonts.balooThambi2(
+                                  textStyle: TextStyle(
+                                    fontSize: 55,
+                                    fontWeight: FontWeight.w800,
+                                    height: 0.9, // Adjust this value to bring the lines closer
+                                    color: Color.fromRGBO(43, 96, 158, 1),
+                                  ),
+                                ),
+                              ),
+                              TextSpan(
+                                text: 'unit',
+                                style: GoogleFonts.balooThambi2(
+                                  textStyle: TextStyle(
+                                    fontSize: 55,
+                                    fontWeight: FontWeight.w800,
+                                    height: 0.9, // Adjust this value to bring the lines closer
+                                    color: Color.fromRGBO(43, 96, 158, 1),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        TextSpan(
-                          text: 'unit',
-                          style: GoogleFonts.balooThambi2(
-                            textStyle: TextStyle(
-                              fontSize: 55,
-                              fontWeight: FontWeight.w800,
-                              height: 0.9, // Adjust this value to bring the lines closer
-                              color: Color.fromRGBO(43, 96, 158, 1),
-                            ),
-                          ),
+                        SizedBox(height: 40),
+                        MyElevatedButton(
+                          onPressed: () {
+                            _sendUnit(context, 'oz', token);
+                          },
+                          text: 'oz (ounces)',
+                          width: 275,
+                          height: 65, // Increased width for the button
+                          backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
+                        ),
+                        SizedBox(height: 20),
+                        MyElevatedButton(
+                          onPressed: () {
+                            _sendUnit(context, 'ml', token);
+                          },
+                          text: 'ml (milliliters)',
+                          width: 275,
+                          height: 65, // Increased width for the button
+                          backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
                         ),
                       ],
-                    ),
-                  ),
-                  SizedBox(height: 40),
-                  MyElevatedButton(
-                    onPressed: () {
-                      _sendUnit(context, 'oz');
-                    },
-                    text: 'oz (ounces)',
-                    width: 275,
-                    height: 65, // Increased width for the button
-                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
-                  ),
-                  SizedBox(height: 20),
-                  MyElevatedButton(
-                    onPressed: () {
-                      _sendUnit(context, 'ml');
-                    },
-                    text: 'ml (milliliters)',
-                    width: 275,
-                    height: 65, // Increased width for the button
-                    backgroundColor: const Color.fromRGBO(88, 210, 255, 1),
-                  ),
-                ],
+                    );
+                  }
+                },
               ),
             ),
           ),

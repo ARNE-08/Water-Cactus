@@ -43,6 +43,7 @@ dependencies:
   widget_mask: ^0.1.0
   fl_chart: ^0.68.0
   carousel_slider: ^4.2.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,10 @@ flutter:
   assets:
     - assets/Cactus.png
     - assets/whiteCactus.png
+    - assets/Flower.png
+    - assets/Glasses-left.png
+    - assets/Glasses-right.png
+    - assets/Back.png
 
     - assets/beverageIcons/water.png
     - assets/beverageIcons/tea.png
