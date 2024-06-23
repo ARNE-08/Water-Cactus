@@ -1,19 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/numpad.dart';
-import 'package:http/http.dart' as http;
-
 
 class LogWaterPage extends StatefulWidget {
-  String? token;
   final int beverageIndex;
   final String beverageName;
 
-  LogWaterPage({required this.token, required this.beverageIndex, required this.beverageName});
+  LogWaterPage({required this.beverageIndex, required this.beverageName});
 
   @override
   State<StatefulWidget> createState() => _LogWaterPageState();
@@ -26,7 +20,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
   final double _threshold = 5.0;
   int _calculatedML = 110;
   int _option1ML = 110;
-  int quantity = 0;
 
   List<String> imagePath = [
     'EmptyBeverages/empty1.png',
@@ -61,82 +54,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
     });
   }
 
-  void addWater() async {
-    final now = DateTime.now();
-    final consumeAt = now.toIso8601String();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
-    try {
-      // Make the HTTP POST request
-      print('Tokenn: ${widget.token}');
-      // print('beverage_id: ${widget.beverageIndex + 1}');
-      // print('quantity: $quantity');
-      // print('consume_at: $consumeAt');
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/addWater'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
-          'beverage_id': widget.beverageIndex + 1,
-          'quantity': quantity,
-          'consume_at': consumeAt,
-        }),
-      );
-
-      // Check if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // print('Succeed to fetch water data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedData = json.decode(response.body);
-        print('fetchedd update water data: ${fetchedData['data']}');
-        // Store the fetched data in the list
-
-      } else {
-        // Handle other status codes (e.g., 400, 401, etc.)
-        print('Failed to add water: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Handle any errors that occur during the process
-      print('Error adding water data: $error');
-    }
-  }
-
-  void addTotalIntake() async {
-    final now = DateTime.now();
-    final stat_date = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    try {
-      // Make the HTTP POST request
-      print('Tokenn: ${widget.token}');
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/addTotalIntake'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
-          'stat_date': stat_date,
-          'quantity': quantity,
-        }),
-      );
-
-      // Check if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // print('Succeed to fetch water data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedData = json.decode(response.body);
-        print('fetchedd update intake data: ${fetchedData['data']}');
-        // Store the fetched data in the list
-
-      } else {
-        // Handle other status codes (e.g., 400, 401, etc.)
-        print('Failed to add intake: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Handle any errors that occur during the process
-      print('Error adding intake data: $error');
-    }
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -162,7 +79,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
     setState(() {
       selectedOptionIndex = newSelectedIndex;
       _calculatedML = newSelectedIndex == 0 ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
-      quantity = _calculatedML;
     });
   }
 
@@ -172,7 +88,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
       selectedOptionIndex = index;
       _calculatedML = index == 0 ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
       _option1ML = 110;
-      quantity = 110;
     });
   }
 
@@ -213,8 +128,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
     if (result != null) {
       setState(() {
         _selectedNumber = result;
-        addWater();
-        addTotalIntake();
       });
       print(_selectedNumber);
     }
@@ -278,7 +191,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 _option1ML = _calculatedML;
                                 _totalDragDistance = 0; // Reset the drag distance
                                 print('up: $_calculatedML');
-                                quantity = _calculatedML;
                               });
                             } else if (_totalDragDistance > _threshold) {
                               setState(() {
@@ -286,7 +198,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 _option1ML = _calculatedML;
                                 _totalDragDistance = 0; // Reset the drag distance
                                 print('down: $_calculatedML');
-                                quantity = _calculatedML;
                               });
                             }
                           },
@@ -295,7 +206,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             setState(() {
                               _totalDragDistance = 0;
                               print(_calculatedML);
-                              quantity = _calculatedML;
                             });
                           },
                           child: buildShaderMaskImage(),
@@ -346,11 +256,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                               MaterialStateProperty.all<Size>(Size(140, 50)),
                           backgroundColor: MaterialStateProperty.all<Color>(beverageColor ?? AppColors.grey), // Default to grey if beverageColor is null
                         ),
-                        onPressed: () {
-                          addWater();
-                          addTotalIntake();
-                          // Navigator.pop(context);
-                        },
+                        onPressed: () {},
                         child: Text('+ ${widget.beverageName}'),
                       ),
                       Spacer(),

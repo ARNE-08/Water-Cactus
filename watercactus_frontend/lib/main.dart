@@ -9,6 +9,7 @@ import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
 import 'package:watercactus_frontend/screen/statistic/statistic.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
@@ -16,7 +17,7 @@ import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Load environment variables
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/editProfile': (context) => EditProfilePage(),
         '/noti-setting': (context) => NotiSettingPage(),
         '/add-drink': (context) => AddDrinkPage(),
+        '/stat': (context) => StatisticPage(),
       },
     );
   }
