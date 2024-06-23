@@ -209,7 +209,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final result = await showModalBottomSheet<String>(
       context: context,
       builder: (BuildContext context) {
-        return NumberPad(buttonText: widget.beverageName);
+        return NumberPad(buttonText: widget.beverageName, buttonColor: maskColor[widget.colorIndex] ?? AppColors.grey);
       },
     );
 
@@ -228,7 +228,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
+    // final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
       List<String> options = [
         '',
         '${_option1ML.toString()} ml',
@@ -346,16 +346,15 @@ class _LogWaterPageState extends State<LogWaterPage> {
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize:
-                              MaterialStateProperty.all<Size>(Size(140, 50)),
-                          backgroundColor: MaterialStateProperty.all<Color>(beverageColor ?? AppColors.grey), // Default to grey if beverageColor is null
+                          fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                          backgroundColor: MaterialStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey), // Default to grey if beverageColor is null
                         ),
                         onPressed: () {
                           addWater();
                           addTotalIntake();
                           Navigator.pop(context, true);
                         },
-                        child: Text('+ ${widget.beverageName}'),
+                        child: Text('+ ${widget.beverageName.toUpperCase()}'),
                       ),
                       Spacer(),
                       IconButton(

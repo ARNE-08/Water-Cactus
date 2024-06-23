@@ -10,7 +10,8 @@ import 'dart:convert';
 
 class NumberPad extends StatefulWidget {
   final String buttonText;
-  NumberPad({required this.buttonText});
+  final Color buttonColor;
+  NumberPad({required this.buttonText, required this.buttonColor});
 
   @override
   _NumberPadState createState() => _NumberPadState();
@@ -88,7 +89,11 @@ class _NumberPadState extends State<NumberPad> {
           ElevatedButton(
             onPressed: _submit,
             //! Custom text in each page
-            child: Text('+ ${widget.buttonText}'),
+            child: Text('+ ${widget.buttonText.toUpperCase()}'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(widget.buttonColor),
+
+            )
           ),
           SizedBox(height: 10),
           GridView.count(
