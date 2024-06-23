@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NumberPad extends StatefulWidget {
   final String buttonText;
@@ -13,6 +18,39 @@ class NumberPad extends StatefulWidget {
 
 class _NumberPadState extends State<NumberPad> {
   String _number = "0";
+  String _unit = "ml";
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    token = Provider.of<TokenProvider>(context, listen: false).token;
+    _getUnit(token);
+  }
+
+  Future<void> _getUnit(String? token) async {
+    final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
+    final response = await http.get(
+      Uri.parse('$apiUrl/getUnit'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['data']);
+      setState(() {
+        _unit = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch unit')),
+      );
+    }
+  }
 
   void _addNumber(int value) {
     if (_number == "0") {
@@ -43,7 +81,7 @@ class _NumberPadState extends State<NumberPad> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '$_number ml',
+            '$_number $_unit',
             style: CustomTextStyle.poppins1,
           ),
           SizedBox(height: 10),

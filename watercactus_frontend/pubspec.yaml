@@ -68,6 +68,10 @@ flutter:
   assets:
     - assets/Cactus.png
     - assets/whiteCactus.png
+    - assets/Flower.png
+    - assets/Glasses-left.png
+    - assets/Glasses-right.png
+    - assets/Back.png
 
     - assets/beverageIcons/water.png
     - assets/beverageIcons/tea.png
