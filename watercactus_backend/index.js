@@ -44,6 +44,7 @@ app.post("/addActivityRate", require("./controller/addActivityRate"));
 app.post("/addWeight", require("./controller/addWeight"));
 app.post("/addWater", require("./controller/addWater"));
 app.post("/addTotalIntake", require("./controller/addTotalIntake"));
+app.post("/getBeverage", require("./controller/getBeverage"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 app.post("/getGoal", require("./controller/getGoal"));

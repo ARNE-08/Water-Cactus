@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/numpad.dart';
@@ -10,10 +8,12 @@ import 'package:http/http.dart' as http;
 
 class LogWaterPage extends StatefulWidget {
   String? token;
-  final int beverageIndex;
+  final int beverageID;
+  final int bottleIndex;
+  final int colorIndex;
   final String beverageName;
 
-  LogWaterPage({required this.token, required this.beverageIndex, required this.beverageName});
+  LogWaterPage({required this.token, required this.beverageID, required this.bottleIndex, required this.colorIndex, required this.beverageName});
 
   @override
   State<StatefulWidget> createState() => _LogWaterPageState();
@@ -69,7 +69,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     try {
       // Make the HTTP POST request
       // print('Tokenn: ${widget.token}');
-      // print('beverage_id: ${widget.beverageIndex + 1}');
+      // print('beverageId: ${widget.beverageID}');
       // print('quantity: $quantity');
       // print('consume_at: $consumeAt');
       final response = await http.post(
@@ -79,7 +79,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
           'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
-          'beverage_id': widget.beverageIndex + 1,
+          'beverage_id': widget.beverageID,
           'quantity': quantity,
           'consume_at': consumeAt,
         }),
@@ -190,13 +190,13 @@ class _LogWaterPageState extends State<LogWaterPage> {
           return LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.transparent, maskColor[widget.beverageIndex]],
+            colors: [Colors.transparent, maskColor[widget.colorIndex]],
             stops: [_calculatedPortion, _calculatedPortion],
           ).createShader(bounds);
         },
         blendMode: BlendMode.srcATop,
         child: Image.asset(
-          imagePath[widget.beverageIndex],
+          imagePath[widget.bottleIndex],
           fit: BoxFit.contain,
         ),
       ),
