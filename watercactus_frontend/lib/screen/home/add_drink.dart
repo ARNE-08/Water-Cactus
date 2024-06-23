@@ -1,6 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
+import 'package:http/http.dart' as http;
+
 
 class AddDrinkPage extends StatefulWidget {
   const AddDrinkPage();
@@ -10,6 +16,16 @@ class AddDrinkPage extends StatefulWidget {
 }
 
 class _AddDrinkPageState extends State<AddDrinkPage> {
+  String? token;
+  final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
+  @override
+  void initState() {
+    super.initState();
+    token = Provider.of<TokenProvider>(context, listen: false).token;
+    // print("Tokennnn: $token");
+  }
+
   List<String> bottleImages = [
     'assets/EmptyBeverages/empty1.png',
     'assets/EmptyBeverages/empty2.png',
@@ -37,6 +53,39 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+
+    void addBeverage() async {
+    print('token from add drink: $token');
+    print('name: ${_nameController.text}');
+    print('bottle_id: $selectedBottleIndex');
+    print('color: $selectedColorIndex');
+    try {
+      print('Tokenn from add page: $token');
+      final response = await http.post(
+        Uri.parse('$apiUrl/addBeverage'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': _nameController.text,
+          'bottle_id': selectedBottleIndex,
+          'color': selectedColorIndex,
+        }),
+      );
+
+      // Check if the request was successful (status code 200)
+      if (response.statusCode == 200) {
+        print('Succeed to add drink: ${response.statusCode}');
+      } else {
+        // Handle other status codes (e.g., 400, 401, etc.)
+        print('Failed to add drink: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error adding drink $error');
+    }
+  }
 
   Widget buildBottleImages(List<String> bottleImages) {
     return SizedBox(
@@ -257,6 +306,10 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                     if (_formKey.currentState!.validate()) {
                       // Add your logic here
                       print('Form is valid, proceed further');
+                      addBeverage();
+                      Navigator.pop(context, true);
+                    } else {
+                      print('Form is invalid');
                     }
                   },
                   child: Text('CONFIRM'),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/widget/wave.dart';
 import 'package:watercactus_frontend/widget/button.dart';
 import 'package:http/http.dart' as http;
@@ -105,6 +107,7 @@ class LoginBox extends StatelessWidget {
           Provider.of<TokenProvider>(context, listen: false).updateToken(token);
         });
         print("Token stored successfully");
+        Provider.of<TokenProvider>(context, listen: false).updateToken(token);
         Navigator.pushNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${jsonResponse['error']}')));

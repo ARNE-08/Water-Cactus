@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/numpad.dart';
@@ -20,6 +21,7 @@ class LogWaterPage extends StatefulWidget {
 }
 
 class _LogWaterPageState extends State<LogWaterPage> {
+  final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
   String cactusPath = 'whiteCactus.png';
   String _selectedNumber = "0";
   double _totalDragDistance = 0.0;
@@ -73,7 +75,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       // print('quantity: $quantity');
       // print('consume_at: $consumeAt');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/addWater'),
+        Uri.parse('$apiUrl/addWater'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${widget.token}',
@@ -110,7 +112,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       // print('stat_date: $stat_date');
       // print('quantity: $quantity');
       final response = await http.post(
-        Uri.parse('http://localhost:3000/addTotalIntake'),
+        Uri.parse('$apiUrl/addTotalIntake'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${widget.token}',
@@ -168,7 +170,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
   }
 
   void _onItemTab(int index) {
-    print(index);
+    // print(index);
     setState(() {
       selectedOptionIndex = index;
       _calculatedML = index == 0 ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
@@ -219,7 +221,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
         addTotalIntake();
         Navigator.pop(context, true);
       });
-      print(_selectedNumber);
+      // print(_selectedNumber);
     }
   }
 
@@ -227,7 +229,6 @@ class _LogWaterPageState extends State<LogWaterPage> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
-    print('color: $beverageColor');
       List<String> options = [
         '',
         '${_option1ML.toString()} ml',
@@ -280,7 +281,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 _calculatedML = (_calculatedML + 10).clamp(0, 330); // Increment by 10 and clamp between 0 and 330
                                 _option1ML = _calculatedML;
                                 _totalDragDistance = 0; // Reset the drag distance
-                                print('up: $_calculatedML');
+                                // print('up: $_calculatedML');
                                 quantity = _calculatedML;
                               });
                             } else if (_totalDragDistance > _threshold) {
@@ -288,7 +289,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 _calculatedML = (_calculatedML - 10).clamp(0, 330); // Decrement by 10 and clamp between 0 and 330
                                 _option1ML = _calculatedML;
                                 _totalDragDistance = 0; // Reset the drag distance
-                                print('down: $_calculatedML');
+                                // print('down: $_calculatedML');
                                 quantity = _calculatedML;
                               });
                             }
@@ -297,7 +298,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             // Reset the drag distance when the drag ends
                             setState(() {
                               _totalDragDistance = 0;
-                              print(_calculatedML);
+                              // print(_calculatedML);
                               quantity = _calculatedML;
                             });
                           },
