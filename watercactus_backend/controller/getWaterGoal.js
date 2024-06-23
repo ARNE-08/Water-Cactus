@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const mysql = require("mysql");
+const convertWaterUnit = require("../utils");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present
@@ -33,48 +35,37 @@ module.exports = (req, res) => {
         // Extract user id from decoded token
         const { id } = decodedToken;
 
-        // Parse request body parameters
-        const { startDate, endDate } = req.body;
+        var sql = mysql.format(
+            "SELECT unit, weight, activity_rate FROM cactus_user WHERE id = ?",
+            [id]
+        );
 
-        // Validate parameters
-        if (!startDate || !endDate) {
-            return res.status(400).json({
-                success: false,
-                message: "Missing startDate or endDate in request body",
-            });
-        }
-
-        // Query to fetch total_intake from water_stat for the current user and specified date interval
-        const sql = `
-            SELECT stat_date, total_intake
-            FROM water_stat
-            WHERE user_id = ?
-                AND stat_date >= ?
-                AND stat_date <= ?;
-        `;
-
-        connection.query(sql, [id, startDate, endDate], (err, results) => {
+        connection.query(sql, (err, rows) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error retrieving water intake",
+                    message: "Error querying",
                     error: err.message,
                 });
             }
 
-            if (results.length === 0) {
-                return res.status(204).json({
-                    success: false,
-                    message: "No water intake data found for the specified date range",
-                });
+            let goal = parseFloat(rows[0].weight) * 0.67
+            if (rows[0].activity_rate === 'low') {
+                goal = goal + parseFloat(convertWaterUnit(350, 'ml'))
+            } else if (rows[0].activity_rate === 'moderate') {
+                goal = goal + parseFloat(convertWaterUnit(700, 'ml'))
+            } else if (rows[0].activity_rate === 'high') {
+                goal = goal + parseFloat(convertWaterUnit(1050, 'ml'))
             }
+
+            if (rows[0].unit === 'ml')
+                goal = convertWaterUnit(goal, 'oz')
 
             // Return the fetched results
             return res.status(200).json({
                 success: true,
-                message: "Water intake data retrieved successfully",
-                data: results,
+                data: goal,
             });
         });
-    });
-};
+    })
+}

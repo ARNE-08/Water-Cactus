@@ -18,6 +18,11 @@ import 'package:watercactus_frontend/screen/home/add_drink.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Flutter Secure Storage
   final FlutterSecureStorage storage = FlutterSecureStorage();
   String? token = await storage.read(key: 'jwt_token');
 
