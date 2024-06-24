@@ -43,7 +43,11 @@ app.post("/addActivityRate", require("./controller/addActivityRate"));
 app.post("/addWeight", require("./controller/addWeight"));
 app.post("/addWater", require("./controller/addWater"));
 app.post("/addTotalIntake", require("./controller/addTotalIntake"));
-app.post("/addGoal", require("./controller/addGoalLog"));
+app.post("/getBeverage", require("./controller/getBeverage"));
+app.post("/addBeverage", require("./controller/addBeverage"));
+app.post("/getGoal", require("./controller/getGoal"));
+app.post("/getReminder", require("./controller/getReminder"));
+app.post("/updateReminder", require("./controller/updateReminder"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 app.get("/getUnit", require("./controller/getUnit"));

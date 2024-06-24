@@ -89,7 +89,7 @@ class _GoalPageState extends State<GoalPage> {
     final result = await showModalBottomSheet<String>(
       context: context,
       builder: (BuildContext context) {
-        return NumberPad(buttonText: 'CUSTOM GOAL');
+        return NumberPad(buttonText: 'CUSTOM GOAL', buttonColor: Colors.lightBlueAccent);
       },
     );
 

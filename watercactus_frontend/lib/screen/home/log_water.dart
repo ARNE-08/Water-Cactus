@@ -22,7 +22,7 @@ class LogWaterPage extends StatefulWidget {
 
 class _LogWaterPageState extends State<LogWaterPage> {
   final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-  String cactusPath = 'whiteCactus.png';
+  String cactusPath = 'assets/whiteCactus.png';
   String _selectedNumber = "0";
   double _totalDragDistance = 0.0;
   final double _threshold = 5.0;
@@ -31,14 +31,14 @@ class _LogWaterPageState extends State<LogWaterPage> {
   int quantity = 110;
 
   List<String> imagePath = [
-    'EmptyBeverages/empty1.png',
-    'EmptyBeverages/empty2.png',
-    'EmptyBeverages/empty3.png',
-    'EmptyBeverages/empty4.png',
-    'EmptyBeverages/empty5.png',
-    'EmptyBeverages/empty6.png',
-    'EmptyBeverages/empty7.png',
-    'EmptyBeverages/empty8.png',
+    'assets/EmptyBeverages/empty1.png',
+    'assets/EmptyBeverages/empty2.png',
+    'assets/EmptyBeverages/empty3.png',
+    'assets/EmptyBeverages/empty4.png',
+    'assets/EmptyBeverages/empty5.png',
+    'assets/EmptyBeverages/empty6.png',
+    'assets/EmptyBeverages/empty7.png',
+    'assets/EmptyBeverages/empty8.png',
   ];
 
   List<Color> maskColor = [
@@ -209,7 +209,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     final result = await showModalBottomSheet<String>(
       context: context,
       builder: (BuildContext context) {
-        return NumberPad(buttonText: widget.beverageName);
+        return NumberPad(buttonText: widget.beverageName, buttonColor: maskColor[widget.colorIndex] ?? AppColors.grey);
       },
     );
 
@@ -228,7 +228,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
+    // final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
       List<String> options = [
         '',
         '${_option1ML.toString()} ml',
@@ -346,16 +346,15 @@ class _LogWaterPageState extends State<LogWaterPage> {
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize:
-                              MaterialStateProperty.all<Size>(Size(140, 50)),
-                          backgroundColor: MaterialStateProperty.all<Color>(beverageColor ?? AppColors.grey), // Default to grey if beverageColor is null
+                          fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                          backgroundColor: MaterialStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey), // Default to grey if beverageColor is null
                         ),
                         onPressed: () {
                           addWater();
                           addTotalIntake();
                           Navigator.pop(context, true);
                         },
-                        child: Text('+ ${widget.beverageName}'),
+                        child: Text('+ ${widget.beverageName.toUpperCase()}'),
                       ),
                       Spacer(),
                       IconButton(
