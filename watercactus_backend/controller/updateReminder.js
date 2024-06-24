@@ -35,10 +35,10 @@ module.exports = (req, res) => {
         const { id } = decodedToken;
 
         // Parse request body parameters
-        const { index, reminder_time, enable } = req.body;
+        const { index, reminder_time, enable, notification_id } = req.body;
 
         // Validate parameters
-        if (!index || !reminder_time || !enable) {
+        if (!index || !reminder_time || !enable || !notification_id) {
             return res.status(400).json({
                 success: false,
                 message: "Missing required parameters in request body",
@@ -47,9 +47,9 @@ module.exports = (req, res) => {
 
         // Update or insert beverage log in the database
         const sql = mysql.format(
-            "INSERT INTO notification (id, user_id, reminder_time, enable) VALUES (?, ?, ?, ?) " +
-            "ON DUPLICATE KEY UPDATE reminder_time = VALUES(reminder_time), enable = VALUES(enable)",
-            [index, id, reminder_time, enable]
+            "INSERT INTO notification (id, user_id, reminder_time, enable, notification_id) VALUES (?, ?, ?, ?, ?) " +
+            "ON DUPLICATE KEY UPDATE reminder_time = VALUES(reminder_time), enable = VALUES(enable), notification_id = VALUES(notification_id)",
+            [index, id, reminder_time, enable, notification_id]
         );
 
         // Execute SQL query
@@ -70,6 +70,7 @@ module.exports = (req, res) => {
                     index,
 					reminder_time,
 					enable,
+					notification_id
                 },
             });
         });
