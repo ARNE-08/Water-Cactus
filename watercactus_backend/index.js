@@ -39,18 +39,16 @@ app.post("/signup", require("./controller/signup"));
 app.post("/login", require("./controller/login"));
 app.post("/getWater", require("./controller/getWater"));
 app.post("/addUnit", require("./controller/addUnit"));
-app.post("/addGender", require("./controller/addGender"));
 app.post("/addActivityRate", require("./controller/addActivityRate"));
 app.post("/addWeight", require("./controller/addWeight"));
 app.post("/addWater", require("./controller/addWater"));
 app.post("/addTotalIntake", require("./controller/addTotalIntake"));
-app.post("/getBeverage", require("./controller/getBeverage"));
-app.post("/addBeverage", require("./controller/addBeverage"));
-app.post("/getGoal", require("./controller/getGoal"));
+app.post("/addGoal", require("./controller/addGoalLog"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 app.get("/getUnit", require("./controller/getUnit"));
-
+app.get("/getEmail", require("./controller/getEmail"));
+app.get("/getInfo", require("./controller/getInfo"));
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

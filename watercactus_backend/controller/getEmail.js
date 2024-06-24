@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const mysql = require("mysql");
-const convertWaterUnit = require("../utils/convertWaterUnit");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present
@@ -36,7 +35,7 @@ module.exports = (req, res) => {
         const { id } = decodedToken;
 
         var sql = mysql.format(
-            "SELECT unit, weight, activity_rate FROM cactus_user WHERE id = ?",
+            "SELECT email FROM cactus_user WHERE id = ?",
             [id]
         );
 
@@ -49,22 +48,10 @@ module.exports = (req, res) => {
                 });
             }
 
-            let goal = parseFloat(rows[0].weight) * 0.67
-            if (rows[0].activity_rate === 'low') {
-                goal = goal + parseFloat(convertWaterUnit(350, 'ml'))
-            } else if (rows[0].activity_rate === 'moderate') {
-                goal = goal + parseFloat(convertWaterUnit(700, 'ml'))
-            } else if (rows[0].activity_rate === 'high') {
-                goal = goal + parseFloat(convertWaterUnit(1050, 'ml'))
-            }
-
-            if (rows[0].unit === 'ml')
-                goal = convertWaterUnit(goal, 'oz')
-
             // Return the fetched results
             return res.status(200).json({
                 success: true,
-                data: goal,
+                data: rows[0].email,
             });
         });
     })
