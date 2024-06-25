@@ -53,6 +53,7 @@ app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 app.get("/getUnit", require("./controller/getUnit"));
 app.get("/getEmail", require("./controller/getEmail"));
 app.get("/getInfo", require("./controller/getInfo"));
+app.get("/getUserProfile", require("./controller/getUserProfile"));
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

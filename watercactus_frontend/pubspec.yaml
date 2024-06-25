@@ -96,6 +96,16 @@ flutter:
     - assets/profile_page/
     - assets/EmptyBeverages/
 
+    - assets/Profile/user.jpg
+    - assets/Profile/1-01.png
+    - assets/Profile/2-01.png
+    - assets/Profile/3-01.png
+    - assets/Profile/4-01.png
+    - assets/Profile/5-01.png
+    - assets/Profile/6-01.png
+    - assets/Profile/7-01.png
+    - assets/Profile/8-01.png
+
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -32,6 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String? token;
   String email = "user";
+  String picture = "assets/Profile/user.jpg";
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
   @override
@@ -39,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     token = Provider.of<TokenProvider>(context, listen: false).token;
     _getEmail(token);
+    _getPicture(token);
   }
 
   Future<void> _getEmail(String? token) async {
@@ -55,6 +57,28 @@ class _ProfilePageState extends State<ProfilePage> {
       print(jsonResponse['data']);
       setState(() {
         email = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch email')),
+      );
+    }
+  }
+
+  Future<void> _getPicture(String? token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getUserProfile'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['data']);
+      setState(() {
+        picture = jsonResponse['data']['picture_preset'];
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -159,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: 100,
                     child: ClipOval(
                       child: Image.asset(
-                          'assets/profile_page/dog.jpg',
+                          picture,
                           fit: BoxFit.cover,
                         ),
                       ),
