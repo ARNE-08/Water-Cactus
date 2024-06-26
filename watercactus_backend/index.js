@@ -57,7 +57,7 @@ app.get("/getUserProfile", require("./controller/getUserProfile"));
 app.get("/getProfilePicture", require("./controller/getProfilePicture"));
 app.put("/updateProfilePicture", require("./controller/updateProfilePicture"));
 app.put("/updateEmail", require("./controller/updateEmail"));
-
+app.put("/updatePassword", require("./controller/updatePassword"));
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
