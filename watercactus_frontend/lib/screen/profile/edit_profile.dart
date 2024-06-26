@@ -18,7 +18,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<String?> getToken() async {
     return Provider.of<TokenProvider>(context, listen: false).token;
   }
-  TextEditingController _newEmailController = TextEditingController();
 
   @override
   void initState() {
@@ -35,7 +34,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String picture = "assets/Profile/user.jpg";
 
   String? _profilePictureUrl;
-  TextEditingController _emailController = TextEditingController();
+  TextEditingController _newEmailController = TextEditingController();
+  TextEditingController _oldPasswordController = TextEditingController();
+  TextEditingController _newPasswordController = TextEditingController();
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
   Future<void> _initialize() async {
@@ -217,6 +218,43 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<void> _updatePassword() async {
+    String? token = await getToken();
+
+    if (token != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$apiUrl/updatePassword'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'current_password': _oldPasswordController.text.trim(),
+            'new_password': _newPasswordController.text.trim(),
+          }),
+        );
+
+        print('API Response Status Code: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          print('Password updated successfully');
+          _showSuccessDialog(); // Show success popup
+        } else {
+          final jsonResponse = json.decode(response.body);
+          print('Failed to update password: ${response.statusCode}');
+          print('Error message: ${jsonResponse['message']}');
+
+          //print(_oldPasswordController.text.trim());
+          //print(_newPasswordController.text.trim());
+        }
+      } catch (e) {
+        print('Error updating password: $e');
+      }
+    } else {
+      print('No token found');
+    }
+  }
+
   Widget buildProfileImages() {
     return SizedBox(
       height: 75,
@@ -325,7 +363,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 20),
-                              
                               Text('Email address',
                                   style: CustomTextStyle.poppins4),
                               const SizedBox(height: 10),
@@ -354,13 +391,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 style: CustomTextStyle.poppins6,
                               ),
                               const SizedBox(height: 20),
-                              Text('Old Password',
+                              Text('Current Password',
                                   style: CustomTextStyle.poppins4),
                               const SizedBox(height: 10),
                               TextField(
+                                controller: _oldPasswordController,
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
-                                  hintText: 'password',
+                                  hintText: 'current password',
                                   hintStyle: CustomTextStyle.poppins6
                                       .copyWith(color: AppColors.grey),
                                   prefixIcon: const Icon(Icons.lock,
@@ -391,9 +429,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 style: CustomTextStyle.poppins6,
                               ),
                               const SizedBox(height: 20),
-                              Text('Password', style: CustomTextStyle.poppins4),
+                              Text('New Password',
+                                  style: CustomTextStyle.poppins4),
                               const SizedBox(height: 10),
                               TextField(
+                                controller: _newPasswordController,
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
                                   hintText: 'new password',
@@ -444,7 +484,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 onPressed: () {
                   _updateProfilePicture();
                   _updateEmail();
-                  //_printToken();
+                  _updatePassword();
+                  _printToken();
                 },
                 child: Text('CONFIRM'),
               ),
