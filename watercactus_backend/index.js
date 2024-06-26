@@ -56,6 +56,7 @@ app.get("/getInfo", require("./controller/getInfo"));
 app.get("/getUserProfile", require("./controller/getUserProfile"));
 app.get("/getProfilePicture", require("./controller/getProfilePicture"));
 app.put("/updateProfilePicture", require("./controller/updateProfilePicture"));
+app.put("/updateEmail", require("./controller/updateEmail"));
 
 
 app.listen(port, () => {
