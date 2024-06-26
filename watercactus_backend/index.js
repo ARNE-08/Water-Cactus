@@ -48,6 +48,7 @@ app.post("/addBeverage", require("./controller/addBeverage"));
 app.post("/getGoal", require("./controller/getGoal"));
 app.post("/getReminder", require("./controller/getReminder"));
 app.post("/updateReminder", require("./controller/updateReminder"));
+app.post("/getMaxNoti", require("./controller/getMaxNoti"));
 
 app.get("/getWaterGoal", require("./controller/getWaterGoal"));
 app.get("/getUnit", require("./controller/getUnit"));
