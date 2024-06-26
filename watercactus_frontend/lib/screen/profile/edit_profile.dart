@@ -18,67 +18,76 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<String?> getToken() async {
     return Provider.of<TokenProvider>(context, listen: false).token;
   }
+  TextEditingController _newEmailController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchProfilePicture();
+    _initialize();
   }
-
-  // Future<void> _printToken() async {
-  //   String? token = await getToken();
-  //   if (token != null) {
-  //     print("Token: $token");
-  //   } else {
-  //     print("No token found");
-  //   }
-  // }
 
   List<String> profileImages = [
     'assets/profile_page/dog.jpg',
   ];
 
   Map<String, int> presetToId = {};
+  String email = "user";
+  String picture = "assets/Profile/user.jpg";
 
   String? _profilePictureUrl;
+  TextEditingController _emailController = TextEditingController();
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
-  Future<void> _fetchProfilePicture() async {
+  Future<void> _initialize() async {
     String? token = await getToken();
     if (token != null) {
-      try {
-        final response = await http.get(
-          Uri.parse('$apiUrl/getProfilePicture'),
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        );
-        print('API Response Status Code: ${response.statusCode}');
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          //print('API Response Data: $data');
-          List<dynamic> pictures = data['data'];
-          setState(() {
-            profileImages = pictures
-                .map((picture) => picture['picture_preset'].toString())
-                .toList();
-            presetToId = {
-              for (var picture in pictures)
-                picture['picture_preset'].toString(): picture['profile_picture_id']
-            };
-          });
-        } else {
-          print('Failed to load profile pictures: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Error loading profile pictures: $e');
-      }
+      await _fetchProfilePicture(token);
+      await _getEmail(token);
+      _getPicture(token);
     } else {
       print("No token found");
     }
   }
 
-  
+  Future<void> _printToken() async {
+    String? token = await getToken();
+    if (token != null) {
+      print("Token: $token");
+    } else {
+      print("No token found");
+    }
+  }
+
+  Future<void> _fetchProfilePicture(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$apiUrl/getProfilePicture'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+      print('API Response Status Code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<dynamic> pictures = data['data'];
+        setState(() {
+          profileImages = pictures
+              .map((picture) => picture['picture_preset'].toString())
+              .toList();
+          presetToId = {
+            for (var picture in pictures)
+              picture['picture_preset'].toString():
+                  picture['profile_picture_id']
+          };
+        });
+      } else {
+        print('Failed to load profile pictures: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error loading profile pictures: $e');
+    }
+  }
+
   Future<void> _updateProfilePicture() async {
     String? token = await getToken();
     if (token != null && _profilePictureUrl != null) {
@@ -101,11 +110,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _showSuccessDialog(); // Show success popup
           } else {
             print('Failed to update profile picture: ${response.statusCode}');
-            // Handle error, show error message, etc.
           }
         } catch (e) {
           print('Error updating profile picture: $e');
-          // Handle error, show error message, etc.
         }
       } else {
         print("Profile picture ID not found");
@@ -115,13 +122,57 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<void> _getEmail(String token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getEmail'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      //print(jsonResponse['data']);
+      setState(() {
+        email = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch email')),
+      );
+    }
+  }
+
+  Future<void> _getPicture(String? token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getUserProfile'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      //print(jsonResponse['data']);
+      setState(() {
+        picture = jsonResponse['data']['picture_preset'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch email')),
+      );
+    }
+  }
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Success'),
-          content: Text('Profile picture updated successfully'),
+          content: Text('Profile updated successfully'),
           actions: [
             TextButton(
               child: Text('OK'),
@@ -134,6 +185,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
       },
     );
   }
+
+  Future<void> _updateEmail() async {
+    String? token = await getToken();
+
+    if (token != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$apiUrl/updateEmail'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'new_email': _newEmailController.text.trim(),
+          }),
+        );
+
+        print('API Response Status Code: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          print('Email updated successfully');
+          _showSuccessDialog(); // Show success popup
+        } else {
+          print('Failed to update email: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error updating email: $e');
+      }
+    } else {
+      print('No token found');
+    }
+  }
+
   Widget buildProfileImages() {
     return SizedBox(
       height: 75,
@@ -211,21 +294,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               fit: BoxFit.cover,
                             )
                           : Image.asset(
-                              'assets/profile_page/dog.jpg',
+                              picture,
                               fit: BoxFit.cover,
                             ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Steve Hazard',
+                    email.split('@')[0], // Extract username from email
                     style: CustomTextStyle.poppins6.copyWith(fontSize: 24),
                   ),
+                  Text(email, style: CustomTextStyle.poppins2),
                   const SizedBox(height: 5),
-                  Text(
-                    'steve@gmail.com',
-                    style: CustomTextStyle.poppins2,
-                  ),
                 ],
               ),
               const SizedBox(height: 30),
@@ -245,14 +325,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 20),
-                              Text('Username', style: CustomTextStyle.poppins4),
+                              
+                              Text('Email address',
+                                  style: CustomTextStyle.poppins4),
                               const SizedBox(height: 10),
                               TextField(
+                                controller: _newEmailController,
                                 decoration: InputDecoration(
-                                  hintText: 'Steve Hazard',
+                                  hintText: 'new email address',
                                   hintStyle: CustomTextStyle.poppins6
                                       .copyWith(color: AppColors.grey),
-                                  prefixIcon: const Icon(Icons.person,
+                                  prefixIcon: const Icon(Icons.mail,
                                       color: Colors.white),
                                   contentPadding:
                                       const EdgeInsets.only(left: 15),
@@ -271,16 +354,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 style: CustomTextStyle.poppins6,
                               ),
                               const SizedBox(height: 20),
-                              Text('Email address',
+                              Text('Old Password',
                                   style: CustomTextStyle.poppins4),
                               const SizedBox(height: 10),
                               TextField(
+                                obscureText: _obscureText,
                                 decoration: InputDecoration(
-                                  hintText: 'steve@gmail.com',
+                                  hintText: 'password',
                                   hintStyle: CustomTextStyle.poppins6
                                       .copyWith(color: AppColors.grey),
-                                  prefixIcon: const Icon(Icons.mail,
+                                  prefixIcon: const Icon(Icons.lock,
                                       color: Colors.white),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: _togglePasswordVisibility,
+                                  ),
                                   contentPadding:
                                       const EdgeInsets.only(left: 15),
                                   border: OutlineInputBorder(
@@ -303,7 +396,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               TextField(
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
-                                  hintText: 'password',
+                                  hintText: 'new password',
                                   hintStyle: CustomTextStyle.poppins6
                                       .copyWith(color: AppColors.grey),
                                   prefixIcon: const Icon(Icons.lock,
@@ -350,7 +443,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 onPressed: () {
                   _updateProfilePicture();
-                 //_printToken();
+                  _updateEmail();
+                  //_printToken();
                 },
                 child: Text('CONFIRM'),
               ),
