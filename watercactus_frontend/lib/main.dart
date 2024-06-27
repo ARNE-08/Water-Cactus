@@ -8,6 +8,7 @@ import 'package:watercactus_frontend/provider/switch_state.dart'; // Import your
 import 'package:watercactus_frontend/screen/auth/login.dart';
 import 'package:watercactus_frontend/screen/auth/signup.dart';
 import 'package:watercactus_frontend/screen/home/home.dart';
+import 'package:watercactus_frontend/screen/profile/drink_list.dart';
 import 'package:watercactus_frontend/screen/profile/waterunit.dart';
 import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
@@ -60,6 +61,8 @@ class MyApp extends StatelessWidget {
         '/noti-setting': (context) => NotiSettingPage(),
         '/add-drink': (context) => AddDrinkPage(),
         // '/edit-unit': (context) => EditUnitPage(),
+        '/drink-list': (context) => DrinkListPage(),
+
       },
     );
   }

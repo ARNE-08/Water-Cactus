@@ -33,10 +33,10 @@ module.exports = (req, res) => {
         // Extract user id from decoded token
         const { id } = decodedToken;
 		// Parse request body parameters
-        const { visible } = req.body;
+        const { beverage_id, name, bottle_id, color, visible } = req.body;
 
         // Validate parameters
-        if (!visible) {
+        if (!beverage_id || !name) {
             return res.status(400).json({
                 success: false,
                 message: "Missing data in request body",
@@ -45,17 +45,16 @@ module.exports = (req, res) => {
 
         // Query to fetch total_intake from water_stat for the current user and specified date interval
         const sql = `
-            SELECT *
-            FROM beverage
-            WHERE (user_id = 0 OR user_id = ?)
-					AND visible = ?;
-        `;
+			UPDATE beverage
+				SET name = ?, bottle_id = ?, color = ?, visible = ?
+				WHERE beverage_id = ? and user_id = ?;
+			`;
 
-        connection.query(sql, [id, visible], (err, results) => {
+        connection.query(sql, [name, bottle_id, color, visible, beverage_id, id], (err, results) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error retrieving beverage data",
+                    message: "Error deleting beverage data",
                     error: err.message,
                 });
             }
@@ -70,7 +69,7 @@ module.exports = (req, res) => {
             // Return the fetched results
             return res.status(200).json({
                 success: true,
-                message: "Beverage data retrieved successfully",
+                message: "Beverage data deleted successfully",
                 data: results,
             });
         });

@@ -1,29 +1,34 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
-import 'package:watercactus_frontend/provider/token_provider.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:http/http.dart' as http;
 
+class EditDrinkPage extends StatefulWidget {
+  String? token;
+  final int beverageIndex;
+  final int bottleIndex;
+  final int colorIndex;
+  final String beverageName;
 
-class AddDrinkPage extends StatefulWidget {
-  const AddDrinkPage();
+  EditDrinkPage({required this.token, required this.beverageIndex, required this.bottleIndex, required this.colorIndex, required this.beverageName});
 
   @override
-  State<StatefulWidget> createState() => _AddDrinkPageState();
+  State<StatefulWidget> createState() => _EditDrinkPageState();
 }
 
-class _AddDrinkPageState extends State<AddDrinkPage> {
-  String? token;
+class _EditDrinkPageState extends State<EditDrinkPage> {
   final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+  int selectedBottleIndex = 0;
+  int selectedColorIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    token = Provider.of<TokenProvider>(context, listen: false).token;
-    // print("Tokennnn: $token");
+    selectedBottleIndex = widget.bottleIndex;
+    selectedColorIndex = widget.colorIndex;
+    _nameController.text = widget.beverageName;
   }
 
   List<String> bottleImages = [
@@ -48,29 +53,28 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
     AppColors.wine,
   ];
 
-  int selectedBottleIndex = 0;
-  int selectedColorIndex = 0;
-
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  void addBeverage() async {
-    print('token from add drink: $token');
-    print('name: ${_nameController.text}');
-    print('bottle_id: $selectedBottleIndex');
-    print('color: $selectedColorIndex');
+  void updateBeverage(String name, int bottleId, int colorId) async {
+    // print('token from list page: ${widget.token}');
+    // print('b_id: ${widget.beverageIndex}');
+    // print('name: ${name}');
+    // print('bottle_id: ${bottleId}');
+    // print('color: ${colorId}');
     try {
-      print('Tokenn from add page: $token');
       final response = await http.post(
-        Uri.parse('$apiUrl/addBeverage'),
+        Uri.parse('$apiUrl/updateBeverage'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
-          'name': _nameController.text,
-          'bottle_id': selectedBottleIndex,
-          'color': selectedColorIndex,
+          'beverage_id': widget.beverageIndex,
+          'name': name,
+          'bottle_id': bottleId,
+          'color': colorId,
+          'visible': 1,
         }),
       );
 
@@ -183,7 +187,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [Colors.transparent, colors[selectedColorIndex]],
-              stops: [0.5, 0.5],
+              stops: [0.6, 0.6],
             ).createShader(bounds);
           },
           blendMode: BlendMode.srcATop,
@@ -219,7 +223,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
           child: Center(
             child: Column(
               children: [
-                Text('Create new drink', style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
+                Text('Edit Drink List', style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
                 const SizedBox(height: 10),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -264,7 +268,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                                   TextFormField(
                                     controller: _nameController,
                                     decoration: InputDecoration(
-                                      hintText: 'Beverage Name',
+                                      hintText: widget.beverageName,
                                       hintStyle: CustomTextStyle.poppins6.copyWith(color: AppColors.grey),
                                       prefixIcon: const Icon(Icons.coffee, color: Colors.white),
                                       contentPadding: const EdgeInsets.only(left: 15),
@@ -305,11 +309,11 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       // Add your logic here
-                      print('Form is valid, proceed further');
-                      addBeverage();
+                      // print('Form is valid, proceed further');
+                      updateBeverage(_nameController.text, selectedBottleIndex, selectedColorIndex);
                       Navigator.pop(context, true);
                     } else {
-                      print('Form is invalid');
+                      // print('Form is invalid');
                     }
                   },
                   child: Text('CONFIRM'),

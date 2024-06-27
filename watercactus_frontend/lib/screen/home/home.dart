@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
-
+          'visible': 1,
         }),
       );
 
@@ -240,13 +240,13 @@ class _HomePageState extends State<HomePage> {
         return LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.transparent, maskColor[colorIndex]], //! ใส่ยังไง
+          colors: [Colors.transparent, maskColor[colorIndex]],
           stops: [0.4, 0.4],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
       child: Image.asset(
-        imagePath[bottleIndex],  //!
+        imagePath[bottleIndex], 
         width: 50,
         height: 50,
       ),
