@@ -78,6 +78,7 @@ flutter:
     - assets/Glasses-left.png
     - assets/Glasses-right.png
     - assets/Back.png
+    - assets/noReminder.png
 
     - assets/beverageIcons/water.png
     - assets/beverageIcons/tea.png

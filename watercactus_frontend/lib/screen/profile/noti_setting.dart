@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:watercactus_frontend/provider/switch_state.dart';
 import 'package:watercactus_frontend/screen/home/home.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:watercactus_frontend/services/notification_service.dart';
-
 
 class NotiSettingPage extends StatefulWidget {
   const NotiSettingPage();
@@ -25,10 +25,9 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
   String? token;
   final String? apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
   List<dynamic> reminderTime = [];
-  int list_length = 0;
-  int max_noti_id = 0;
+  int listLength = 0;
+  int maxNotiId = 0;
   late final NotificationService notificationService;
-
 
   @override
   void initState() {
@@ -36,22 +35,18 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     notificationService = NotificationService();
     notificationService.initialize();
     listenToNotificationStream();
-
     token = Provider.of<TokenProvider>(context, listen: false).token;
-    print('token from noti page: $token');
+    // print('token from noti page: $token');
     fetchReminder();
   }
 
   void listenToNotificationStream() =>
-    notificationService.behaviorSubject.listen((payload) {
-      Navigator.push(
+      notificationService.behaviorSubject.listen((payload) {
+        Navigator.push(
           context,
-          MaterialPageRoute(
-              builder: (context) => const HomePage()
-          )
-      );
-    }
-  );
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+  });
 
   void fetchReminder() async {
     try {
@@ -67,7 +62,6 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
       if (response.statusCode == 200) {
         print('Succeed to fetch reminder: ${response.statusCode}');
         final Map<String, dynamic> fetchedReminderData = json.decode(response.body);
-        // print('fetchReminder data: $fetchedReminderData');
         setState(() {
           reminderTime = (fetchedReminderData['data'] as List).map((item) {
             final timeParts = item['reminder_time'].split(':');
@@ -80,8 +74,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
               'notification_id': item['notification_id'],
             };
           }).toList();
-          list_length = reminderTime.length;
-          // print('reminderTime: $reminderTime');
+          listLength = reminderTime.length;
         });
       } else {
         print('Failed to fetch reminderTime: ${response.statusCode}');
@@ -91,7 +84,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     }
   }
 
-  void updateReminder(int index, String reminder_time, String enable, int notification_id) async {
+  void updateReminder(int index, String reminderTime, String enable, int notificationId) async {
     try {
       final response = await http.post(
         Uri.parse('$apiUrl/updateReminder'),
@@ -101,9 +94,9 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
         },
         body: jsonEncode({
           'index': index,
-          'reminder_time': reminder_time,
+          'reminder_time': reminderTime,
           'enable': enable,
-          'notification_id': notification_id,
+          'notification_id': notificationId,
         }),
       );
 
@@ -119,36 +112,62 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
   }
 
   Future<void> fetchMaxNoti() async {
-  try {
-    final response = await http.post(
-      Uri.parse('$apiUrl/getMaxNoti'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({}),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/getMaxNoti'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({}),
+      );
 
-    if (response.statusCode == 200) {
-      print('Succeed to fetch max_noti_id: ${response.statusCode}');
-      final Map<String, dynamic> fetchedData = json.decode(response.body);
-      // print('max_noti_id data: $fetchedData');
+      if (response.statusCode == 200) {
+        print('Succeed to fetch max_noti_id: ${response.statusCode}');
+        final Map<String, dynamic> fetchedData = json.decode(response.body);
+        List<dynamic> dataList = fetchedData['data'];
 
-      // Access the 'data' list from the JSON response
-      List<dynamic> dataList = fetchedData['data'];
-
-      setState(() {
-        max_noti_id = dataList[0]['max_notification_id'];
-        // print('max_noti_id: $max_noti_id');
-      });
-    } else {
-      print('Failed to fetch max_noti_id: ${response.statusCode}');
+        setState(() {
+          maxNotiId = dataList[0]['max_notification_id'];
+        });
+      } else {
+        print('Failed to fetch max_noti_id: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching max_noti_id: $error');
     }
-  } catch (error) {
-    print('Error fetching max_noti_id: $error');
   }
-}
 
+  Future<void> toggleSwitch(bool value) async {
+    Provider.of<SwitchState>(context, listen: false).toggleSwitch(value);
+    if (!value) {
+      notificationService.cancelAllNotifications();
+    } else {
+      fetchReminder();
+      await fetchMaxNoti();
+
+      for (int index = 0; index < reminderTime.length; index++) {
+        if (reminderTime[index]['enable'] == 'on') {
+          setState(() {
+            updateReminder(
+              index + 1,
+              reminderTime[index]['reminder_time'].format(context),
+              'on',
+              maxNotiId + 1,
+            );
+          });
+
+          notificationService.showScheduledDailyNotification(
+            id: maxNotiId + 1,
+            title: "Drink Water",
+            body: "Time to drink some water!",
+            time: reminderTime[index]['reminder_time'],
+          );
+          maxNotiId++;
+        }
+      }
+    }
+  }
 
   Future<void> _showTimePicker(BuildContext context, int index) async {
     final TimeOfDay initialTime = reminderTime[index]['reminder_time'];
@@ -166,30 +185,25 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     if (picked != null) {
       await fetchMaxNoti();
       setState(() {
-        print('This is the deleted noti_id: ${reminderTime[index]['notification_id']}');
-        notificationService.cancelNotifications(reminderTime[index]['notification_id']); //! ตรงนี้ใส่อะไร
+        // print('This is the deleted noti_id: ${reminderTime[index]['notification_id']}');
+        notificationService.cancelNotifications(reminderTime[index]['notification_id']);
         reminderTime[index]['reminder_time'] = picked;
-        // print('what is max_noti_id before updateReminder: $max_noti_id');
         reminderTime[index]['enable'] = true;
-        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', max_noti_id + 1);
+        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
         fetchReminder();
-        print('This is new added noti_id: ${max_noti_id + 1}');
+        buildReminder(reminderTime);
+        // print('This is new added noti_id: ${maxNotiId + 1}');
         notificationService.showScheduledDailyNotification(
-          id: max_noti_id + 1,
+          id: maxNotiId + 1,
           title: "Drink Water",
           body: "Time to drink some water!",
-          // payload: "You just took water! Huurray!",
           time: reminderTime[index]['reminder_time'],
         );
       });
-      // updateReminder(index + 1, picked.format(context), "on", reminderTime[index]['notification_id']);
-      // print('Here the updated existing reminder time: ');
-      // print(reminderTime[index]['reminder_time'].format(context));
-      // print(reminderTime[index]['enable']);
     }
   }
 
-  Future<void> _showAddNewTimePicker(BuildContext context, int list_length) async {
+  Future<void> _showAddNewTimePicker(BuildContext context, int listLength) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -204,25 +218,20 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     if (picked != null) {
       await fetchMaxNoti();
       setState(() {
-        reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': max_noti_id + 1});
-        updateReminder(list_length + 1, picked.format(context), "on", max_noti_id + 1);  //! notiID ตรงนี้ต้องเป็น max() น่าจะต้องสร้างฟังก์ชันเพิ่ม
+        reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': maxNotiId + 1});
+        updateReminder(listLength + 1, picked.format(context), "on", maxNotiId + 1);
         fetchReminder();
-        list_length = reminderTime.length;
+        buildReminder(reminderTime);
+        listLength = reminderTime.length;
         fetchMaxNoti();
-        print('This is max noti_id: ${max_noti_id}');
+        // print('This is max noti_id: ${maxNotiId}');
         notificationService.showScheduledDailyNotification(
-          id: max_noti_id + 1,
+          id: maxNotiId + 1,
           title: "Drink Water",
           body: "Time to drink some water!",
-          // payload: "You just took water! Huurray!",
-           time: picked,
+          time: picked,
         );
-        // _scheduleNotification(max_noti_id, picked); // ! ส่วนอันนี้เหมือนเดิมเพราะ fetch ให้แล้ว
-      }
-    );
-      // print('Here the updated existing reminder time: ');
-      // print(reminderTime[list_length - 1]['reminder_time'].format(context));
-      // print(reminderTime[list_length - 1]['enable']);
+      });
     }
   }
 
@@ -259,21 +268,18 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                       await fetchMaxNoti();
                       setState(() {
                         reminderTime[index]['enable'] = value;
-                        // print(reminderTime[index]['enable']);
                         if (!value) {
-                          print('Switch off with delete noti_id: ${reminderTime[index]['notification_id']}');
-                          notificationService.cancelNotifications(reminderTime[index]['notification_id']); //! ตรงนี้ใส่อะไร
+                          // print('Switch off with delete noti_id: ${reminderTime[index]['notification_id']}');
+                          notificationService.cancelNotifications(reminderTime[index]['notification_id']);
                           updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
                         } else {
-                          // fetchMaxNoti();
-                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', max_noti_id + 1);
+                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
                           fetchReminder();
-                          print('This is new added noti_id: ${max_noti_id + 1}');
+                          // print('This is new added noti_id: ${maxNotiId + 1}');
                           notificationService.showScheduledDailyNotification(
-                            id: max_noti_id + 1,
+                            id: maxNotiId + 1,
                             title: "Drink Water",
                             body: "Time to drink some water!",
-                            // payload: "You just took water! Huurray!",
                             time: reminderTime[index]['reminder_time'],
                           );
                         }
@@ -291,9 +297,32 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     );
   }
 
+  Widget buildPicture() {
+    return Container(
+      width: double.infinity,
+      height: 300,
+      child: Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset('assets/noReminder.png'),
+            SizedBox(height: 20),
+            Text('No reminder set yet.', style: CustomTextStyle.poppins2),
+            SizedBox(height: 5),
+            Text('Please turn on Reminder.', style: CustomTextStyle.poppins2),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    double screenwidth = MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool isSwitched = Provider.of<SwitchState>(context).isSwitched;
+    // print('isSwitched from noti page: $isSwitched');
+
 
     return Scaffold(
       appBar: AppBar(
@@ -330,10 +359,8 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                         children: [
                           Text('Reminder', style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
                           Switch(
-                            value: false,
-                            onChanged: (value) {
-                              // Placeholder for onChanged logic
-                            },
+                            value: isSwitched,
+                            onChanged: toggleSwitch,
                             activeTrackColor: Colors.lightBlueAccent,
                             activeColor: Colors.blue,
                           ),
@@ -342,46 +369,47 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                     ),
                   ),
                   SizedBox(height: 30),
-                  Text('Time of each notification', style: CustomTextStyle.poppins4.copyWith(color: Colors.black)),
-                  SizedBox(height: 10),
-                  Container(
-                    height: 1,
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    color: AppColors.darkGrey,
-                  ),
-                  SizedBox(height: 20),
-                  buildReminder(reminderTime),
-                  // ElevatedButton(
-                  // onPressed: () async {
-                  //   await notificationService.showGroupedNotifications(
-                  //   title: "Drink Water");
-                  // },
-                  // child: const Text("Drink grouped")),
-                  SizedBox(height: 150), // Give space for the button
+                  isSwitched
+                      ? Column(
+                          children: [
+                            Text('Time of each notification', style: CustomTextStyle.poppins4.copyWith(color: Colors.black)),
+                            SizedBox(height: 10),
+                            Container(
+                              height: 1,
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              color: AppColors.darkGrey,
+                            ),
+                            SizedBox(height: 20),
+                            isSwitched ? buildReminder(reminderTime) : buildPicture(),
+                            SizedBox(height: 150), // Give space for the button
+                          ],
+                        )
+                      : buildPicture(),
                 ],
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-             color: AppColors.lightBlue,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 120, right: 120, bottom: 60, top: 20),
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
-                    backgroundColor: MaterialStateProperty.all<Color>(AppColors.tea),
+          if (isSwitched)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                color: AppColors.lightBlue,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 120, right: 120, bottom: 60, top: 20),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      fixedSize: WidgetStateProperty.all<Size>(Size(140, 50)),
+                      backgroundColor: WidgetStateProperty.all<Color>(AppColors.tea),
+                    ),
+                    onPressed: () {
+                      _showAddNewTimePicker(context, listLength);
+                    },
+                    child: Text('ADD NEW'),
                   ),
-                  onPressed: () {
-                    _showAddNewTimePicker(context, list_length);
-                  },
-                  child: Text('ADD NEW'),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

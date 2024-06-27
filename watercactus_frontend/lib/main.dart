@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:watercactus_frontend/provider/switch_state.dart'; // Import your SwitchState provider
 import 'package:watercactus_frontend/screen/auth/login.dart';
 import 'package:watercactus_frontend/screen/auth/signup.dart';
 import 'package:watercactus_frontend/screen/home/home.dart';
-// import 'package:watercactus_frontend/screen/profile/editunit.dart';
 import 'package:watercactus_frontend/screen/profile/waterunit.dart';
 import 'package:watercactus_frontend/screen/startup/start.dart';
 import 'package:watercactus_frontend/screen/profile/goal_cal.dart';
 import 'package:watercactus_frontend/screen/statistic/statistic.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/screen/profile/profile.dart';
 import 'package:watercactus_frontend/screen/profile/edit_profile.dart';
 import 'package:watercactus_frontend/screen/profile/noti_setting.dart';
 import 'package:watercactus_frontend/screen/home/add_drink.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +30,11 @@ void main() async {
   String? token = await storage.read(key: 'jwt_token');
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => TokenProvider()..updateToken(token ?? ''),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => TokenProvider()..updateToken(token ?? '')), // Your existing TokenProvider
+        ChangeNotifierProvider(create: (context) => SwitchState()), // Provide SwitchState here
+      ],
       child: MyApp(),
     ),
   );

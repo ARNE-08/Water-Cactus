@@ -241,7 +241,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, maskColor[colorIndex]], //! ใส่ยังไง
-          stops: [0.3, 0.3],
+          stops: [0.4, 0.4],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
