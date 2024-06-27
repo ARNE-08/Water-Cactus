@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
+import 'package:watercactus_frontend/screen/home/home.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:watercactus_frontend/services/notification_service.dart';
+
 
 class NotiSettingPage extends StatefulWidget {
   const NotiSettingPage();
@@ -24,15 +27,31 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
   List<dynamic> reminderTime = [];
   int list_length = 0;
   int max_noti_id = 0;
+  late final NotificationService notificationService;
+
 
   @override
   void initState() {
     super.initState();
-    tz.initializeTimeZones();
+    notificationService = NotificationService();
+    notificationService.initialize();
+    listenToNotificationStream();
+
     token = Provider.of<TokenProvider>(context, listen: false).token;
-    // print('token from noti page: $token');
+    print('token from noti page: $token');
     fetchReminder();
   }
+
+  void listenToNotificationStream() =>
+    notificationService.behaviorSubject.listen((payload) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const HomePage()
+          )
+      );
+    }
+  );
 
   void fetchReminder() async {
     try {
@@ -147,13 +166,23 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     if (picked != null) {
       await fetchMaxNoti();
       setState(() {
+        print('This is the deleted noti_id: ${reminderTime[index]['notification_id']}');
+        notificationService.cancelNotifications(reminderTime[index]['notification_id']); //! ตรงนี้ใส่อะไร
         reminderTime[index]['reminder_time'] = picked;
         // print('what is max_noti_id before updateReminder: $max_noti_id');
         reminderTime[index]['enable'] = true;
-        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), reminderTime[index]['enable'] ? 'on' : 'off', max_noti_id + 1);
+        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', max_noti_id + 1);
         fetchReminder();
-        _updateNotification(max_noti_id + 1, picked);
+        print('This is new added noti_id: ${max_noti_id + 1}');
+        notificationService.showScheduledDailyNotification(
+          id: max_noti_id + 1,
+          title: "Drink Water",
+          body: "Time to drink some water!",
+          // payload: "You just took water! Huurray!",
+          time: reminderTime[index]['reminder_time'],
+        );
       });
+      // updateReminder(index + 1, picked.format(context), "on", reminderTime[index]['notification_id']);
       // print('Here the updated existing reminder time: ');
       // print(reminderTime[index]['reminder_time'].format(context));
       // print(reminderTime[index]['enable']);
@@ -175,63 +204,27 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     if (picked != null) {
       await fetchMaxNoti();
       setState(() {
-        // reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': max_noti_id + 1});
+        reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': max_noti_id + 1});
         updateReminder(list_length + 1, picked.format(context), "on", max_noti_id + 1);  //! notiID ตรงนี้ต้องเป็น max() น่าจะต้องสร้างฟังก์ชันเพิ่ม
         fetchReminder();
         list_length = reminderTime.length;
-        _scheduleNotification(max_noti_id, picked); // ! ส่วนอันนี้เหมือนเดิมเพราะ fetch ให้แล้ว
-      });
+        fetchMaxNoti();
+        print('This is max noti_id: ${max_noti_id}');
+        notificationService.showScheduledDailyNotification(
+          id: max_noti_id + 1,
+          title: "Drink Water",
+          body: "Time to drink some water!",
+          // payload: "You just took water! Huurray!",
+           time: picked,
+        );
+        // _scheduleNotification(max_noti_id, picked); // ! ส่วนอันนี้เหมือนเดิมเพราะ fetch ให้แล้ว
+      }
+    );
       // print('Here the updated existing reminder time: ');
       // print(reminderTime[list_length - 1]['reminder_time'].format(context));
       // print(reminderTime[list_length - 1]['enable']);
     }
   }
-
-  Future<void> _scheduleNotification(int notificationId, TimeOfDay timeOfDay) async {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
-    if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-            'alerts', 'WaterCactus',
-            importance: Importance.max,
-            priority: Priority.high,
-            showWhen: true,
-        );
-
-    const IOSNotificationDetails iOSPlatformChannelSpecifics = IOSNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics,
-    );
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        notificationId, // Unique ID for this notification
-        'Reminder',
-        'It\'s time to drink water!',
-        scheduledDate,
-        platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-    );
-  }
-
-  Future<void> _updateNotification(int notificationId, TimeOfDay newTimeOfDay) async {
-    // Cancel existing notification
-    await flutterLocalNotificationsPlugin.cancel(notificationId);
-
-    // Schedule new notification with updated time
-    await _scheduleNotification(notificationId, newTimeOfDay);
-}
 
   Widget buildReminder(List<dynamic> reminderTime) {
     return ListView.builder(
@@ -262,11 +255,28 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                   ),
                   Switch(
                     value: reminderTime[index]['enable'],
-                    onChanged: (value) {
+                    onChanged: (value) async {
+                      await fetchMaxNoti();
                       setState(() {
                         reminderTime[index]['enable'] = value;
                         // print(reminderTime[index]['enable']);
-                        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), reminderTime[index]['enable'] ? 'on' : 'off', reminderTime[index]['notification_id'] + 1);
+                        if (!value) {
+                          print('Switch off with delete noti_id: ${reminderTime[index]['notification_id']}');
+                          notificationService.cancelNotifications(reminderTime[index]['notification_id']); //! ตรงนี้ใส่อะไร
+                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
+                        } else {
+                          // fetchMaxNoti();
+                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', max_noti_id + 1);
+                          fetchReminder();
+                          print('This is new added noti_id: ${max_noti_id + 1}');
+                          notificationService.showScheduledDailyNotification(
+                            id: max_noti_id + 1,
+                            title: "Drink Water",
+                            body: "Time to drink some water!",
+                            // payload: "You just took water! Huurray!",
+                            time: reminderTime[index]['reminder_time'],
+                          );
+                        }
                       });
                     },
                     activeTrackColor: Colors.lightBlueAccent,
@@ -341,6 +351,12 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                   ),
                   SizedBox(height: 20),
                   buildReminder(reminderTime),
+                  // ElevatedButton(
+                  // onPressed: () async {
+                  //   await notificationService.showGroupedNotifications(
+                  //   title: "Drink Water");
+                  // },
+                  // child: const Text("Drink grouped")),
                   SizedBox(height: 150), // Give space for the button
                 ],
               ),
