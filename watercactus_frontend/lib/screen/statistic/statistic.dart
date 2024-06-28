@@ -557,7 +557,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                       Text(
                                         'Last 7 days Hydration Intake ',
                                         style: CustomTextStyle.poppins3
-                                            .copyWith(fontSize: 12),
+                                            .copyWith(fontSize: 12, color: Colors.black),
                                       ),
                                       SizedBox(height: 20),
                                       ListView.builder(
@@ -640,7 +640,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                           Text(
                                             'Monthly Hydration Intake',
                                             style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 12),
+                                                .copyWith(fontSize: 12,color: Colors.black),
                                           ),
                                           SizedBox(height: 10),
                                           Column(
@@ -718,7 +718,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                               Text(
                                                 'Drink Water Report',
                                                 style: CustomTextStyle.poppins3
-                                                    .copyWith(fontSize: 12),
+                                                    .copyWith(fontSize: 12, color: Colors.black),
                                               ),
                                               SizedBox(height: 20),
 
