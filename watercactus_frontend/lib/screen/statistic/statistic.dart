@@ -29,24 +29,53 @@ final List<String> texts = [
 ];
 
 class _StatisticPageState extends State<StatisticPage> {
+  String? token;
   double waterIntake = 0;
   double dailyGoal = 1;
   List<Map<String, dynamic>> weeklyWaterIntake = [];
   Map<String, double> monthlyWaterIntake = {};
+  String _unit = "ml";
+
   Future<String?> getToken() async {
     return Provider.of<TokenProvider>(context, listen: false).token;
   }
 
   @override
   void initState() {
-    super.initState();
-    fetchWaterIntake();
-    fetchWaterGoal();
-    fetchWeeklyWaterIntake();
-    fetchMonthlyWaterIntake();
+    token = Provider.of<TokenProvider>(context, listen: false).token;
+    if (token != null) {
+      super.initState();
+      fetchWaterIntake();
+      fetchWaterGoal();
+      fetchWeeklyWaterIntake();
+      fetchMonthlyWaterIntake();
+      _getUnit(token);
+    }
   }
 
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
+
+ Future<void> _getUnit(String? token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getUnit'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      // print(jsonResponse['data']);
+      setState(() {
+        _unit = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch unit')),
+      );
+    }
+  }
 
   void fetchWeeklyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -438,14 +467,14 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 8.0),
                                   Text(
-                                    'Ideal Water Intake',
+                                    'Ideal Water Intake ',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 10,
                                     ),
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '$waterIntake ml',
+                                    '$waterIntake ${_unit == 'ml' ? 'ml' : 'oz'}',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: waterIntake >= dailyGoal
@@ -479,7 +508,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '$dailyGoal ml',
+                                    '$dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: Colors.black,
@@ -531,7 +560,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             ),
                                           ),
                                           Text(
-                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ml',
+                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
                                               fontSize: 18,
@@ -557,7 +586,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                       Text(
                                         'Last 7 days Hydration Intake ',
                                         style: CustomTextStyle.poppins3
-                                            .copyWith(fontSize: 12, color: Colors.black),
+                                            .copyWith(
+                                                fontSize: 12,
+                                                color: Colors.black),
                                       ),
                                       SizedBox(height: 20),
                                       ListView.builder(
@@ -594,7 +625,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Daily Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      'Daily Intake: ${weeklyWaterIntake[index]['waterIntake']} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -605,7 +636,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ml',
+                                                      'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -640,7 +671,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                           Text(
                                             'Monthly Hydration Intake',
                                             style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 12,color: Colors.black),
+                                                .copyWith(
+                                                    fontSize: 12,
+                                                    color: Colors.black),
                                           ),
                                           SizedBox(height: 10),
                                           Column(
@@ -686,7 +719,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                               ),
                                                             ),
                                                             Text(
-                                                              '${monthlyWaterIntake[key]} ml',
+                                                              '${monthlyWaterIntake[key]} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                               style:
                                                                   CustomTextStyle
                                                                       .poppins3
@@ -718,7 +751,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                               Text(
                                                 'Drink Water Report',
                                                 style: CustomTextStyle.poppins3
-                                                    .copyWith(fontSize: 12, color: Colors.black),
+                                                    .copyWith(
+                                                        fontSize: 12,
+                                                        color: Colors.black),
                                               ),
                                               SizedBox(height: 20),
 
@@ -744,7 +779,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateWeeklyAverage().toStringAsFixed(2)} ml',
+                                                    '${calculateWeeklyAverage().toStringAsFixed(2)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
@@ -774,7 +809,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateMonthlyAverage().toStringAsFixed(2)} ml',
+                                                    '${calculateMonthlyAverage().toStringAsFixed(2)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
