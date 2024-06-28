@@ -36,10 +36,10 @@ module.exports = (req, res) => {
         const { id } = decodedToken;
 
         // Parse request body parameters
-        const { name, bottle_id, color } = req.body;
+        const { name, bottle_id, color, visible } = req.body;
 
         // Validate parameters
-        if (!name || !bottle_id || !color) {
+        if (!name) {
             return res.status(400).json({
                 success: false,
                 message: "Missing data in request body",
@@ -47,8 +47,8 @@ module.exports = (req, res) => {
         }
 
         var sql = mysql.format(
-            "insert into beverage (name, bottle_id, color, user_id) values (?, ?, ?, ?)",
-            [name, bottle_id, color, id]
+            "insert into beverage (name, bottle_id, color, user_id, visible) values (?, ?, ?, ?, ?)",
+            [name, bottle_id, color, id, visible]
         );
 
         connection.query(sql, (err, results) => {

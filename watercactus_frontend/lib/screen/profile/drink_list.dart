@@ -230,7 +230,8 @@ class _DrinkListPageState extends State<DrinkListPage> {
           IconButton(
             icon: const Icon(Icons.cancel, color: AppColors.black, size: 30),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushNamed(context, '/profile');
+              // Navigator.pop(context);
             },
           ),
           const SizedBox(width: 20),
@@ -245,8 +246,8 @@ class _DrinkListPageState extends State<DrinkListPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ButtonStyle(
-                  fixedSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.brightBlue),
+                  fixedSize: WidgetStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor: WidgetStateProperty.all<Color>(AppColors.brightBlue),
                 ),
                 onPressed: () async {
                   final result = await Navigator.push(
@@ -269,7 +270,7 @@ class _DrinkListPageState extends State<DrinkListPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 80,)
+              SizedBox(height: 40,)
             ],
           ),
         ),

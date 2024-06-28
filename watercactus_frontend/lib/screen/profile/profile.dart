@@ -168,167 +168,193 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
-                  children: [
-                    SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: ClipOval(
-                      child: Image.asset(
-                          picture,
-                          fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    children: [
+                      SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: ClipOval(
+                        child: Image.asset(
+                            picture,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: -10,
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/editProfile');
-                        },
-                        icon: Icon(Icons.edit_square, color: AppColors.black, size: 30),
+                      Positioned(
+                        bottom: 0,
+                        right: -10,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/editProfile');
+                          },
+                          icon: Icon(Icons.edit_square, color: AppColors.black, size: 30),
+                        ),
                       ),
+                    ]
+                  ),
+                  SizedBox(width: 30),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(email.split('@')[0], style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
+                        Text(email, style: CustomTextStyle.poppins2),
+                      ]
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 5),
+            CardCarousel(cards: cardList),
+            Padding(
+              padding:  EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/edit-unit');
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        SizedBox(
+                          height: 45,
+                          width: 45,
+                          child: ClipOval(
+                            child: Image.asset(
+                                'assets/profile_page/measure.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        Text('Measurement unit', style: CustomTextStyle.poppins6),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/goal-calculation');
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        SizedBox(
+                          height: 45,
+                          width: 45,
+                          child: ClipOval(
+                            child: Image.asset(
+                                'assets/profile_page/goal.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        Text('Custom goal', style: CustomTextStyle.poppins6),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/noti-setting');
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        SizedBox(
+                          height: 45,
+                          width: 45,
+                          child: ClipOval(
+                            child: Image.asset(
+                                'assets/profile_page/noti.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        Text('Notification setting', style: CustomTextStyle.poppins6),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/drink-list');
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        SizedBox(
+                          height: 45,
+                          width: 45,
+                          child: ClipOval(
+                            child: Image.asset(
+                                'assets/profile_page/drink-list.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        Text('Add/Edit drink list', style: CustomTextStyle.poppins6),
+                      ],
+                    ),
+                  )
+                ],
+              )
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding:  EdgeInsets.all(20),
+              child: Container(
+                height: 100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('My account', style: CustomTextStyle.poppins4),
+                        SizedBox(height: 15),
+                        Container(
+                          height: 1,
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          color: AppColors.darkGrey,
+                        ),
+                        SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () => _showLogoutConfirmationDialog(),
+                          child: Text('Log Out', style: CustomTextStyle.poppins6.copyWith(color: Colors.red, fontSize: 16))
+                        ),
+                      ],
                     ),
                   ]
                 ),
-                SizedBox(width: 30),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(email.split('@')[0], style: CustomTextStyle.poppins6.copyWith(fontSize: 24)),
-                      Text(email, style: CustomTextStyle.poppins2),
-                    ]
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 5),
-          CardCarousel(cards: cardList),
-          Padding(
-            padding:  EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/edit-unit');
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      SizedBox(
-                        height: 45,
-                        width: 45,
-                        child: ClipOval(
-                          child: Image.asset(
-                              'assets/profile_page/measure.png',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                      ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      Text('Measurement unit', style: CustomTextStyle.poppins6),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/goal-calculation');
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      SizedBox(
-                        height: 45,
-                        width: 45,
-                        child: ClipOval(
-                          child: Image.asset(
-                              'assets/profile_page/goal.png',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                      ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      Text('Custom goal', style: CustomTextStyle.poppins6),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/noti-setting');
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      SizedBox(
-                        height: 45,
-                        width: 45,
-                        child: ClipOval(
-                          child: Image.asset(
-                              'assets/profile_page/noti.png',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                      ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                      Text('Notification setting', style: CustomTextStyle.poppins6),
-                    ],
-                  ),
-                )
-              ],
+              )
             )
-          ),
-          SizedBox(height: 10),
-          Padding(
-            padding:  EdgeInsets.all(20),
-            child: Container(
-              height: 100,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('My account', style: CustomTextStyle.poppins4),
-                      SizedBox(height: 15),
-                      Container(
-                        height: 1,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        color: AppColors.darkGrey,
-                      ),
-                      SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: () => _showLogoutConfirmationDialog(),
-                        child: Text('Log Out', style: CustomTextStyle.poppins6.copyWith(color: Colors.red, fontSize: 16))
-                      ),
-                    ],
-                  ),
-                ]
-              ),
-            )
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

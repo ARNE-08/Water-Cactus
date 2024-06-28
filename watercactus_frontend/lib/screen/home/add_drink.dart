@@ -71,6 +71,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
           'name': _nameController.text,
           'bottle_id': selectedBottleIndex,
           'color': selectedColorIndex,
+          'visible': 1,
         }),
       );
 
