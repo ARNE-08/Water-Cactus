@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mysql = require("mysql");
+const getCurrentDateTime = require("../utils/getCurrentDateTime");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present
@@ -36,26 +37,27 @@ module.exports = (req, res) => {
         const { id } = decodedToken;
 
         // Parse request body parameters
-        const { gender } = req.body;
+        const { goal } = req.body;
+        const date = getCurrentDateTime();
 
         // Validate parameters
-        if (!gender) {
+        if (!goal) {
             return res.status(400).json({
                 success: false,
-                message: "Missing gender in request body",
+                message: "Missing goal in request body",
             });
         }
 
         var sql = mysql.format(
-            "UPDATE cactus_user SET gender = ? WHERE id = ?",
-            [gender, id]
+            "INSERT INTO water_goal (user_id, goal_date, goal) VALUES (?, ?, ?)",
+            [id, date, goal]
         );
 
         connection.query(sql, (err, results) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error updating",
+                    message: "Error adding goal",
                     error: err.message,
                 });
             }
@@ -63,9 +65,10 @@ module.exports = (req, res) => {
             // Return the fetched results
             return res.status(200).json({
                 success: true,
-                message: "Add gender successfully",
-                data: gender,
+                message: "Add water goal successfully",
+                data: goal,
             });
         });
-    })
+    }
+    )
 }
