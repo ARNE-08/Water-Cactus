@@ -361,8 +361,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize: WidgetStateProperty.all<Size>(Size(140, 50)),
-                          backgroundColor: WidgetStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey),
+                          fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                          backgroundColor: MaterialStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey),
                         ),
                         onPressed: () async {
                           await addWater();

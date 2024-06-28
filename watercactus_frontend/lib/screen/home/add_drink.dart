@@ -300,8 +300,8 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                 SizedBox(height: 40),
                 ElevatedButton(
                   style: ButtonStyle(
-                    fixedSize: WidgetStateProperty.all<Size>(Size(140, 50)),
-                    backgroundColor: WidgetStateProperty.all<Color>(AppColors.brightBlue),
+                    fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                    backgroundColor: MaterialStateProperty.all<Color>(AppColors.brightBlue),
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {

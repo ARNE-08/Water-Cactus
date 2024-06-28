@@ -399,8 +399,8 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                   padding: const EdgeInsets.only(left: 120, right: 120, bottom: 60, top: 20),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      fixedSize: WidgetStateProperty.all<Size>(Size(140, 50)),
-                      backgroundColor: WidgetStateProperty.all<Color>(AppColors.tea),
+                      fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                      backgroundColor: MaterialStateProperty.all<Color>(AppColors.tea),
                     ),
                     onPressed: () {
                       _showAddNewTimePicker(context, listLength);

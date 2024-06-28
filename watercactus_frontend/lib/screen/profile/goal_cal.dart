@@ -95,7 +95,7 @@ class _GoalPageState extends State<GoalPage> {
 
     if (result != null) {
       setState(() {
-       _goal = '$result $_unit';
+       _goal = '$result';
       });
     }
   }

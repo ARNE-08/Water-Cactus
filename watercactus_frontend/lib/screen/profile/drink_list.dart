@@ -246,8 +246,8 @@ class _DrinkListPageState extends State<DrinkListPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ButtonStyle(
-                  fixedSize: WidgetStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: WidgetStateProperty.all<Color>(AppColors.brightBlue),
+                  fixedSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.brightBlue),
                 ),
                 onPressed: () async {
                   final result = await Navigator.push(
