@@ -29,7 +29,6 @@ module.exports = (req, res) => {
     }
     // Extract user id from decoded token
     const { id } = decodedToken;
-    const { startDate, endDate } = req.body;
 
     // Validate parameters
     if (!startDate || !endDate) {
@@ -40,28 +39,24 @@ module.exports = (req, res) => {
     }
 
     const query = `
-			SELECT ws.stat_date, wg.goal
-			FROM water_stat ws
-			INNER JOIN water_goal wg ON ws.goal_id = wg.goal_id
-			WHERE ws.stat_date BETWEEN ? AND ?
+		SELECT goal_date, goal
+			FROM water_goal
+			WHERE goal_date BETWEEN ? AND ? AND user_id = ?
+			ORDER BY goal_date;
 		`;
 
-    connection.query(query, [startDate, endDate], (err, results) => {
+    connection.query(query, [startDate, endDate, id], (err, results) => {
       if (err) {
         console.error("Error fetching water goals from database: " + err.stack);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
+        res.status(500).json({ success: false, message: "Internal server error" });
         return;
       }
 
       if (results.length === 0) {
-        res
-          .status(204)
-          .json({
-            success: true,
-            message: "No goals found for the specified time interval",
-          });
+        res.status(204).json({
+          success: true,
+          message: "No goals found for the specified time interval",
+        });
       } else {
         res.status(200).json({ success: true, data: results });
       }
