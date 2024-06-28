@@ -555,7 +555,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Last 7 Days Water Intake',
+                                        'Last 7 days Hydration Intake ',
                                         style: CustomTextStyle.poppins3
                                             .copyWith(fontSize: 12),
                                       ),
@@ -594,7 +594,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      'Daily Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -638,7 +638,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Monthly Water Intake',
+                                            'Monthly Hydration Intake',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(fontSize: 12),
                                           ),
@@ -674,7 +674,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                                   .spaceBetween,
                                                           children: [
                                                             Text(
-                                                              'Monthly Water Intake:',
+                                                              'Monthly Intake:',
                                                               style:
                                                                   CustomTextStyle
                                                                       .poppins3
