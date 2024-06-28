@@ -61,11 +61,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _fetchProfilePicture(String token) async {
     try {
-      final response = await http.get(
+       final response = await http.post(
         Uri.parse('$apiUrl/getProfilePicture'),
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: jsonEncode({
+          'visible': 1,
+        }),
       );
       print('API Response Status Code: ${response.statusCode}');
       if (response.statusCode == 200) {

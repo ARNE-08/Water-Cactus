@@ -160,7 +160,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 IconButton(
                 icon: const Icon(Icons.cancel, color: AppColors.black, size: 30),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/home');
                 },
               ),
               SizedBox(width: 20),
