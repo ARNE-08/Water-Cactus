@@ -35,10 +35,10 @@ module.exports = (req, res) => {
         const { id } = decodedToken;
 
         // Parse request body parameters
-        const { reminder_time, noti_id} = req.body;
+        const {index} = req.body;
 
         // Validate parameters
-        if (!reminder_time) {
+        if (!index) {
             return res.status(400).json({
                 success: false,
                 message: "Missing required parameters in request body",
@@ -46,8 +46,8 @@ module.exports = (req, res) => {
         }
 
         var sql = mysql.format(
-            "insert into notification (user_id, reminder_time, enable, notification_id) values (?, ?, ?, ?)",
-            [id, reminder_time, 1, noti_id]
+            "DELETE FROM notification WHERE id = ? AND user_id = ?",
+            [index, id]
         );
 
         // Execute SQL query
@@ -55,7 +55,7 @@ module.exports = (req, res) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error adding notification",
+                    message: "Error deleting notification",
                     error: err.message,
                 });
             }
@@ -63,9 +63,9 @@ module.exports = (req, res) => {
             // Return success response
             res.status(200).json({
                 success: true,
-                message: "Added notification successfully",
+                message: "Delete notification successfully",
                 data: {
-					reminder_time,
+					results,
                 },
             });
         });

@@ -111,6 +111,55 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     }
   }
 
+  Future<void> addReminder(String reminderTime, int maxNotiId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/addReminder'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'reminder_time': reminderTime,
+          'noti_id': maxNotiId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> fetchedData = json.decode(response.body);
+        print('add notification in updateNotification(): ${fetchedData['data']}');
+      } else {
+        print('Failed to add notification: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error add notification data: $error');
+    }
+  }
+
+  Future<void> deleteReminder(int index) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/deleteReminder'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'index': index,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> fetchedData = json.decode(response.body);
+        print('delete notification in updateNotification(): ${fetchedData['data']}');
+      } else {
+        print('Failed to delete notification: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error delete notification data: $error');
+    }
+  }
+
   Future<void> fetchMaxNoti() async {
     try {
       final response = await http.post(
@@ -217,16 +266,15 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
 
     if (picked != null) {
       await fetchMaxNoti();
+      print('max Noti id: $maxNotiId');
       setState(() {
         reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': maxNotiId + 1});
-        updateReminder(listLength + 1, picked.format(context), "on", maxNotiId + 1);
+        addReminder(picked.format(context), maxNotiId + 1);
         fetchReminder();
         buildReminder(reminderTime);
         listLength = reminderTime.length;
-        fetchMaxNoti();
-        // print('This is max noti_id: ${maxNotiId}');
         notificationService.showScheduledDailyNotification(
-          id: maxNotiId + 1,
+          id: maxNotiId,
           title: "Drink Water",
           body: "Time to drink some water!",
           time: picked,
@@ -236,66 +284,97 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
   }
 
   Widget buildReminder(List<dynamic> reminderTime) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: reminderTime.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Container(
-            height: 80,
-            width: MediaQuery.of(context).size.width * 0.8,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.white),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => _showTimePicker(context, index),
-                    child: Text(
-                      reminderTime[index]['reminder_time'].format(context),
-                      style: CustomTextStyle.poppins4.copyWith(fontSize: 20, color: Colors.black),
-                    ),
-                  ),
-                  Switch(
-                    value: reminderTime[index]['enable'],
-                    onChanged: (value) async {
-                      await fetchMaxNoti();
-                      setState(() {
-                        reminderTime[index]['enable'] = value;
-                        if (!value) {
-                          // print('Switch off with delete noti_id: ${reminderTime[index]['notification_id']}');
-                          notificationService.cancelNotifications(reminderTime[index]['notification_id']);
-                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
-                        } else {
-                          updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
-                          fetchReminder();
-                          // print('This is new added noti_id: ${maxNotiId + 1}');
-                          notificationService.showScheduledDailyNotification(
-                            id: maxNotiId + 1,
-                            title: "Drink Water",
-                            body: "Time to drink some water!",
-                            time: reminderTime[index]['reminder_time'],
-                          );
-                        }
-                      });
-                    },
-                    activeTrackColor: Colors.lightBlueAccent,
-                    activeColor: Colors.blue,
-                  ),
-                ],
-              ),
+  return ListView.builder(
+    shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
+    itemCount: reminderTime.length,
+    itemBuilder: (context, index) {
+      return Dismissible(
+        key: Key(reminderTime[index]['notification_id'].toString()),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) async {
+          // Handle the deletion logic here
+          final removedItem = reminderTime.removeAt(index);
+          setState(() {
+            notificationService.cancelNotifications(removedItem['notification_id']);
+            deleteReminder(removedItem['id']);
+            // fetchReminder(); // No need to call fetchReminder as we are directly manipulating the list
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Reminder deleted')),
+          );
+        },
+        background: Container(
+          width: double.infinity,
+          alignment: Alignment.center,
+          color: Colors.red,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Icon(
+              Icons.delete,
+              color: Colors.white,
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Container(
+              height: 80,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.white),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => _showTimePicker(context, index),
+                      child: Text(
+                        reminderTime[index]['reminder_time'].format(context),
+                        style: CustomTextStyle.poppins4.copyWith(fontSize: 20, color: Colors.black),
+                      ),
+                    ),
+                    Switch(
+                      value: reminderTime[index]['enable'],
+                      onChanged: (value) async {
+                        await fetchMaxNoti();
+                        setState(() {
+                          reminderTime[index]['enable'] = value;
+                          if (!value) {
+                            notificationService.cancelNotifications(reminderTime[index]['notification_id']);
+                            updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
+                          } else {
+                            updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
+                            fetchReminder();
+                            notificationService.showScheduledDailyNotification(
+                              id: maxNotiId + 1,
+                              title: "Drink Water",
+                              body: "Time to drink some water!",
+                              time: reminderTime[index]['reminder_time'],
+                            );
+                          }
+                        });
+                      },
+                      activeTrackColor: Colors.lightBlueAccent,
+                      activeColor: Colors.blue,
+                    ),
+                  ],
+                ),
+              ),
+            ),]
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
 
   Widget buildPicture() {
     return Container(
@@ -322,7 +401,6 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isSwitched = Provider.of<SwitchState>(context).isSwitched;
     // print('isSwitched from noti page: $isSwitched');
-
 
     return Scaffold(
       appBar: AppBar(
@@ -380,7 +458,9 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                               color: AppColors.darkGrey,
                             ),
                             SizedBox(height: 20),
-                            isSwitched ? buildReminder(reminderTime) : buildPicture(),
+                            isSwitched
+                                ? buildReminder(reminderTime)
+                                : buildPicture(),
                             SizedBox(height: 150), // Give space for the button
                           ],
                         )

@@ -49,7 +49,7 @@ module.exports = (req, res) => {
                 });
             }
 
-            if (results.length === 0) {
+            if (results.length === 0 || results[0].max_notification_id === null) {
                 return res.status(204).json({
                     success: false,
                     message: "No notification row found",
