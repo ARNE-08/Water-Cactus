@@ -234,7 +234,7 @@ class _StatisticPageState extends State<StatisticPage> {
         .first;
     try {
       // Make the HTTP POST request
-      print('Tokenn: $token');
+      //print('Tokenn: $token');
       final response = await http.post(
         Uri.parse('$apiUrl/getWater'),
         headers: {

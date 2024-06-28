@@ -112,7 +112,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           print('API Response Status Code: ${response.statusCode}');
           if (response.statusCode == 200) {
             print('Profile picture updated successfully');
-            _showSuccessDialog(); // Show success popup
+            _showSuccessDialog(context); // Show success popup
           } else {
             print('Failed to update profile picture: ${response.statusCode}');
           }
@@ -171,25 +171,62 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('Profile updated successfully'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+ void _showSuccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 60,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Success',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Profile updated successfully',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  backgroundColor: AppColors.brightBlue,
+                ),
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
   Future<void> _updateEmail() async {
     String? token = await getToken();
@@ -210,7 +247,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         print('API Response Status Code: ${response.statusCode}');
         if (response.statusCode == 200) {
           print('Email updated successfully');
-          _showSuccessDialog(); // Show success popup
+          _showSuccessDialog(context); // Show success popup
         } else {
           print('Failed to update email: ${response.statusCode}');
         }
@@ -242,7 +279,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         print('API Response Status Code: ${response.statusCode}');
         if (response.statusCode == 200) {
           print('Password updated successfully');
-          _showSuccessDialog(); // Show success popup
+          _showSuccessDialog(context); // Show success popup
         } else {
           final jsonResponse = json.decode(response.body);
           print('Failed to update password: ${response.statusCode}');
