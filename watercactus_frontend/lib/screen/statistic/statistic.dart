@@ -33,6 +33,9 @@ class _StatisticPageState extends State<StatisticPage> {
   double dailyGoal = 1;
   List<Map<String, dynamic>> weeklyWaterIntake = [];
   Map<String, double> monthlyWaterIntake = {};
+  Future<String?> getToken() async {
+    return Provider.of<TokenProvider>(context, listen: false).token;
+  }
 
   @override
   void initState() {
@@ -222,6 +225,7 @@ class _StatisticPageState extends State<StatisticPage> {
         final Map<String, dynamic> fetchedWaterData =
             json.decode(response.body);
         print('fetchedd water data: ${fetchedWaterData['data']}');
+        //_printToken();
         // Store the fetched data in the list
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
@@ -246,8 +250,14 @@ class _StatisticPageState extends State<StatisticPage> {
   void fetchWaterGoal() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
@@ -262,10 +272,7 @@ class _StatisticPageState extends State<StatisticPage> {
           'endDate': endDate,
         }),
       );
-        // print("----------------------");
-        // print('Response status code: ${response.statusCode}');
-        // print('Response body: ${response.body}');
-        // print("----------------------");
+
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
@@ -280,10 +287,9 @@ class _StatisticPageState extends State<StatisticPage> {
         });
       } else if (response.statusCode == 204) {
         setState(() {
-         dailyGoal = 1;
+          dailyGoal = 1;
         });
-      }
-      else {
+      } else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch goal data: ${response.statusCode}');
       }
@@ -292,7 +298,6 @@ class _StatisticPageState extends State<StatisticPage> {
       print('Error fetching goal data: $error');
     }
   }
-
 
   double calculateWeeklyAverage() {
     if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
@@ -356,6 +361,15 @@ class _StatisticPageState extends State<StatisticPage> {
     });
 
     return drinkFrequency;
+  }
+
+  Future<void> _printToken() async {
+    String? token = await getToken();
+    if (token != null) {
+      print("Token: $token");
+    } else {
+      print("No token found");
+    }
   }
 
   @override
@@ -541,9 +555,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Last 7 Days Water Intake',
+                                        'Last 7 days Hydration Intake ',
                                         style: CustomTextStyle.poppins3
-                                            .copyWith(fontSize: 12),
+                                            .copyWith(fontSize: 12, color: Colors.black),
                                       ),
                                       SizedBox(height: 20),
                                       ListView.builder(
@@ -580,7 +594,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Water Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
+                                                      'Daily Intake: ${weeklyWaterIntake[index]['waterIntake']} ml',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -624,9 +638,9 @@ class _StatisticPageState extends State<StatisticPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Monthly Water Intake',
+                                            'Monthly Hydration Intake',
                                             style: CustomTextStyle.poppins3
-                                                .copyWith(fontSize: 12),
+                                                .copyWith(fontSize: 12,color: Colors.black),
                                           ),
                                           SizedBox(height: 10),
                                           Column(
@@ -660,7 +674,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                                   .spaceBetween,
                                                           children: [
                                                             Text(
-                                                              'Monthly Water Intake:',
+                                                              'Monthly Intake:',
                                                               style:
                                                                   CustomTextStyle
                                                                       .poppins3
@@ -704,7 +718,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                               Text(
                                                 'Drink Water Report',
                                                 style: CustomTextStyle.poppins3
-                                                    .copyWith(fontSize: 12),
+                                                    .copyWith(fontSize: 12, color: Colors.black),
                                               ),
                                               SizedBox(height: 20),
 

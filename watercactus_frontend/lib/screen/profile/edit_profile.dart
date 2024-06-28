@@ -489,7 +489,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   _updateProfilePicture();
                   _updateEmail();
                   _updatePassword();
-                  _printToken();
+                  //_printToken();
                 },
                 child: Text('CONFIRM'),
               ),
