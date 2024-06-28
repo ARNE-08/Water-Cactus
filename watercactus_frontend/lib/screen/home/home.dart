@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   int dailyGoal = 1;
   String? token;
   List<dynamic> beverageList = [];
+  String _unit = "ml";
 
   List<String> imagePath = [
     'assets/EmptyBeverages/empty1.png',
@@ -60,8 +61,39 @@ class _HomePageState extends State<HomePage> {
         fetchWaterIntake();
         fetchWaterGoal();
         fetchBeverage();
+        _getUnit(token);
       }
     });
+  }
+
+  Future<void> _getUnit(String? token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/getUnit'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      // print(jsonResponse['data']);
+      setState(() {
+        _unit = jsonResponse['data'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch unit')),
+      );
+    }
+  }
+
+  String calculateWaterIntake(int amount) {
+    if (_unit == 'ml') {
+      return amount.toStringAsFixed(2);
+    } else {
+      return (amount / 29.5735).toStringAsFixed(1); // Convert ml to oz
+    }
   }
 
   void fetchBeverage() async {
@@ -128,7 +160,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
           waterIntake = dynamicList[0]['total_intake'];
-          // print('waterIntake: $waterIntake');
+          print('This is fetched waterIntake: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -246,7 +278,7 @@ class _HomePageState extends State<HomePage> {
       },
       blendMode: BlendMode.srcATop,
       child: Image.asset(
-        imagePath[bottleIndex], 
+        imagePath[bottleIndex],
         width: 50,
         height: 50,
       ),
@@ -298,7 +330,7 @@ class _HomePageState extends State<HomePage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: '$waterIntake ml\n',
+                                text: '${calculateWaterIntake(waterIntake)} ${_unit == 'ml' ? 'ml' : 'oz'}\n',
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
@@ -354,6 +386,7 @@ class _HomePageState extends State<HomePage> {
                           itemBuilder: (context, index) {
                             //! อันเก่า
                             if (index >= 0 && index < 8) {
+                              // print('_unit: $_unit');
                               return BeverageOriginalItem(
                                 index: index, //! for color
                                 token: token,  //! for token
@@ -362,10 +395,12 @@ class _HomePageState extends State<HomePage> {
                                 screenWidth: screenWidth,
                                 fetchWaterGoal: fetchWaterGoal,
                                 fetchWaterIntake: fetchWaterIntake,
+                                unit: _unit,
                               );
                             //! อันใหม่
                             }
                             else if (index >= 8 && index < beverageList.length){
+                              // print('_unit: $_unit');
                               return BeverageNewItem(
                                 index: beverageList[index]['beverage_id'],
                                 token: token,
@@ -376,6 +411,7 @@ class _HomePageState extends State<HomePage> {
                                 fetchWaterGoal: fetchWaterGoal,
                                 fetchWaterIntake: fetchWaterIntake,
                                 buildAddDrinkImage: buildAddDrinkImage,
+                                unit: _unit,
                               );
                             }
                             //! Add Water Page
@@ -440,6 +476,7 @@ class BeverageOriginalItem extends StatelessWidget {
   final double screenWidth;
   final Function fetchWaterGoal;
   final Function fetchWaterIntake;
+  final String unit;
 
   const BeverageOriginalItem({
     Key? key,
@@ -450,6 +487,7 @@ class BeverageOriginalItem extends StatelessWidget {
     required this.screenWidth,
     required this.fetchWaterGoal,
     required this.fetchWaterIntake,
+    required this.unit,
   }) : super(key: key);
 
 
@@ -467,12 +505,13 @@ class BeverageOriginalItem extends StatelessWidget {
               bottleIndex: index,
               colorIndex: index,
               beverageName: beverageNames[index],
+              unit: unit,
             ),
           ),
         );
         if (result == true) {
           fetchWaterGoal();
-          fetchWaterIntake();
+          await fetchWaterIntake();
         }
       },
       child: Padding(
@@ -544,6 +583,7 @@ class BeverageNewItem extends StatelessWidget {
   final Function fetchWaterGoal;
   final Function fetchWaterIntake;
   final Function buildAddDrinkImage;
+  final String unit;
 
   const BeverageNewItem ({
     Key? key,
@@ -556,6 +596,7 @@ class BeverageNewItem extends StatelessWidget {
     required this.fetchWaterGoal,
     required this.fetchWaterIntake,
     required this.buildAddDrinkImage,
+    required this.unit,
   }) : super(key: key);
 
   @override
@@ -571,6 +612,7 @@ class BeverageNewItem extends StatelessWidget {
               bottleIndex: bottleIndex,
               colorIndex: colorIndex,
               beverageName: beverageName,
+              unit: unit,
             ),
           ),
         );

@@ -6,15 +6,22 @@ import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/numpad.dart';
 import 'package:http/http.dart' as http;
 
-
 class LogWaterPage extends StatefulWidget {
-  String? token;
+  final String? token;
   final int beverageID;
   final int bottleIndex;
   final int colorIndex;
   final String beverageName;
+  final String unit;
 
-  LogWaterPage({required this.token, required this.beverageID, required this.bottleIndex, required this.colorIndex, required this.beverageName});
+  LogWaterPage({
+    required this.token,
+    required this.beverageID,
+    required this.bottleIndex,
+    required this.colorIndex,
+    required this.beverageName,
+    required this.unit,
+  });
 
   @override
   State<StatefulWidget> createState() => _LogWaterPageState();
@@ -28,6 +35,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
   final double _threshold = 5.0;
   int _calculatedML = 110;
   int _option1ML = 110;
+  double _calculatedoz = 12;
+  double _option1oz = 12;
   int quantity = 110;
 
   List<String> imagePath = [
@@ -63,17 +72,10 @@ class _LogWaterPageState extends State<LogWaterPage> {
     });
   }
 
-  void addWater() async {
+  Future<void> addWater() async {
     final now = DateTime.now();
     final consumeAt = now.toIso8601String();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
-      // Make the HTTP POST request
-      // print('Tokenn: ${widget.token}');
-      // print('beverageId: ${widget.beverageID}');
-      // print('quantity: $quantity');
-      // print('consume_at: $consumeAt');
       final response = await http.post(
         Uri.parse('$apiUrl/addWater'),
         headers: {
@@ -87,30 +89,21 @@ class _LogWaterPageState extends State<LogWaterPage> {
         }),
       );
 
-      // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
-        // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedData = json.decode(response.body);
         print('update water data: ${fetchedData['data']}');
-        // Store the fetched data in the list
-
       } else {
-        // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to add water: ${response.statusCode}');
       }
     } catch (error) {
-      // Handle any errors that occur during the process
       print('Error adding water data: $error');
     }
   }
 
-  void addTotalIntake() async {
+  Future<void> addTotalIntake() async {
     final now = DateTime.now();
     final stat_date = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
     try {
-      // Make the HTTP POST request
-      // print('stat_date: $stat_date');
-      // print('quantity: $quantity');
       final response = await http.post(
         Uri.parse('$apiUrl/addTotalIntake'),
         headers: {
@@ -123,19 +116,13 @@ class _LogWaterPageState extends State<LogWaterPage> {
         }),
       );
 
-      // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
-        // print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedData = json.decode(response.body);
         print('update intake data: ${fetchedData['data']}');
-        // Store the fetched data in the list
-
       } else {
-        // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to add intake: ${response.statusCode}');
       }
     } catch (error) {
-      // Handle any errors that occur during the process
       print('Error adding intake data: $error');
     }
   }
@@ -152,7 +139,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     int newSelectedIndex = selectedOptionIndex;
 
     for (int index = 0; index < 4; index++) {
-      double itemExtent = 120.0; // Adjust according to the size of your items
+      double itemExtent = 120.0;
       double itemCenter = index * itemExtent + itemExtent / 2;
 
       double distance = (_controller.offset + center - itemCenter).abs();
@@ -164,23 +151,41 @@ class _LogWaterPageState extends State<LogWaterPage> {
 
     setState(() {
       selectedOptionIndex = newSelectedIndex;
-      _calculatedML = newSelectedIndex == 0 ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
-      quantity = _calculatedML;
+      (widget.unit == 'ml')
+          ? _calculatedML = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330
+          : _calculatedoz = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 12 : newSelectedIndex == 2 ? 7.1 : 3.7;
+      // _calculatedML = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
+      (widget.unit == 'ml')
+          ? quantity = _calculatedML
+          : quantity = _calculatedoz.toInt();
+      // quantity = _calculatedML;
+      print('quantity: $quantity');
     });
   }
 
   void _onItemTab(int index) {
-    // print(index);
     setState(() {
       selectedOptionIndex = index;
-      _calculatedML = index == 0 ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
-      _option1ML = 110;
-      quantity = 110;
+      (widget.unit == 'ml')
+          ? _calculatedML = (index == 0) ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330
+          : _calculatedoz = (index == 0) ? 0 : index == 1 ? 12 : index == 2 ? 7.1 : 3.7;
+      // _calculatedML = (index == 0) ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
+      (widget.unit == 'ml')
+          ? _option1ML = 110
+          : _option1oz = 12;
+      // _option1ML = 110;
+      quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
+      print('quantity: $quantity');
+      // quantity = 110;
     });
   }
 
   double get _calculatedPortion {
-    return 1 - (_calculatedML / 330);
+    double result = 0;
+    (widget.unit == 'ml')
+        ? result = 1 - (_calculatedML / 330)
+        : result = 1 - (_calculatedoz / 13);
+    return (result);
   }
 
   Widget buildShaderMaskImage() {
@@ -216,26 +221,24 @@ class _LogWaterPageState extends State<LogWaterPage> {
     if (result != null) {
       setState(() {
         _selectedNumber = result;
-        quantity = int.parse(_selectedNumber);
-        addWater();
-        addTotalIntake();
-        Navigator.pop(context, true);
+        (widget.unit == 'ml')
+            ? quantity = int.parse(_selectedNumber)
+            : quantity = (int.parse(_selectedNumber) * 29.5735).toInt();
+        // quantity = int.parse(_selectedNumber);
+      print('quantity: $quantity');
       });
-      // print(_selectedNumber);
+      await addWater();
+      await addTotalIntake();
+      Navigator.pop(context, true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    // final Color? beverageColor = AppColors.beverageColors[widget.beverageName];
-      List<String> options = [
-        '',
-        '${_option1ML.toString()} ml',
-        '80ml',
-        '330ml',
-        // ''
-      ];
+    List<String> options = (widget.unit == 'ml')
+        ? ['', '${_option1ML.toString()} ml', '80 ml', '330 ml']
+        : ['', '${_option1oz.toString()} oz', '7.1 oz', '3.7 oz'];
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -266,40 +269,53 @@ class _LogWaterPageState extends State<LogWaterPage> {
                         SizedBox(height: 100),
                         GestureDetector(
                           onVerticalDragUpdate: (details) {
-                              selectedOptionIndex = 1;
-                              _controller.animateTo(
+                            selectedOptionIndex = 1;
+                            _controller.animateTo(
                               0,
                               duration: const Duration(milliseconds: 50),
                               curve: Curves.easeInOut,
                             );
-                            // Accumulate the total drag distance
+
                             _totalDragDistance += details.delta.dy;
 
-                            // Detect if the total drag distance is greater than the threshold
                             if (_totalDragDistance < -_threshold) {
                               setState(() {
-                                _calculatedML = (_calculatedML + 10).clamp(0, 330); // Increment by 10 and clamp between 0 and 330
-                                _option1ML = _calculatedML;
-                                _totalDragDistance = 0; // Reset the drag distance
-                                // print('up: $_calculatedML');
-                                quantity = _calculatedML;
+                                (widget.unit == 'ml')
+                                    ? _calculatedML = (_calculatedML + 10).clamp(0, 330)
+                                    : _calculatedoz = (_calculatedoz + 1).clamp(0, 13);
+                                // _calculatedML = (_calculatedML + 10).clamp(0, 330);
+                                (widget.unit == 'ml')
+                                    ? _option1ML = _calculatedML
+                                    : _option1oz = _calculatedoz.ceilToDouble();
+                                // _option1ML = _calculatedML;
+                                _totalDragDistance = 0;
+                                quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
+                                print('quantity: $quantity');
+                                // quantity = _calculatedML;
                               });
                             } else if (_totalDragDistance > _threshold) {
                               setState(() {
-                                _calculatedML = (_calculatedML - 10).clamp(0, 330); // Decrement by 10 and clamp between 0 and 330
-                                _option1ML = _calculatedML;
-                                _totalDragDistance = 0; // Reset the drag distance
-                                // print('down: $_calculatedML');
-                                quantity = _calculatedML;
+                                (widget.unit == 'ml')
+                                    ? _calculatedML = (_calculatedML - 10).clamp(0, 330)
+                                    : _calculatedoz = (_calculatedoz - 1).clamp(0, 13);
+                                // _calculatedML = (_calculatedML - 10).clamp(0, 330);
+                                (widget.unit == 'ml')
+                                    ? _option1ML = _calculatedML
+                                    : _option1oz = _calculatedoz.ceilToDouble();
+                                // _option1ML = _calculatedML;
+                                _totalDragDistance = 0;
+                                quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
+                                print('quantity: $quantity');
+                                // quantity = _calculatedML;
                               });
                             }
                           },
                           onVerticalDragEnd: (details) {
-                            // Reset the drag distance when the drag ends
                             setState(() {
                               _totalDragDistance = 0;
-                              // print(_calculatedML);
-                              quantity = _calculatedML;
+                              quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
+                                print('Here quantity: $quantity');
+                              // quantity = _calculatedML;
                             });
                           },
                           child: buildShaderMaskImage(),
@@ -340,18 +356,17 @@ class _LogWaterPageState extends State<LogWaterPage> {
                       ),
                     ),
                     Row(children: [
-                      // SizedBox(width: 150),
                       Container(
                         width: (screenWidth / 2) - 80,
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
-                          backgroundColor: MaterialStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey), // Default to grey if beverageColor is null
+                          fixedSize: WidgetStateProperty.all<Size>(Size(140, 50)),
+                          backgroundColor: WidgetStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey),
                         ),
-                        onPressed: () {
-                          addWater();
-                          addTotalIntake();
+                        onPressed: () async {
+                          await addWater();
+                          await addTotalIntake();
                           Navigator.pop(context, true);
                         },
                         child: Text('+ ${widget.beverageName.toUpperCase()}'),
@@ -359,17 +374,13 @@ class _LogWaterPageState extends State<LogWaterPage> {
                       Spacer(),
                       IconButton(
                         onPressed: () => _showNumberPad(context),
-                        icon: Icon(Icons.dialpad,
-                            color: AppColors.black, size: 30),
+                        icon: Icon(Icons.dialpad, color: AppColors.black, size: 30),
                       ),
                       SizedBox(width: 30),
                     ]),
-                    SizedBox(
-                      height: 50,
-                    )
+                    SizedBox(height: 50)
                   ]),
                 ),
-                // SizedBox(width: screenWidth / 2), // Space to center the selected option
               ],
             ),
           ),
