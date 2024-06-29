@@ -360,13 +360,17 @@ class _LogWaterPageState extends State<LogWaterPage> {
                         },
                       ),
                     ),
-                    Row(children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
                       Container(
                         width: (screenWidth / 2) - 80,
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                          minimumSize: MaterialStateProperty.all<Size>(Size(140, 50)),
+                          maximumSize: MaterialStateProperty.all<Size>(Size(180, 50)),
                           backgroundColor: MaterialStateProperty.all<Color>(maskColor[widget.colorIndex] ?? AppColors.grey),
                         ),
                         onPressed: () async {
