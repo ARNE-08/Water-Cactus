@@ -238,7 +238,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
         notificationService.cancelNotifications(reminderTime[index]['notification_id']);
         reminderTime[index]['reminder_time'] = picked;
         reminderTime[index]['enable'] = true;
-        updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
+        updateReminder(reminderTime[index]['id'], reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
         fetchReminder();
         buildReminder(reminderTime);
         // print('This is new added noti_id: ${maxNotiId + 1}');
@@ -347,9 +347,9 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
                           reminderTime[index]['enable'] = value;
                           if (!value) {
                             notificationService.cancelNotifications(reminderTime[index]['notification_id']);
-                            updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
+                            updateReminder(reminderTime[index]['id'], reminderTime[index]['reminder_time'].format(context), 'off', reminderTime[index]['notification_id']);
                           } else {
-                            updateReminder(index + 1, reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
+                            updateReminder(reminderTime[index]['id'], reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
                             fetchReminder();
                             notificationService.showScheduledDailyNotification(
                               id: maxNotiId + 1,
