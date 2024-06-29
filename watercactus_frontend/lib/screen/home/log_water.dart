@@ -159,7 +159,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
           ? quantity = _calculatedML
           : quantity = _calculatedoz.toInt();
       // quantity = _calculatedML;
-      // print('quantity: $quantity');
+      print('quantity: $quantity');
     });
   }
 
@@ -175,7 +175,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
           : _option1oz = 12;
       // _option1ML = 110;
       quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-      // print('quantity: $quantity');
+      print('quantity: $quantity');
       // quantity = 110;
     });
   }
@@ -225,7 +225,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
             ? quantity = int.parse(_selectedNumber)
             : quantity = (int.parse(_selectedNumber) * 29.5735).toInt();
         // quantity = int.parse(_selectedNumber);
-      // print('quantity: $quantity');
+      print('quantity: $quantity');
       });
       await addWater();
       await addTotalIntake();
@@ -290,7 +290,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 // _option1ML = _calculatedML;
                                 _totalDragDistance = 0;
                                 quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-                                // print('quantity: $quantity');
+                                print('quantity: $quantity');
                                 // quantity = _calculatedML;
                               });
                             } else if (_totalDragDistance > _threshold) {
@@ -305,7 +305,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                                 // _option1ML = _calculatedML;
                                 _totalDragDistance = 0;
                                 quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-                                // print('quantity: $quantity');
+                                print('quantity: $quantity');
                                 // quantity = _calculatedML;
                               });
                             }
@@ -314,7 +314,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             setState(() {
                               _totalDragDistance = 0;
                               quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-                                // print('Here quantity: $quantity');
+                                print('Here quantity: $quantity');
                               // quantity = _calculatedML;
                             });
                           },
