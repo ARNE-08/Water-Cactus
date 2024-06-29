@@ -207,9 +207,9 @@ class _HomePageState extends State<HomePage> {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoalllll: $dailyGoal');
-          (_unit == 'ml')
-              ? dailyGoal = dailyGoal
-              : dailyGoal = (dailyGoal / 29.5735);
+          // (_unit == 'ml')
+          //     ? dailyGoal = dailyGoal
+          //     : dailyGoal = (dailyGoal / 29.5735);
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -246,7 +246,7 @@ class _HomePageState extends State<HomePage> {
     print('waterIntake: $waterIntake');
     print('dailygoal: $dailyGoal');
     print('percentageee: $percentage');
-    return percentage.roundToDouble();
+    return percentage.toDouble();
   }
 
   Widget buildShaderMaskImage() {
@@ -336,7 +336,7 @@ class _HomePageState extends State<HomePage> {
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
-                                text: '$_calculatedPercentage % of your daily target\n',
+                                text: '${_calculatedPercentage.toStringAsFixed(2)} % of your daily target\n',
                                 style: CustomTextStyle.poppins4,
                               ),
                             ],
