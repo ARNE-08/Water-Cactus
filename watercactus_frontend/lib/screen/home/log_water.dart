@@ -37,7 +37,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
   int _option1ML = 110;
   double _calculatedoz = 12;
   double _option1oz = 12;
-  int quantity = 110;
+  int quantity = 0;
+
 
   List<String> imagePath = [
     'assets/EmptyBeverages/empty1.png',
@@ -70,6 +71,10 @@ class _LogWaterPageState extends State<LogWaterPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.addListener(_onScroll);
     });
+    (widget.unit == 'ml')
+      ? quantity = 110
+      : quantity = 355;
+    print('quantity: $quantity');
   }
 
   Future<void> addWater() async {
