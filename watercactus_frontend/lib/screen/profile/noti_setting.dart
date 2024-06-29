@@ -84,7 +84,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
     }
   }
 
-  void updateReminder(int index, String reminderTime, String enable, int notificationId) async {
+  Future<void> updateReminder(int index, String reminderTime, String enable, int notificationId) async {
     try {
       final response = await http.post(
         Uri.parse('$apiUrl/updateReminder'),
@@ -238,7 +238,8 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
         notificationService.cancelNotifications(reminderTime[index]['notification_id']);
         reminderTime[index]['reminder_time'] = picked;
         reminderTime[index]['enable'] = true;
-        updateReminder(reminderTime[index]['id'], reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
+      });
+      await updateReminder(reminderTime[index]['id'], reminderTime[index]['reminder_time'].format(context), 'on', maxNotiId + 1);
         fetchReminder();
         buildReminder(reminderTime);
         // print('This is new added noti_id: ${maxNotiId + 1}');
@@ -248,7 +249,6 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
           body: "Time to drink some water!",
           time: reminderTime[index]['reminder_time'],
         );
-      });
     }
   }
 
