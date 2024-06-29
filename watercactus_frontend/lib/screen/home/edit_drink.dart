@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
@@ -283,6 +284,9 @@ class _EditDrinkPageState extends State<EditDrinkPage> {
                                         borderSide: BorderSide(color: Colors.white),
                                       ),
                                     ),
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(9),
+                                    ],
                                     style: CustomTextStyle.poppins6,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {

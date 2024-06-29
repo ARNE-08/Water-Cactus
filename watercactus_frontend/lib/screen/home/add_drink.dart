@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:watercactus_frontend/provider/token_provider.dart';
@@ -280,6 +281,9 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                                         borderSide: BorderSide(color: Colors.white),
                                       ),
                                     ),
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(9),
+                                    ],
                                     style: CustomTextStyle.poppins6,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
