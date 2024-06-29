@@ -209,7 +209,7 @@ class _HomePageState extends State<HomePage> {
           print('dailyGoalllll: $dailyGoal');
           (_unit == 'ml')
               ? dailyGoal = dailyGoal
-              : dailyGoal = (dailyGoal / 29.5735);
+              : dailyGoal = (dailyGoal * 29.5735);
         });
       } else if (response.statusCode == 204) {
         setState(() {
