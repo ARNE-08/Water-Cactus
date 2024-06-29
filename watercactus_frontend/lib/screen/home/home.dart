@@ -156,10 +156,15 @@ class _HomePageState extends State<HomePage> {
         final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
         // print('fetched water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
+        await _getUnit(token);
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
           waterIntake = dynamicList[0]['total_intake'];
-          print('This is fetched waterIntake: $waterIntake');
+          print('This is fetched waterIntake 1: $waterIntake');
+          (_unit == 'ml')
+              ? waterIntake = waterIntake
+              : waterIntake = (waterIntake / 29.5735).round();
+          print('This is fetched waterIntake 2: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -181,14 +186,12 @@ class _HomePageState extends State<HomePage> {
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
-      final response = await http.post(
+      final response = await http.get(
         Uri.parse('$apiUrl/getGoalToday'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-        }),
       );
 
       // Check if the request was successful (status code 200)
@@ -199,13 +202,14 @@ class _HomePageState extends State<HomePage> {
         // print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         await _getUnit(token);
+        print('get unit object: $_unit');
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
-          print('dailyGoal: $dailyGoal');
+          print('dailyGoalllll: $dailyGoal');
           (_unit == 'ml')
               ? dailyGoal = dailyGoal
-              : dailyGoal = (dailyGoal * 29.5735); // Convert ml to oz
+              : dailyGoal = (dailyGoal / 29.5735);
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -221,8 +225,6 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching goal data: $error');
     }
   }
-
-
 
   Widget buildOriginalImage() {
     return Image.asset(
@@ -240,11 +242,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   double get _calculatedPercentage {
-    // print('water intake: $waterIntake & daily: $dailyGoal');
-    double percentage = (waterIntake.toDouble() / dailyGoal) * 100;
-    // print('intake: ${waterIntake.toDouble()}');
-    // print('dailygoal: $dailyGoal');
-    // print('percentageee: $percentage');
+    double percentage = (waterIntake / dailyGoal) * 100;
+    print('waterIntake: $waterIntake');
+    print('dailygoal: $dailyGoal');
+    print('percentageee: $percentage');
     return percentage.roundToDouble();
   }
 
@@ -331,7 +332,7 @@ class _HomePageState extends State<HomePage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: '${calculateWaterIntake(waterIntake)} ${_unit == 'ml' ? 'ml' : 'oz'}\n',
+                                text: '$waterIntake ${_unit == 'ml' ? 'ml' : 'oz'}\n',
                                 style: CustomTextStyle.poppins1,
                               ),
                               TextSpan(
