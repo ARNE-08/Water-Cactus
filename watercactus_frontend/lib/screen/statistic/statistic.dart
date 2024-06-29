@@ -162,6 +162,7 @@ class _StatisticPageState extends State<StatisticPage> {
     }
   }
 
+
   void fetchMonthlyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
