@@ -21,13 +21,6 @@ final List<String> imagePaths = [
   'assets/frequency.png',
 ];
 
-final List<String> texts = [
-  'Weekly Average',
-  'Monthly Average',
-  'Average Completion',
-  'Drink Frequency',
-];
-
 class _StatisticPageState extends State<StatisticPage> {
   String? token;
   double waterIntake = 0;
@@ -347,54 +340,107 @@ class _StatisticPageState extends State<StatisticPage> {
     return weeklyAverage; // No need for toStringAsFixed(2) here
   }
 
-  double calculateMonthlyAverage() {
-    if (monthlyWaterIntake.isEmpty)
-      return 0; // Error: 0 is an int, not a double
+  double calculateCurrentMonthAverage() {
+  if (monthlyWaterIntake.isEmpty) return 0.0;
 
-    double totalIntake = 0;
-    monthlyWaterIntake.values.forEach((intake) {
-      totalIntake += intake;
-    });
+  // Get the current month and year
+  final now = DateTime.now();
+  final currentMonth = now.month;
+  final currentYear = now.year;
+  final daysInCurrentMonth = now.day;
 
-    // Calculate average
-    double monthlyAverage = totalIntake / monthlyWaterIntake.length;
+  double totalIntake = 0.0;
+  int entryCount = 0;
 
-    // Optionally, round to two decimal places
-    return monthlyAverage; // No need for toStringAsFixed(2) here
-  }
+  // Print the current month and year for debugging
+  print('Current month: $currentMonth, Current year: $currentYear');
 
-  double calculateAverageCompletion() {
-    if (weeklyWaterIntake.isEmpty) return 0; // Error: 0 is an int, not a double
+  // Iterate over the monthlyWaterIntake to sum up the intake for the current month
+  monthlyWaterIntake.forEach((date, intake) {
+    print('Checking date: $date'); // Debug print
+    List<String> dateParts = date.split('/');
+    if (dateParts.length == 2) {
+      int month = int.parse(dateParts[0]);
+      int year = int.parse(dateParts[1]);
+      print('Year: $year, Month: $month'); // Debug print
 
-    double totalCompletion = 0;
-    weeklyWaterIntake.forEach((entry) {
-      double waterIntake = entry['waterIntake'];
-      double dailyGoal = entry['dailyGoal'];
-      if (dailyGoal > 0) {
-        totalCompletion += (waterIntake / dailyGoal) * 100;
+      if (year == currentYear && month == currentMonth) {
+        totalIntake += intake;
+        entryCount++;
+        print('Included date: $date, Intake: $intake'); // Debug print
       }
-    });
+    } else {
+      print('Invalid date format: $date'); // Debug print for invalid dates
+    }
+  });
 
-    // Calculate average completion
-    double averageCompletion = totalCompletion / weeklyWaterIntake.length;
-
-    // Optionally, round to two decimal places
-    return averageCompletion; // No need for toStringAsFixed(2) here
+  if (entryCount == 0) {
+    print('No data for the current month'); // Debug print
+    return 0.0; // Avoid division by zero
   }
 
-  int calculateDrinkFrequency() {
-    if (weeklyWaterIntake.isEmpty) return 0;
+  // Calculate the average daily intake for the current month
+  double dailyAverageIntake = totalIntake / daysInCurrentMonth;
+  print('Total intake: $totalIntake, Days in month: $daysInCurrentMonth, Daily average intake: $dailyAverageIntake'); // Debug print
 
-    int drinkFrequency = 0;
-    weeklyWaterIntake.forEach((entry) {
-      double waterIntake = entry['waterIntake'];
-      if (waterIntake > 0) {
-        drinkFrequency++;
+  return dailyAverageIntake;
+}
+
+
+
+  double calculateCompletionPercentage() {
+  if (weeklyWaterIntake.isEmpty) return 0; // Handle edge case when there's no data
+
+  int successfulDays = 0;
+
+  weeklyWaterIntake.forEach((entry) {
+    double waterIntake = entry['waterIntake'];
+    double dailyGoal = entry['dailyGoal'];
+    
+    if (_unit == 'ml') {
+      if (waterIntake >= dailyGoal) {
+        successfulDays++;
       }
-    });
+    } else {
+      // Convert daily intake from ml to oz if the unit is oz
+      double waterIntakeInOz = waterIntake / 29.5735; // 1 ml = 0.033814 oz
+      if (waterIntakeInOz >= dailyGoal) {
+        successfulDays++;
+      }
+    }
+  });
 
-    return drinkFrequency;
-  }
+  // Calculate percentage of days that met their daily goal
+  double completionPercentage = (successfulDays / weeklyWaterIntake.length) * 100;
+  
+  // Optionally, round to two decimal places
+  return completionPercentage;
+}
+
+
+
+ int calculateSuccessFrequency() {
+  if (weeklyWaterIntake.isEmpty) return 0;
+
+  int successFrequency = 0;
+  weeklyWaterIntake.forEach((entry) {
+    double waterIntake = entry['waterIntake'];
+    double dailyGoal = entry['dailyGoal'];
+
+    if (_unit == 'oz') {
+      // Convert water intake to oz if the unit is oz
+      waterIntake = waterIntake / 29.5735; // 1 ml = 0.033814 oz
+    }
+
+    // Compare water intake with daily goal
+    if (waterIntake >= dailyGoal) {
+      successFrequency++;
+    }
+  });
+
+  return successFrequency;
+}
+
 
   Future<void> _printToken() async {
     String? token = await getToken();
@@ -772,7 +818,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                               ),
                                               SizedBox(height: 20),
 
-                                              // Weekly Average
+                                              // Last 7 Days Average
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -824,7 +870,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateWaterIntake(calculateMonthlyAverage())} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                    '${calculateWaterIntake(calculateCurrentMonthAverage())} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
@@ -854,7 +900,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateAverageCompletion().toStringAsFixed(2)} %',
+                                                    '${calculateCompletionPercentage().toStringAsFixed(2)} %',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
@@ -862,7 +908,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                               ),
                                               Divider(),
 
-                                              // Drink Frequency (You can display relevant data here)
+                                              // Success Frequency (You can display relevant data here)
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -877,14 +923,14 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       ),
                                                       SizedBox(width: 8.0),
                                                       Text(
-                                                        'Drink Frequency',
+                                                        'Success Frequency',
                                                         style: CustomTextStyle
                                                             .poppins3,
                                                       ),
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateDrinkFrequency()} times',
+                                                    '${calculateSuccessFrequency()} times',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
