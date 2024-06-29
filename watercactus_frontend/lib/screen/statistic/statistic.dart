@@ -76,6 +76,13 @@ class _StatisticPageState extends State<StatisticPage> {
       );
     }
   }
+  String calculateWaterIntake(double amount) {
+    if (_unit == 'ml') {
+      return amount.toStringAsFixed(2);
+    } else {
+      return (amount / 29.5735).toStringAsFixed(1); // Convert ml to oz
+    }
+  }
 
   void fetchWeeklyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -474,7 +481,8 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '$waterIntake ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                    '${calculateWaterIntake(waterIntake)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: waterIntake >= dailyGoal
@@ -560,7 +568,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             ),
                                           ),
                                           Text(
-                                            '${waterIntake.toStringAsFixed(0)} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                            '${calculateWaterIntake(waterIntake)} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
                                               fontSize: 18,
@@ -625,7 +633,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Daily Intake: ${weeklyWaterIntake[index]['waterIntake']} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                      'Daily Intake: ${calculateWaterIntake(weeklyWaterIntake[index]['waterIntake'])} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -719,7 +727,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                               ),
                                                             ),
                                                             Text(
-                                                              '${monthlyWaterIntake[key]} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                              '${calculateWaterIntake(monthlyWaterIntake[key] ?? 0.0)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                               style:
                                                                   CustomTextStyle
                                                                       .poppins3
@@ -779,7 +787,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateWeeklyAverage().toStringAsFixed(2)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                    '${calculateWaterIntake(calculateWeeklyAverage())} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
@@ -809,7 +817,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ],
                                                   ),
                                                   Text(
-                                                    '${calculateMonthlyAverage().toStringAsFixed(2)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                    '${calculateWaterIntake(calculateMonthlyAverage())} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                                     style: CustomTextStyle
                                                         .poppins3,
                                                   ),
