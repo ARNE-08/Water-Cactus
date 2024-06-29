@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   String cactusPath = 'assets/whiteCactus.png';
   bool showShaderMask = true;
   int waterIntake = 0;
-  int dailyGoal = 1;
+  double dailyGoal = 1;
   String? token;
   List<dynamic> beverageList = [];
   String _unit = "ml";
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       token = Provider.of<TokenProvider>(context, listen: false).token;
-      // print("Tokennnn!: $token");
+      print("Tokennnn!: $token");
       if (token != null) {
         fetchWaterIntake();
         fetchWaterGoal();
@@ -229,15 +229,15 @@ class _HomePageState extends State<HomePage> {
 
   double get _calculatedPortion {
     // print('water intake: $waterIntake & daily: $dailyGoal');
-    if (waterIntake == dailyGoal) {
+    if (waterIntake.toDouble() == dailyGoal) {
       return 0;
     }
-    return 1 - (waterIntake / dailyGoal);
+    return 1 - (waterIntake.toDouble() / dailyGoal);
   }
 
   double get _calculatedPercentage {
     // print('water intake: $waterIntake & daily: $dailyGoal');
-    double percentage = (waterIntake / dailyGoal) * 100;
+    double percentage = (waterIntake.toDouble() / dailyGoal) * 100;
     return percentage.roundToDouble();
   }
 
