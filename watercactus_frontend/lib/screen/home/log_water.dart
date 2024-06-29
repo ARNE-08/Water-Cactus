@@ -33,10 +33,10 @@ class _LogWaterPageState extends State<LogWaterPage> {
   String _selectedNumber = "0";
   double _totalDragDistance = 0.0;
   final double _threshold = 5.0;
-  int _calculatedML = 110;
-  int _option1ML = 110;
-  double _calculatedoz = 12;
-  double _option1oz = 12;
+  int _calculatedML = 240;
+  int _option1ML = 240;
+  double _calculatedoz = 8;
+  double _option1oz = 8;
   int quantity = 0;
 
 
@@ -72,8 +72,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
       _controller.addListener(_onScroll);
     });
     (widget.unit == 'ml')
-      ? quantity = 110
-      : quantity = 355;
+      ? quantity = 240
+      : quantity = 240;
     print('quantity: $quantity');
   }
 
@@ -143,7 +143,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     double minDistance = double.infinity;
     int newSelectedIndex = selectedOptionIndex;
 
-    for (int index = 0; index < 4; index++) {
+    for (int index = 0; index < 6; index++) {
       double itemExtent = 120.0;
       double itemCenter = index * itemExtent + itemExtent / 2;
 
@@ -157,8 +157,20 @@ class _LogWaterPageState extends State<LogWaterPage> {
     setState(() {
       selectedOptionIndex = newSelectedIndex;
       (widget.unit == 'ml')
-          ? _calculatedML = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330
-          : _calculatedoz = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 12 : newSelectedIndex == 2 ? 7.1 : 3.7;
+          ? _calculatedML =
+                (newSelectedIndex == 0) ? 0
+                : newSelectedIndex == 1 ? 240
+                : newSelectedIndex == 2 ? 350
+                : newSelectedIndex == 3 ? 500
+                : newSelectedIndex == 4 ? 620
+                : 750
+          : _calculatedoz =
+                (newSelectedIndex == 0) ? 0
+                : newSelectedIndex == 1 ? 8
+                : newSelectedIndex == 2 ? 12
+                : newSelectedIndex == 3 ? 16
+                : newSelectedIndex == 4 ? 22
+                : 24;
       // _calculatedML = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
       (widget.unit == 'ml')
           ? quantity = _calculatedML
@@ -172,12 +184,22 @@ class _LogWaterPageState extends State<LogWaterPage> {
     setState(() {
       selectedOptionIndex = index;
       (widget.unit == 'ml')
-          ? _calculatedML = (index == 0) ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330
-          : _calculatedoz = (index == 0) ? 0 : index == 1 ? 12 : index == 2 ? 7.1 : 3.7;
+          ? _calculatedML = (index == 0) ? 0
+                                  : index == 1 ? 240
+                                  : index == 2 ? 350
+                                  : index == 3 ? 500
+                                  : index == 4 ? 620
+                                  : 750
+          : _calculatedoz = (index == 0) ? 0
+                                  : index == 1 ? 8
+                                  : index == 2 ? 12
+                                  : index == 3 ? 16
+                                  : index == 4 ? 22
+                                  : 24;
       // _calculatedML = (index == 0) ? 0 : index == 1 ? 110 : index == 2 ? 80 : 330;
       (widget.unit == 'ml')
-          ? _option1ML = 110
-          : _option1oz = 12;
+          ? _option1ML = 240
+          : _option1oz = 8;
       // _option1ML = 110;
       quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
       print('quantity on Tab: $quantity');
@@ -188,8 +210,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
   double get _calculatedPortion {
     double result = 0;
     (widget.unit == 'ml')
-        ? result = 1 - (_calculatedML / 330)
-        : result = 1 - (_calculatedoz / 12);
+        ? result = 1 - (_calculatedML / 750)
+        : result = 1 - (_calculatedoz / 24);
     return (result);
   }
 
@@ -242,8 +264,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     List<String> options = (widget.unit == 'ml')
-        ? ['', '${_option1ML.toString()} ml', '80 ml', '330 ml']
-        : ['', '${_option1oz.toString()} oz', '7.1 oz', '3.7 oz'];
+        ? ['', '${_option1ML.toString()} ml', '350 ml', '500 ml', '620 ml', '750 ml']
+        : ['', '${_option1oz.toString()} oz', '12 oz', '16 oz', '22 oz', '24 oz'];
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -286,8 +308,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             if (_totalDragDistance < -_threshold) {
                               setState(() {
                                 (widget.unit == 'ml')
-                                    ? _calculatedML = (_calculatedML + 10).clamp(0, 330)
-                                    : _calculatedoz = (_calculatedoz + 1).clamp(0, 13);
+                                    ? _calculatedML = (_calculatedML + 10).clamp(0, 750)
+                                    : _calculatedoz = (_calculatedoz + 1).clamp(0, 24);
                                 // _calculatedML = (_calculatedML + 10).clamp(0, 330);
                                 (widget.unit == 'ml')
                                     ? _option1ML = _calculatedML
@@ -301,8 +323,8 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             } else if (_totalDragDistance > _threshold) {
                               setState(() {
                                 (widget.unit == 'ml')
-                                    ? _calculatedML = (_calculatedML - 10).clamp(0, 330)
-                                    : _calculatedoz = (_calculatedoz - 1).clamp(0, 13);
+                                    ? _calculatedML = (_calculatedML - 10).clamp(0, 750)
+                                    : _calculatedoz = (_calculatedoz - 1).clamp(0, 24);
                                 // _calculatedML = (_calculatedML - 10).clamp(0, 330);
                                 (widget.unit == 'ml')
                                     ? _option1ML = _calculatedML
