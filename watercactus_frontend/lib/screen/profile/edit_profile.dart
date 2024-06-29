@@ -139,9 +139,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
 
 int _successCount = 0; // Counter to track successful updates
-bool _failedProfilePictureDialogShown = false;
-bool _failedEmailDialogShown = false;
-bool _failedPasswordDialogShown = false;
+bool _failedDialogShown = false;
 
 Future<void> _updateProfilePicture() async {
   String? token = await getToken();
@@ -167,14 +165,13 @@ Future<void> _updateProfilePicture() async {
           _successCount++; // Increment success count
           print('Profile picture updated successfully');
         } else if (response.statusCode == 401) {
-          _showFailedProfilePictureDialog(context, 'Failed to update profile picture: Current password is incorrect');
+          _showFailedDialogIfNeeded(context, 'Current password is incorrect');
         } else {
           final jsonResponse = json.decode(response.body);
-          _showFailedProfilePictureDialog(context, 'Failed to update profile picture: ${jsonResponse['message']}');
-          // Optionally, handle different error scenarios here
+          _showFailedDialogIfNeeded(context, 'Failed to update profile picture: ${jsonResponse['message']}');
         }
       } catch (e) {
-        _showFailedProfilePictureDialog(context, 'Error updating profile picture: $e');
+        _showFailedDialogIfNeeded(context, 'Error updating profile picture: $e');
       }
     } else {
       print("Profile picture ID not found for $_profilePictureUrl");
@@ -212,13 +209,12 @@ Future<void> _updateEmail() async {
         _successCount++; // Increment success count
         print('Email updated successfully');
       } else if (response.statusCode == 401) {
-        _showFailedEmailDialog(context, 'Failed to update email: Current password is incorrect');
+        _showFailedDialogIfNeeded(context, 'Current password is incorrect');
       } else {
-        _showFailedEmailDialog(context, 'Failed to update email: ${response.statusCode}');
-        // Optionally, handle different error scenarios here
+        _showFailedDialogIfNeeded(context, 'Failed to update email: ${response.statusCode}');
       }
     } catch (e) {
-      _showFailedEmailDialog(context, 'Error updating email: $e');
+      _showFailedDialogIfNeeded(context, 'Error updating email: $e');
     }
   } else {
     print('No token found, current password is empty, or new email is empty');
@@ -245,7 +241,6 @@ Future<void> _updatePassword() async {
         body: jsonEncode({
           'current_password': currentPassword,
           'new_password': newPassword,
-          // Add other parameters as needed
         }),
       );
 
@@ -253,13 +248,14 @@ Future<void> _updatePassword() async {
       if (response.statusCode == 200) {
         _successCount++; // Increment success count
         print('Password updated successfully');
+      } else if (response.statusCode == 401) {
+        _showFailedDialogIfNeeded(context, 'Current password is incorrect');
       } else {
         final jsonResponse = json.decode(response.body);
-        _showFailedPasswordDialog(context, 'Failed to update password: ${jsonResponse['message']}');
-        // Optionally, handle different error scenarios here
+        _showFailedDialogIfNeeded(context, 'Failed to update password: ${jsonResponse['message']}');
       }
     } catch (e) {
-      _showFailedPasswordDialog(context, 'Error updating password: $e');
+      _showFailedDialogIfNeeded(context, 'Error updating password: $e');
     }
   } else {
     print('No token found, current password is empty, or new password is empty');
@@ -272,6 +268,13 @@ Future<void> _updatePassword() async {
 void _checkShowSuccessDialog() {
   if (_successCount == 1) {
     _showSuccessDialog(context, 'Profile updated successfully');
+  }
+}
+
+void _showFailedDialogIfNeeded(BuildContext context, String errorMessage) {
+  if (!_failedDialogShown) {
+    _failedDialogShown = true;
+    _showFailedDialog(context, 'Failed', errorMessage);
   }
 }
 
@@ -333,7 +336,6 @@ void _showFailedDialog(BuildContext context, String title, String errorMessage) 
   );
 }
 
-
 void _showSuccessDialog(BuildContext context, String message) {
   showDialog(
     context: context,
@@ -379,7 +381,7 @@ void _showSuccessDialog(BuildContext context, String message) {
                 ),
                 child: Text('OK'),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacementNamed('/profile');
                 },
               ),
             ],
@@ -389,30 +391,6 @@ void _showSuccessDialog(BuildContext context, String message) {
     },
   );
 }
-
-void _showFailedProfilePictureDialog(BuildContext context, String errorMessage) {
-  if (!_failedProfilePictureDialogShown) {
-    _failedProfilePictureDialogShown = true;
-    _showFailedDialog(context, 'Failed', errorMessage);
-  }
-}
-
-void _showFailedEmailDialog(BuildContext context, String errorMessage) {
-  if (!_failedEmailDialogShown) {
-    _failedEmailDialogShown = true;
-    _showFailedDialog(context, 'Failed', errorMessage);
-  }
-}
-
-void _showFailedPasswordDialog(BuildContext context, String errorMessage) {
-  if (!_failedPasswordDialogShown) {
-    _failedPasswordDialogShown = true;
-    _showFailedDialog(context, 'Failed', errorMessage);
-  }
-}
-
-
-
 
   Widget buildProfileImages() {
     return SizedBox(
