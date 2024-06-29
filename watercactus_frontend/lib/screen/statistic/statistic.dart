@@ -603,10 +603,21 @@ class _StatisticPageState extends State<StatisticPage> {
                                           double dailyGoal =
                                               weeklyWaterIntake[index]
                                                   ['dailyGoal'];
-                                          bool reachedGoal =
+                                          bool reachedGoal;
+                                          double waterIntake =
                                               weeklyWaterIntake[index]
-                                                      ['waterIntake'] >=
-                                                  dailyGoal;
+                                                  ['waterIntake'];
+
+                                          if (_unit == 'ml') {
+                                            reachedGoal =
+                                                waterIntake >= dailyGoal;
+                                          } else {
+                                            // Convert daily intake from ml to oz if the unit is oz
+                                            double waterIntakeInOz = waterIntake /
+                                                29.5735; // 1 ml = 0.033814 oz
+                                            reachedGoal =
+                                                waterIntakeInOz >= dailyGoal;
+                                          }
 
                                           return Column(
                                             crossAxisAlignment:
@@ -629,7 +640,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Daily Intake: ${calculateWaterIntake(weeklyWaterIntake[index]['waterIntake'])} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                      'Daily Intake: ${calculateWaterIntake(waterIntake)} $_unit',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
@@ -640,7 +651,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      'Daily Goal: ${weeklyWaterIntake[index]['dailyGoal']} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                                      'Daily Goal: $dailyGoal $_unit',
                                                       style: CustomTextStyle
                                                           .poppins3
                                                           .copyWith(
