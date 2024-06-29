@@ -162,7 +162,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
       // _calculatedML = (newSelectedIndex == 0) ? 0 : newSelectedIndex == 1 ? 110 : newSelectedIndex == 2 ? 80 : 330;
       (widget.unit == 'ml')
           ? quantity = _calculatedML
-          : quantity = _calculatedoz.toInt();
+          : quantity = (_calculatedoz * 29.5735).toInt();
       // quantity = _calculatedML;
       print('quantity: $quantity');
     });
@@ -180,7 +180,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
           : _option1oz = 12;
       // _option1ML = 110;
       quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-      print('quantity: $quantity');
+      print('quantity on Tab: $quantity');
       // quantity = 110;
     });
   }
@@ -189,7 +189,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
     double result = 0;
     (widget.unit == 'ml')
         ? result = 1 - (_calculatedML / 330)
-        : result = 1 - (_calculatedoz / 13);
+        : result = 1 - (_calculatedoz / 12);
     return (result);
   }
 
