@@ -137,7 +137,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
- void _showPicSuccessDialog(BuildContext context) {
+ void _showSuccessDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -165,7 +165,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               SizedBox(height: 10),
               Text(
-                'Profile picture updated successfully',
+                'Profile updated successfully',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -193,173 +193,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   );
 }
 
- void _showEmailSuccessDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 60,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Success',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Email updated successfully',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  backgroundColor: AppColors.brightBlue,
-                ),
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
- void _showPassSuccessDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 60,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Success',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Password updated successfully',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  backgroundColor: AppColors.brightBlue,
-                ),
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
-void _showFailedDialog(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Failed',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  backgroundColor: Colors.red, // Use appropriate color for failure
-                ),
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
 Future<void> _updateProfilePicture() async {
   String? token = await getToken();
   String currentPassword = _oldPasswordController.text.trim(); // Assuming you have a controller for old password
@@ -377,13 +210,14 @@ Future<void> _updateProfilePicture() async {
           body: jsonEncode({
             'current_password': currentPassword,
             'profile_picture_id': profilePictureId,
-            // Add any other necessary parameters for updating profile picture
           }),
         );
         print('API Response Status Code: ${response.statusCode}');
         if (response.statusCode == 200) {
           print('Profile picture updated successfully');
-          _showPicSuccessDialog(context); // Show success popup
+          _showSuccessDialog(context);
+        } else if (response.statusCode == 401) {
+          print('Failed to update profile picture: Unauthorized');  
         } else {
           print('Failed to update profile picture: ${response.statusCode}');
           // Optionally, handle different error scenarios here
@@ -398,6 +232,8 @@ Future<void> _updateProfilePicture() async {
     print("No token found, current password is empty, or profile picture URL is not selected");
   }
 }
+
+
 
 
 Future<void> _updateEmail() async {
@@ -415,14 +251,16 @@ Future<void> _updateEmail() async {
         body: jsonEncode({
           'current_password': currentPassword,
           'new_email': _newEmailController.text.trim(),
-          // Add other parameters as needed
         }),
       );
 
       print('API Response Status Code: ${response.statusCode}');
       if (response.statusCode == 200) {
         print('Email updated successfully');
-        _showEmailSuccessDialog(context); // Show success popup
+        _showSuccessDialog(context);
+      } else if (response.statusCode == 401) {
+        print('Failed to update email: Unauthorized');
+        
       } else {
         print('Failed to update email: ${response.statusCode}');
         // Optionally, handle different error scenarios here
@@ -434,6 +272,7 @@ Future<void> _updateEmail() async {
     print('No token found or current password is empty');
   }
 }
+
 
 Future<void> _updatePassword() async {
   String? token = await getToken();
@@ -458,7 +297,7 @@ Future<void> _updatePassword() async {
       print('API Response Status Code: ${response.statusCode}');
       if (response.statusCode == 200) {
         print('Password updated successfully');
-        _showPassSuccessDialog(context); // Show success popup
+        _showSuccessDialog(context);
       } else {
         final jsonResponse = json.decode(response.body);
         print('Failed to update password: ${response.statusCode}');
