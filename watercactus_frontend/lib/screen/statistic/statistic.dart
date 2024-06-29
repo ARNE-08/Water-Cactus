@@ -23,7 +23,7 @@ final List<String> imagePaths = [
 
 class _StatisticPageState extends State<StatisticPage> {
   String? token;
-  double waterIntake = 0;
+  int waterIntake = 0;
   double dailyGoal = 1;
   List<Map<String, dynamic>> weeklyWaterIntake = [];
   Map<String, double> monthlyWaterIntake = {};
@@ -79,88 +79,92 @@ class _StatisticPageState extends State<StatisticPage> {
   }
 
   void fetchWeeklyWaterIntake() async {
-    String? token = Provider.of<TokenProvider>(context, listen: false).token;
-    final now = DateTime.now();
+  String? token = Provider.of<TokenProvider>(context, listen: false).token;
+  final now = DateTime.now();
 
-    try {
-      for (int i = 6; i >= 0; i--) {
-        final currentDate = now.subtract(Duration(days: i));
-        final startDate =
-            DateTime(currentDate.year, currentDate.month, currentDate.day)
-                .toIso8601String()
-                .split('T')
-                .first;
-        final endDate = DateTime(currentDate.year, currentDate.month,
-                currentDate.day, 23, 59, 59)
-            .toIso8601String()
-            .split('T')
-            .first;
+  try {
+    for (int i = 6; i >= 0; i--) {
+      final currentDate = now.subtract(Duration(days: i));
+      final startDate =
+          DateTime(currentDate.year, currentDate.month, currentDate.day)
+              .toIso8601String()
+              .split('T')
+              .first;
+      final endDate = DateTime(currentDate.year, currentDate.month,
+              currentDate.day, 23, 59, 59)
+          .toIso8601String()
+          .split('T')
+          .first;
 
-        // Fetch daily goal for the current day
-        final goalResponse = await http.get(
-          Uri.parse('$apiUrl/getGoalToday'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        );
+      // Fetch daily goal for the current day
+      final goalResponse = await http.get(
+        Uri.parse('$apiUrl/getGoalToday'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-        // Fetch water intake data for the current day
-        final waterResponse = await http.post(
-          Uri.parse('$apiUrl/getWater'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          body: jsonEncode({
-            'startDate': startDate,
-            'endDate': endDate,
-          }),
-        );
+      // Fetch water intake data for the current day
+      final waterResponse = await http.post(
+        Uri.parse('$apiUrl/getWater'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'startDate': startDate,
+          'endDate': endDate,
+        }),
+      );
 
-        if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
-          final Map<String, dynamic> fetchedGoalData =
-              json.decode(goalResponse.body);
-          final Map<String, dynamic> fetchedWaterData =
-              json.decode(waterResponse.body);
+      if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
+        final Map<String, dynamic> fetchedGoalData =
+            json.decode(goalResponse.body);
+        final Map<String, dynamic> fetchedWaterData =
+            json.decode(waterResponse.body);
 
-          List<dynamic> goalDataList = fetchedGoalData['data'];
-          List<dynamic> waterDataList = fetchedWaterData['data'];
+        List<dynamic> goalDataList = fetchedGoalData['data'];
+        List<dynamic> waterDataList = fetchedWaterData['data'];
 
-          double dailyGoal =
-              goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
-          double waterIntake =
-              waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
-          print("--------------------");
-          print('Fetched data for ${currentDate.day}/${currentDate.month}:');
-          print('Daily Goal: $dailyGoal');
-          print('Daily Water Intake: $waterIntake');
+        double dailyGoal = goalDataList.isNotEmpty
+            ? (goalDataList[0]['goal'] as num).toDouble()
+            : 1.0;
+        double waterIntake = waterDataList.isNotEmpty
+            ? (waterDataList[0]['total_intake'] as num).toDouble()
+            : 0.0;
 
-          setState(() {
-            weeklyWaterIntake.add({
-              'date': '${currentDate.day}/${currentDate.month}',
-              'waterIntake': waterIntake,
-              'dailyGoal': dailyGoal,
-            });
+        print("--------------------");
+        print('Fetched data for ${currentDate.day}/${currentDate.month}:');
+        print('Daily Goal: $dailyGoal');
+        print('Daily Water Intake: $waterIntake');
+
+        setState(() {
+          weeklyWaterIntake.add({
+            'date': '${currentDate.day}/${currentDate.month}',
+            'waterIntake': waterIntake,
+            'dailyGoal': dailyGoal,
           });
-        } else if (goalResponse.statusCode == 204) {
-          setState(() {
-            // If no goal data found, default to 1
-            weeklyWaterIntake.add({
-              'date': '${currentDate.day}/${currentDate.month}',
-              'waterIntake': 0,
-              'dailyGoal': 1,
-            });
+        });
+      } else if (goalResponse.statusCode == 204) {
+        setState(() {
+          // If no goal data found, default to 1
+          weeklyWaterIntake.add({
+            'date': '${currentDate.day}/${currentDate.month}',
+            'waterIntake': 0.0,
+            'dailyGoal': 1.0,
           });
-        } else {
-          print(
-              'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
-        }
+        });
+      } else {
+        print(
+            'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
       }
-    } catch (error) {
-      print('Error fetching weekly water data: $error');
     }
+  } catch (error) {
+    print('Error fetching weekly water data: $error');
   }
+}
+
 
   void fetchMonthlyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -225,17 +229,10 @@ class _StatisticPageState extends State<StatisticPage> {
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day)
-        .toIso8601String()
-        .split('T')
-        .first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
-        .toIso8601String()
-        .split('T')
-        .first;
+    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
-      //print('Tokenn: $token');
       final response = await http.post(
         Uri.parse('$apiUrl/getWater'),
         headers: {
@@ -251,23 +248,26 @@ class _StatisticPageState extends State<StatisticPage> {
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
-        // print('Succeed to fetch water data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedWaterData =
-            json.decode(response.body);
-        print('fetchedd water data: ${fetchedWaterData['data']}');
-        //_printToken();
+        print('Succeed to fetch water data: ${response.statusCode}');
+        final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
+        // print('fetched water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
+        await _getUnit(token);
         setState(() {
           List<dynamic> dynamicList = fetchedWaterData['data'];
-          // print(dynamicList);
           waterIntake = dynamicList[0]['total_intake'];
-          // print('waterIntake: $waterIntake');
+          print('This is fetched waterIntake 1: $waterIntake');
+          (_unit == 'ml')
+              ? waterIntake = waterIntake
+              : waterIntake = (waterIntake / 29.5735).round();
+          print('This is fetched waterIntake 2: $waterIntake');
         });
       } else if (response.statusCode == 204) {
         setState(() {
           waterIntake = 0;
         });
-      } else {
+      }
+      else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch water data: ${response.statusCode}');
       }
@@ -517,7 +517,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '${calculateWaterIntake(waterIntake)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                    '${(waterIntake.toDouble())} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: waterIntake >= dailyGoal
@@ -586,7 +586,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                                     ]
                                                   : [
                                                       PieChartSectionData(
-                                                        value: waterIntake,
+                                                        value: waterIntake.toDouble(),
                                                         color: Colors.blue,
                                                         radius: 20,
                                                         showTitle: false,
@@ -603,7 +603,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             ),
                                           ),
                                           Text(
-                                            '${calculateWaterIntake(waterIntake)} / ${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                            '${(waterIntake.toDouble())} / ${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
                                               fontSize: 18,
