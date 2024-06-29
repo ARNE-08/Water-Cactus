@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const mysql = require("mysql");
 
 module.exports = (req, res) => {
     // Check if Authorization header is present
@@ -33,34 +34,39 @@ module.exports = (req, res) => {
         // Extract user id from decoded token
         const { id } = decodedToken;
 
-        // Query to fetch total_intake from water_stat for the current user and specified date interval
-        const sql = `
-            SELECT max(notification_id) as max_notification_id
-            FROM notification
-            WHERE user_id = ?
-        `;
+        // Parse request body parameters
+        const { reminder_time, noti_id} = req.body;
 
-        connection.query(sql, id, (err, results) => {
+        // Validate parameters
+        if (!reminder_time) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required parameters in request body",
+            });
+        }
+
+        var sql = mysql.format(
+            "insert into notification (user_id, reminder_time, enable, notification_id) values (?, ?, ?, ?)",
+            [id, reminder_time, 1, noti_id]
+        );
+
+        // Execute SQL query
+        global.connection.query(sql, (err, results) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Error retrieving beverage data",
+                    message: "Error adding notification",
                     error: err.message,
                 });
             }
 
-            if (results.length === 0 || results[0].max_notification_id === null) {
-                return res.status(204).json({
-                    success: false,
-                    message: "No notification row found",
-                });
-            }
-
-            // Return the fetched results
-            return res.status(200).json({
+            // Return success response
+            res.status(200).json({
                 success: true,
-                message: "Notification data retrieved successfully",
-                data: results,
+                message: "Added notification successfully",
+                data: {
+					reminder_time,
+                },
             });
         });
     });

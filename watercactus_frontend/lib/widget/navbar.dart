@@ -37,7 +37,7 @@ class _NavbarState extends State<Navbar> {
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-      print(jsonResponse['data']);
+      // print(jsonResponse['data']);
       setState(() {
         picture = jsonResponse['data']['picture_preset'];
       });

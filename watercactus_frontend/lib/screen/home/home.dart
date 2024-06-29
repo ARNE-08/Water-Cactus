@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   String cactusPath = 'assets/whiteCactus.png';
   bool showShaderMask = true;
   int waterIntake = 0;
-  int dailyGoal = 1;
+  double dailyGoal = 1;
   String? token;
   List<dynamic> beverageList = [];
   String _unit = "ml";
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       token = Provider.of<TokenProvider>(context, listen: false).token;
-      // print("Tokennnn!: $token");
+      print("Tokennnn!: $token");
       if (token != null) {
         fetchWaterIntake();
         fetchWaterGoal();
@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage> {
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
-        // print('Succeed to fetch water data: ${response.statusCode}');
+        print('Succeed to fetch water data: ${response.statusCode}');
         final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
         // print('fetched water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
@@ -178,21 +178,16 @@ class _HomePageState extends State<HomePage> {
 
   void fetchWaterGoal() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
       final response = await http.post(
-        Uri.parse('$apiUrl/getGoal'),
+        Uri.parse('$apiUrl/getGoalToday'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
         }),
       );
 
@@ -206,7 +201,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
-          // print('dailyGoal: $dailyGoal');
+          print('dailyGoal: $dailyGoal');
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -234,15 +229,15 @@ class _HomePageState extends State<HomePage> {
 
   double get _calculatedPortion {
     // print('water intake: $waterIntake & daily: $dailyGoal');
-    if (waterIntake == dailyGoal) {
+    if (waterIntake.toDouble() == dailyGoal) {
       return 0;
     }
-    return 1 - (waterIntake / dailyGoal);
+    return 1 - (waterIntake.toDouble() / dailyGoal);
   }
 
   double get _calculatedPercentage {
     // print('water intake: $waterIntake & daily: $dailyGoal');
-    double percentage = (waterIntake / dailyGoal) * 100;
+    double percentage = (waterIntake.toDouble() / dailyGoal) * 100;
     return percentage.roundToDouble();
   }
 
@@ -272,7 +267,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, maskColor[colorIndex]],
-          stops: [0.4, 0.4],
+          stops: [0.5, 0.5],
         ).createShader(bounds);
       },
       blendMode: BlendMode.srcATop,
