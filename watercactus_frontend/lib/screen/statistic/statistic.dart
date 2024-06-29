@@ -55,7 +55,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
   final String apiUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
- Future<void> _getUnit(String? token) async {
+  Future<void> _getUnit(String? token) async {
     final response = await http.get(
       Uri.parse('$apiUrl/getUnit'),
       headers: {
@@ -76,6 +76,7 @@ class _StatisticPageState extends State<StatisticPage> {
       );
     }
   }
+
   String calculateWaterIntake(double amount) {
     if (_unit == 'ml') {
       return amount.toStringAsFixed(2);
@@ -104,7 +105,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
         // Fetch daily goal for the current day
         final goalResponse = await http.post(
-          Uri.parse('$apiUrl/getGoal'),
+          Uri.parse('$apiUrl/getGoalToday'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -141,6 +142,10 @@ class _StatisticPageState extends State<StatisticPage> {
               goalDataList.isNotEmpty ? goalDataList[0]['goal'] : 1;
           double waterIntake =
               waterDataList.isNotEmpty ? waterDataList[0]['total_intake'] : 0;
+          print("--------------------");
+          print('Fetched data for ${currentDate.day}/${currentDate.month}:');
+          print('Daily Goal: $dailyGoal');
+          print('Daily Water Intake: $waterIntake');
 
           setState(() {
             weeklyWaterIntake.add({
@@ -285,28 +290,16 @@ class _StatisticPageState extends State<StatisticPage> {
 
   void fetchWaterGoal() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day)
-        .toIso8601String()
-        .split('T')
-        .first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
-        .toIso8601String()
-        .split('T')
-        .first;
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
       final response = await http.post(
-        Uri.parse('$apiUrl/getGoal'),
+        Uri.parse('$apiUrl/getGoalToday'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
+        body: jsonEncode({}),
       );
 
       // Check if the request was successful (status code 200)
@@ -314,12 +307,16 @@ class _StatisticPageState extends State<StatisticPage> {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch goal data: ${response.statusCode}');
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        print('fetched goal data: ${fetchedGoalData['data']}');
+        // print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
+        await _getUnit(token);
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoal: $dailyGoal');
+          (_unit == 'ml')
+              ? dailyGoal = dailyGoal
+              : dailyGoal = (dailyGoal * 29.5735); // Convert ml to oz
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -482,7 +479,6 @@ class _StatisticPageState extends State<StatisticPage> {
                                   SizedBox(height: 10.0),
                                   Text(
                                     '${calculateWaterIntake(waterIntake)} ${_unit == 'ml' ? 'ml' : 'oz'}',
-                                
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: waterIntake >= dailyGoal
@@ -516,7 +512,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '$dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                    '${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: Colors.black,
@@ -568,7 +564,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                             ),
                                           ),
                                           Text(
-                                            '${calculateWaterIntake(waterIntake)} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                            '${calculateWaterIntake(waterIntake)} / ${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
                                             style: CustomTextStyle.poppins3
                                                 .copyWith(
                                               fontSize: 18,
