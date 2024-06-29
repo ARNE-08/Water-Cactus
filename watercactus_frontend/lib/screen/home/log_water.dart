@@ -314,7 +314,7 @@ class _LogWaterPageState extends State<LogWaterPage> {
                             setState(() {
                               _totalDragDistance = 0;
                               quantity = (widget.unit == 'ml') ? _calculatedML : (_calculatedoz * 29.5735).toInt();
-                                print('Here quantity: $quantity');
+                                // print('Here quantity: $quantity');
                               // quantity = _calculatedML;
                             });
                           },

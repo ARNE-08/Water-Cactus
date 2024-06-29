@@ -198,10 +198,14 @@ class _HomePageState extends State<HomePage> {
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
         // print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
+        await _getUnit(token);
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
           print('dailyGoal: $dailyGoal');
+          (_unit == 'ml')
+              ? dailyGoal = dailyGoal
+              : dailyGoal = (dailyGoal * 29.5735); // Convert ml to oz
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -238,6 +242,9 @@ class _HomePageState extends State<HomePage> {
   double get _calculatedPercentage {
     // print('water intake: $waterIntake & daily: $dailyGoal');
     double percentage = (waterIntake.toDouble() / dailyGoal) * 100;
+    // print('intake: ${waterIntake.toDouble()}');
+    // print('dailygoal: $dailyGoal');
+    // print('percentageee: $percentage');
     return percentage.roundToDouble();
   }
 
