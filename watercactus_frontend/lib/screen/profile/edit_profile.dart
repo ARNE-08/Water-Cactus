@@ -93,40 +93,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  Future<void> _updateProfilePicture() async {
-    String? token = await getToken();
-    if (token != null && _profilePictureUrl != null) {
-      int? profilePictureId = presetToId[_profilePictureUrl];
-      if (profilePictureId != null) {
-        try {
-          final response = await http.put(
-            Uri.parse('$apiUrl/updateProfilePicture'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
-              'profile_picture_id': profilePictureId,
-            }),
-          );
-          print('API Response Status Code: ${response.statusCode}');
-          if (response.statusCode == 200) {
-            print('Profile picture updated successfully');
-            _showSuccessDialog(context); // Show success popup
-          } else {
-            print('Failed to update profile picture: ${response.statusCode}');
-          }
-        } catch (e) {
-          print('Error updating profile picture: $e');
-        }
-      } else {
-        print("Profile picture ID not found");
-      }
-    } else {
-      print("No token found or profile picture selected");
-    }
-  }
-
   Future<void> _getEmail(String token) async {
     final response = await http.get(
       Uri.parse('$apiUrl/getEmail'),
@@ -171,7 +137,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
- void _showSuccessDialog(BuildContext context) {
+ void _showPicSuccessDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -199,7 +165,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               SizedBox(height: 10),
               Text(
-                'Profile updated successfully',
+                'Profile picture updated successfully',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -227,74 +193,286 @@ class _EditProfilePageState extends State<EditProfilePage> {
   );
 }
 
+ void _showEmailSuccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 60,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Success',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Email updated successfully',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  backgroundColor: AppColors.brightBlue,
+                ),
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
 
-  Future<void> _updateEmail() async {
-    String? token = await getToken();
+ void _showPassSuccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 60,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Success',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Password updated successfully',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  backgroundColor: AppColors.brightBlue,
+                ),
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
 
-    if (token != null) {
+void _showFailedDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Failed',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  backgroundColor: Colors.red, // Use appropriate color for failure
+                ),
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+Future<void> _updateProfilePicture() async {
+  String? token = await getToken();
+  String currentPassword = _oldPasswordController.text.trim(); // Assuming you have a controller for old password
+
+  if (token != null && currentPassword.isNotEmpty && _profilePictureUrl != null) {
+    int? profilePictureId = presetToId[_profilePictureUrl];
+    if (profilePictureId != null) {
       try {
         final response = await http.put(
-          Uri.parse('$apiUrl/updateEmail'),
+          Uri.parse('$apiUrl/updateProfilePicture'),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/json',
           },
           body: jsonEncode({
-            'new_email': _newEmailController.text.trim(),
+            'current_password': currentPassword,
+            'profile_picture_id': profilePictureId,
+            // Add any other necessary parameters for updating profile picture
           }),
         );
-
         print('API Response Status Code: ${response.statusCode}');
         if (response.statusCode == 200) {
-          print('Email updated successfully');
-          _showSuccessDialog(context); // Show success popup
+          print('Profile picture updated successfully');
+          _showPicSuccessDialog(context); // Show success popup
         } else {
-          print('Failed to update email: ${response.statusCode}');
+          print('Failed to update profile picture: ${response.statusCode}');
+          // Optionally, handle different error scenarios here
         }
       } catch (e) {
-        print('Error updating email: $e');
+        print('Error updating profile picture: $e');
       }
     } else {
-      print('No token found');
+      print("Profile picture ID not found for $_profilePictureUrl");
     }
+  } else {
+    print("No token found, current password is empty, or profile picture URL is not selected");
   }
+}
 
-  Future<void> _updatePassword() async {
-    String? token = await getToken();
 
-    if (token != null) {
-      try {
-        final response = await http.put(
-          Uri.parse('$apiUrl/updatePassword'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'current_password': _oldPasswordController.text.trim(),
-            'new_password': _newPasswordController.text.trim(),
-          }),
-        );
+Future<void> _updateEmail() async {
+  String? token = await getToken();
+  String currentPassword = _oldPasswordController.text.trim(); // Assuming you have a controller for old password
 
-        print('API Response Status Code: ${response.statusCode}');
-        if (response.statusCode == 200) {
-          print('Password updated successfully');
-          _showSuccessDialog(context); // Show success popup
-        } else {
-          final jsonResponse = json.decode(response.body);
-          print('Failed to update password: ${response.statusCode}');
-          print('Error message: ${jsonResponse['message']}');
+  if (token != null && currentPassword.isNotEmpty) {
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl/updateEmail'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_email': _newEmailController.text.trim(),
+          // Add other parameters as needed
+        }),
+      );
 
-          //print(_oldPasswordController.text.trim());
-          //print(_newPasswordController.text.trim());
-        }
-      } catch (e) {
-        print('Error updating password: $e');
+      print('API Response Status Code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        print('Email updated successfully');
+        _showEmailSuccessDialog(context); // Show success popup
+      } else {
+        print('Failed to update email: ${response.statusCode}');
+        // Optionally, handle different error scenarios here
       }
-    } else {
-      print('No token found');
+    } catch (e) {
+      print('Error updating email: $e');
     }
+  } else {
+    print('No token found or current password is empty');
   }
+}
+
+Future<void> _updatePassword() async {
+  String? token = await getToken();
+  String currentPassword = _oldPasswordController.text.trim();
+  String newPassword = _newPasswordController.text.trim();
+
+  if (token != null && currentPassword.isNotEmpty) {
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl/updatePassword'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          // Add other parameters as needed
+        }),
+      );
+
+      print('API Response Status Code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        print('Password updated successfully');
+        _showPassSuccessDialog(context); // Show success popup
+      } else {
+        final jsonResponse = json.decode(response.body);
+        print('Failed to update password: ${response.statusCode}');
+        print('Error message: ${jsonResponse['message']}');
+        // Optionally, handle different error scenarios here
+      }
+    } catch (e) {
+      print('Error updating password: $e');
+    }
+  } else {
+    print('No token found or current password is empty');
+  }
+}
+
 
   Widget buildProfileImages() {
     return SizedBox(
