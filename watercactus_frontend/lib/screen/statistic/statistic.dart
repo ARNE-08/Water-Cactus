@@ -97,16 +97,12 @@ class _StatisticPageState extends State<StatisticPage> {
             .first;
 
         // Fetch daily goal for the current day
-        final goalResponse = await http.post(
+        final goalResponse = await http.get(
           Uri.parse('$apiUrl/getGoalToday'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
           },
-          body: jsonEncode({
-            'startDate': startDate,
-            'endDate': endDate,
-          }),
         );
 
         // Fetch water intake data for the current day
@@ -286,13 +282,12 @@ class _StatisticPageState extends State<StatisticPage> {
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
-      final response = await http.post(
+      final response = await http.get(
         Uri.parse('$apiUrl/getGoalToday'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({}),
       );
 
       // Check if the request was successful (status code 200)
