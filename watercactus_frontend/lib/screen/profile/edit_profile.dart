@@ -182,7 +182,7 @@ Future<void> _updateProfilePicture() async {
   } else {
     print("No token found, current password is empty, or profile picture URL is not selected");
   }
-  
+
   // Check if we should show success dialog
   _checkShowSuccessDialog();
 }
@@ -223,7 +223,7 @@ Future<void> _updateEmail() async {
   } else {
     print('No token found, current password is empty, or new email is empty');
   }
-  
+
   // Check if we should show success dialog
   _checkShowSuccessDialog();
 }
@@ -264,7 +264,7 @@ Future<void> _updatePassword() async {
   } else {
     print('No token found, current password is empty, or new password is empty');
   }
-  
+
   // Check if we should show success dialog
   _checkShowSuccessDialog();
 }
@@ -411,41 +411,38 @@ void _showFailedPasswordDialog(BuildContext context, String errorMessage) {
   }
 }
 
-
-
-
   Widget buildProfileImages() {
-    return SizedBox(
-      height: 75,
-      child: ListView.builder(
-        key: const PageStorageKey('profileImages'),
-        scrollDirection: Axis.horizontal,
-        itemCount: profileImages.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _profilePictureUrl = profileImages[index];
-                });
-              },
-              child: SizedBox(
-                height: 65,
-                width: 65,
-                child: ClipOval(
-                  child: Image.asset(
-                    profileImages[index],
-                    fit: BoxFit.cover,
-                  ),
+  return SizedBox(
+    height: 75,
+    child: ListView.builder(
+      key: const PageStorageKey('profileImages'),
+      scrollDirection: Axis.horizontal,
+      itemCount: profileImages.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _profilePictureUrl = profileImages[index];
+              });
+            },
+            child: SizedBox(
+              height: 65,
+              width: 65,
+              child: ClipOval(
+                child: Image.asset(
+                  profileImages[index],
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
 
   bool _obscureText = true;
 
@@ -486,14 +483,10 @@ void _showFailedPasswordDialog(BuildContext context, String errorMessage) {
                     width: 160,
                     child: ClipOval(
                       child: _profilePictureUrl != null
-                          ? Image.network(
-                              _profilePictureUrl!,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              picture,
-                              fit: BoxFit.cover,
-                            ),
+                            ? (_profilePictureUrl!.startsWith('http')
+                                ? Image.network(_profilePictureUrl!, fit: BoxFit.cover)
+                                : Image.asset(_profilePictureUrl!, fit: BoxFit.cover))
+                            : Image.asset(picture, fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(height: 10),

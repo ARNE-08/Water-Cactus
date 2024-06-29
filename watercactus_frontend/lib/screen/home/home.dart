@@ -202,14 +202,10 @@ class _HomePageState extends State<HomePage> {
         // print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         await _getUnit(token);
-        print('get unit object: $_unit');
+        // print('get unit object: $_unit');
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
-          print('dailyGoalllll: $dailyGoal');
-          // (_unit == 'ml')
-          //     ? dailyGoal = dailyGoal
-          //     : dailyGoal = (dailyGoal / 29.5735);
         });
       } else if (response.statusCode == 204) {
         setState(() {
@@ -337,7 +333,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               TextSpan(
                                 text: '${_calculatedPercentage.toStringAsFixed(2)} % of your daily target\n',
-                                style: CustomTextStyle.poppins4,
+                                style: CustomTextStyle.poppins4.copyWith(fontSize: 12),
                               ),
                             ],
                           ),
