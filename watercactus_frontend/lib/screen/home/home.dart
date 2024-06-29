@@ -181,14 +181,12 @@ class _HomePageState extends State<HomePage> {
     try {
       // Make the HTTP POST request
       // print('Tokenn: $token');
-      final response = await http.post(
+      final response = await http.get(
         Uri.parse('$apiUrl/getGoalToday'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-        }),
       );
 
       // Check if the request was successful (status code 200)
@@ -205,7 +203,7 @@ class _HomePageState extends State<HomePage> {
           print('dailyGoal: $dailyGoal');
           (_unit == 'ml')
               ? dailyGoal = dailyGoal
-              : dailyGoal = (dailyGoal * 29.5735); // Convert ml to oz
+              : dailyGoal = (dailyGoal / 29.5735); // Convert ml to oz
         });
       } else if (response.statusCode == 204) {
         setState(() {

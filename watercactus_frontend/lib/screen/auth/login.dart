@@ -40,7 +40,7 @@ class LoginPage extends StatelessWidget {
       Navigator.pushNamed(context, '/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signup failed')),
+        SnackBar(content: Text('Login failed')),
       );
     }
   }
