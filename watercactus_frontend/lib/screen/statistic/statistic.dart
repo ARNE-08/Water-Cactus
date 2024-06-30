@@ -70,101 +70,100 @@ class _StatisticPageState extends State<StatisticPage> {
     }
   }
 
-  String calculateWaterIntake(double amount) {
+  double calculateWaterIntake(double amount) {
     if (_unit == 'ml') {
-      return amount.toStringAsFixed(2);
+      return double.parse(amount.toStringAsFixed(2));
     } else {
-      return (amount / 29.5735).toStringAsFixed(1); // Convert ml to oz
+      return double.parse((amount / 29.5735).toStringAsFixed(1)); // Convert ml to oz
     }
   }
 
   void fetchWeeklyWaterIntake() async {
-  String? token = Provider.of<TokenProvider>(context, listen: false).token;
-  final now = DateTime.now();
+    String? token = Provider.of<TokenProvider>(context, listen: false).token;
+    final now = DateTime.now();
 
-  try {
-    for (int i = 6; i >= 0; i--) {
-      final currentDate = now.subtract(Duration(days: i));
-      final startDate =
-          DateTime(currentDate.year, currentDate.month, currentDate.day)
-              .toIso8601String()
-              .split('T')
-              .first;
-      final endDate = DateTime(currentDate.year, currentDate.month,
-              currentDate.day, 23, 59, 59)
-          .toIso8601String()
-          .split('T')
-          .first;
+    try {
+      for (int i = 6; i >= 0; i--) {
+        final currentDate = now.subtract(Duration(days: i));
+        final startDate =
+            DateTime(currentDate.year, currentDate.month, currentDate.day)
+                .toIso8601String()
+                .split('T')
+                .first;
+        final endDate = DateTime(currentDate.year, currentDate.month,
+                currentDate.day, 23, 59, 59)
+            .toIso8601String()
+            .split('T')
+            .first;
 
-      // Fetch daily goal for the current day
-      final goalResponse = await http.get(
-        Uri.parse('$apiUrl/getGoalToday'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+        // Fetch daily goal for the current day
+        final goalResponse = await http.get(
+          Uri.parse('$apiUrl/getGoalToday'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
 
-      // Fetch water intake data for the current day
-      final waterResponse = await http.post(
-        Uri.parse('$apiUrl/getWater'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'startDate': startDate,
-          'endDate': endDate,
-        }),
-      );
+        // Fetch water intake data for the current day
+        final waterResponse = await http.post(
+          Uri.parse('$apiUrl/getWater'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+        );
 
-      if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
-        final Map<String, dynamic> fetchedGoalData =
-            json.decode(goalResponse.body);
-        final Map<String, dynamic> fetchedWaterData =
-            json.decode(waterResponse.body);
+        if (goalResponse.statusCode == 200 && waterResponse.statusCode == 200) {
+          final Map<String, dynamic> fetchedGoalData =
+              json.decode(goalResponse.body);
+          final Map<String, dynamic> fetchedWaterData =
+              json.decode(waterResponse.body);
 
-        List<dynamic> goalDataList = fetchedGoalData['data'];
-        List<dynamic> waterDataList = fetchedWaterData['data'];
+          List<dynamic> goalDataList = fetchedGoalData['data'];
+          List<dynamic> waterDataList = fetchedWaterData['data'];
 
-        double dailyGoal = goalDataList.isNotEmpty
-            ? (goalDataList[0]['goal'] as num).toDouble()
-            : 1.0;
-        double waterIntake = waterDataList.isNotEmpty
-            ? (waterDataList[0]['total_intake'] as num).toDouble()
-            : 0.0;
+          double dailyGoal = goalDataList.isNotEmpty
+              ? (goalDataList[0]['goal'] as num).toDouble()
+              : 1.0;
+          double waterIntake = waterDataList.isNotEmpty
+              ? (waterDataList[0]['total_intake'] as num).toDouble()
+              : 0.0;
 
-        print("--------------------");
-        print('Fetched data for ${currentDate.day}/${currentDate.month}:');
-        print('Daily Goal: $dailyGoal');
-        print('Daily Water Intake: $waterIntake');
+          // print("--------------------");
+         //print('Fetched data for ${currentDate.day}/${currentDate.month}:');
+          //print('Daily Goal: $dailyGoal');
+          //print('Daily Water Intake: $waterIntake');
 
-        setState(() {
-          weeklyWaterIntake.add({
-            'date': '${currentDate.day}/${currentDate.month}',
-            'waterIntake': waterIntake,
-            'dailyGoal': dailyGoal,
+          setState(() {
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': waterIntake,
+              'dailyGoal': dailyGoal,
+            });
           });
-        });
-      } else if (goalResponse.statusCode == 204) {
-        setState(() {
-          // If no goal data found, default to 1
-          weeklyWaterIntake.add({
-            'date': '${currentDate.day}/${currentDate.month}',
-            'waterIntake': 0.0,
-            'dailyGoal': 1.0,
+        } else if (goalResponse.statusCode == 204) {
+          setState(() {
+            // If no goal data found, default to 1
+            weeklyWaterIntake.add({
+              'date': '${currentDate.day}/${currentDate.month}',
+              'waterIntake': 0.0,
+              'dailyGoal': 1.0,
+            });
           });
-        });
-      } else {
-        print(
-            'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+        } else {
+          print(
+              'Failed to fetch data for ${currentDate.day}/${currentDate.month}');
+        }
       }
+    } catch (error) {
+      print('Error fetching weekly water data: $error');
     }
-  } catch (error) {
-    print('Error fetching weekly water data: $error');
   }
-}
-
 
   void fetchMonthlyWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
@@ -298,19 +297,17 @@ class _StatisticPageState extends State<StatisticPage> {
         // print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         await _getUnit(token);
+        // print('get unit object: $_unit');
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
           dailyGoal = dynamicList[0]['goal'];
-          print('dailyGoal: $dailyGoal');
-          (_unit == 'ml')
-              ? dailyGoal = dailyGoal
-              : dailyGoal = (dailyGoal * 29.5735); // Convert ml to oz
         });
       } else if (response.statusCode == 204) {
         setState(() {
-          dailyGoal = 1;
+         dailyGoal = 1;
         });
-      } else {
+      }
+      else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch goal data: ${response.statusCode}');
       }
@@ -551,7 +548,7 @@ class _StatisticPageState extends State<StatisticPage> {
                                   ),
                                   SizedBox(height: 10.0),
                                   Text(
-                                    '${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                    '$dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
                                     style: CustomTextStyle.poppins3.copyWith(
                                       fontSize: 12,
                                       color: Colors.black,
@@ -563,62 +560,60 @@ class _StatisticPageState extends State<StatisticPage> {
                           ],
                         )
                       : index == 1
-                          ? Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          PieChart(
-                                            PieChartData(
-                                              sections: waterIntake > dailyGoal
-                                                  ? [
-                                                      PieChartSectionData(
-                                                        value: dailyGoal,
-                                                        color: Colors.blue,
-                                                        radius: 20,
-                                                        showTitle: false,
-                                                      ),
-                                                    ]
-                                                  : [
-                                                      PieChartSectionData(
-                                                        value: waterIntake.toDouble(),
-                                                        color: Colors.blue,
-                                                        radius: 20,
-                                                        showTitle: false,
-                                                      ),
-                                                      PieChartSectionData(
-                                                        value: dailyGoal -
-                                                            waterIntake,
-                                                        color: Colors.grey,
-                                                        radius: 20,
-                                                        showTitle: false,
-                                                      ),
-                                                    ],
-                                              centerSpaceRadius: 100,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${(waterIntake.toDouble())} / ${calculateWaterIntake(dailyGoal)} ${_unit == 'ml' ? 'ml' : 'oz'}',
-                                            style: CustomTextStyle.poppins3
-                                                .copyWith(
-                                              fontSize: 18,
-                                              color: waterIntake >= dailyGoal
-                                                  ? Colors.blue
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
+    ? Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PieChart(
+                      PieChartData(
+                        sections: waterIntake >= dailyGoal
+                            ? [
+                                PieChartSectionData(
+                                  value: waterIntake.toDouble(),
+                                  color: Colors.blue,
+                                  radius: 20,
+                                  showTitle: false,
+                                ),
+                              ]
+                            : [
+                                PieChartSectionData(
+                                  value: waterIntake.toDouble(),
+                                  color: Colors.blue,
+                                  radius: 20,
+                                  showTitle: false,
+                                ),
+                                PieChartSectionData(
+                                  value: dailyGoal - waterIntake.toDouble(),
+                                  color: Colors.grey,
+                                  radius: 20,
+                                  showTitle: false,
+                                ),
+                              ],
+                        centerSpaceRadius: 100,
+                      ),
+                    ),
+                    Text(
+                      '${(waterIntake.toDouble())} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
+                      style: CustomTextStyle.poppins3.copyWith(
+                        fontSize: 18,
+                        color: waterIntake.toDouble() >= dailyGoal
+                            ? Colors.blue
+                            : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      )
                           : index == 2
                               ? Padding(
                                   padding: const EdgeInsets.all(20),
