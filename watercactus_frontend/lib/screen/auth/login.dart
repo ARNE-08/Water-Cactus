@@ -261,7 +261,7 @@ class LoginBox extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${jsonResponse['error']}')));
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: Server error')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: Incorrect Password or Email')));
       }
     }
   }
