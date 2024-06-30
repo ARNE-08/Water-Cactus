@@ -48,7 +48,7 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
         );
   });
 
-  void fetchReminder() async {
+  Future<void> fetchReminder() async {
     try {
       final response = await http.post(
         Uri.parse('$apiUrl/getReminder'),
@@ -269,17 +269,17 @@ class _NotiSettingPageState extends State<NotiSettingPage> {
       print('max Noti id: $maxNotiId');
       setState(() {
         reminderTime.add({'reminder_time': picked, 'enable': true, 'notification_id': maxNotiId + 1});
-        addReminder(picked.format(context), maxNotiId + 1);
-        fetchReminder();
-        buildReminder(reminderTime);
-        listLength = reminderTime.length;
-        notificationService.showScheduledDailyNotification(
-          id: maxNotiId,
-          title: "Drink Water",
-          body: "Time to drink some water!",
-          time: picked,
-        );
       });
+      await addReminder(picked.format(context), maxNotiId + 1);
+      await fetchReminder();
+      buildReminder(reminderTime);
+      listLength = reminderTime.length;
+      notificationService.showScheduledDailyNotification(
+        id: maxNotiId,
+        title: "Drink Water",
+        body: "Time to drink some water!",
+        time: picked,
+      );
     }
   }
 

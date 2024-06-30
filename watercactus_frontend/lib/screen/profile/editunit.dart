@@ -153,8 +153,8 @@ class _EditUnitPageState extends State<EditUnitPage> {
             ),
           ),
           Positioned(
-              top: 20,
-              left: 20,
+              top: 60,
+              left: 30,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context);

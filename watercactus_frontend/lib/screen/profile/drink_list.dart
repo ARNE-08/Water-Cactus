@@ -72,7 +72,7 @@ class _DrinkListPageState extends State<DrinkListPage> {
     AppColors.wine,
   ];
 
-  void fetchBeverage() async {
+  Future<void> fetchBeverage() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     try {
       final response = await http.post(
@@ -119,9 +119,7 @@ class _DrinkListPageState extends State<DrinkListPage> {
 
       if (response.statusCode == 200) {
         print('Success to set visible = 0 : ${response.statusCode}');
-        setState(() {
-          fetchBeverage();
-        });
+        await fetchBeverage();
       } else {
         print('Failed to set visible: ${response.statusCode}');
       }
@@ -153,23 +151,23 @@ class _DrinkListPageState extends State<DrinkListPage> {
     return beverageList.map((beverage) {
       int index = beverageList.indexOf(beverage);
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 7),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(15),
-        width: double.infinity,
-        height: 80,
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: 75,
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: index < 8
             ? Row(
                 children: [
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 15),
                   Image.asset(
                     imagePaths[index],
                     height: 50,
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 25),
                   Text(
                     beverageNames[index],
                     style: CustomTextStyle.poppins6,
@@ -178,9 +176,9 @@ class _DrinkListPageState extends State<DrinkListPage> {
               )
             : Row(
                 children: [
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 15),
                   buildAddDrinkImage(beverage['bottle_id'], beverage['color']),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 25),
                   Text(
                     beverage['name'].toUpperCase(),
                     style: CustomTextStyle.poppins6,
@@ -202,7 +200,7 @@ class _DrinkListPageState extends State<DrinkListPage> {
                         ),
                       );
                       if (result == true) {
-                        fetchBeverage();
+                        await fetchBeverage();
                       }
                     },
                   ),
@@ -257,7 +255,7 @@ class _DrinkListPageState extends State<DrinkListPage> {
                     ),
                   );
                   if (result == true) {
-                    fetchBeverage();
+                    await fetchBeverage();
                   }
                 },
                 child: Text('+ CREATE NEW DRINK', style: CustomTextStyle.poppins3.copyWith(color: AppColors.white, fontSize: 14)),

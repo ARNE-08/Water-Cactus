@@ -102,7 +102,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
               color: AppColors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color: selectedBottleIndex == index ? AppColors.darkGrey : AppColors.white,
+                color: selectedBottleIndex == index ? Colors.amber : AppColors.white,
                 width: 2.5,
               ),
             ),
@@ -173,8 +173,8 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
         color: AppColors.white,
         shape: BoxShape.circle,
         border: Border.all(
-          color: AppColors.white,
-          width: 1.5,
+          color: Colors.white,
+          width: 3,
         ),
       ),
       child: Padding(
@@ -217,7 +217,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Center(
             child: Column(
               children: [
@@ -254,7 +254,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                           const SizedBox(height: 10),
                           buildColor(colors),
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
+                            width: MediaQuery.of(context).size.width * 0.9,
                             child: Form(
                               key: _formKey,
                               child: Column(
