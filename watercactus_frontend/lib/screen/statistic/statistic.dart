@@ -577,7 +577,7 @@ class _StatisticPageState extends State<StatisticPage> {
                             ? [
                                 PieChartSectionData(
                                   value: waterIntake.toDouble(),
-                                  color: Colors.grey,
+                                  color: Colors.blue,
                                   radius: 20,
                                   showTitle: false,
                                 ),
