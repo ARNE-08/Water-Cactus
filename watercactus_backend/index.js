@@ -52,7 +52,6 @@ app.post("/getMaxNoti", require("./controller/getMaxNoti"));
 app.post("/updateBeverage", require("./controller/updateBeverage"));
 app.post("/addGoal", require("./controller/addGoalLog"));
 app.post("/addReminder", require("./controller/addReminder"));
-app.get("/getGoalToday", require("./controller/getGoalToday"));
 app.post("/deleteReminder", require("./controller/deleteReminder"));
 
 app.get("/getGoalToday", require("./controller/getGoalToday"));
