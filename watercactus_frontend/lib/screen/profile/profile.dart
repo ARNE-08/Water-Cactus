@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:watercactus_frontend/theme/custom_theme.dart';
 import 'package:watercactus_frontend/theme/color_theme.dart';
 import 'package:watercactus_frontend/widget/card_carousel.dart';
@@ -131,7 +132,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       'Logout',
                       style: CustomTextStyle.poppins4.copyWith(color: Colors.white),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      // Clear the token
+                      final FlutterSecureStorage storage = FlutterSecureStorage();
+                      await storage.delete(key: 'jwt_token');
+
                       Navigator.of(context).pop(); // Close the dialog
                       Navigator.pushNamed(
                           context, '/login'); // Navigate to the login page
