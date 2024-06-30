@@ -74,7 +74,8 @@ class _StatisticPageState extends State<StatisticPage> {
     if (_unit == 'ml') {
       return double.parse(amount.toStringAsFixed(2));
     } else {
-      return double.parse((amount / 29.5735).toStringAsFixed(1)); // Convert ml to oz
+      return double.parse(
+          (amount / 29.5735).toStringAsFixed(1)); // Convert ml to oz
     }
   }
 
@@ -135,7 +136,7 @@ class _StatisticPageState extends State<StatisticPage> {
               : 0.0;
 
           // print("--------------------");
-         //print('Fetched data for ${currentDate.day}/${currentDate.month}:');
+          //print('Fetched data for ${currentDate.day}/${currentDate.month}:');
           //print('Daily Goal: $dailyGoal');
           //print('Daily Water Intake: $waterIntake');
 
@@ -228,8 +229,14 @@ class _StatisticPageState extends State<StatisticPage> {
   void fetchWaterIntake() async {
     String? token = Provider.of<TokenProvider>(context, listen: false).token;
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String().split('T').first;
+    final startDate = DateTime(now.year, now.month, now.day)
+        .toIso8601String()
+        .split('T')
+        .first;
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59)
+        .toIso8601String()
+        .split('T')
+        .first;
     try {
       // Make the HTTP POST request
       final response = await http.post(
@@ -248,7 +255,8 @@ class _StatisticPageState extends State<StatisticPage> {
       if (response.statusCode == 200) {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch water data: ${response.statusCode}');
-        final Map<String, dynamic> fetchedWaterData = json.decode(response.body);
+        final Map<String, dynamic> fetchedWaterData =
+            json.decode(response.body);
         // print('fetched water data: ${fetchedWaterData['data']}');
         // Store the fetched data in the list
         await _getUnit(token);
@@ -265,8 +273,7 @@ class _StatisticPageState extends State<StatisticPage> {
         setState(() {
           waterIntake = 0;
         });
-      }
-      else {
+      } else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch water data: ${response.statusCode}');
       }
@@ -304,10 +311,9 @@ class _StatisticPageState extends State<StatisticPage> {
         });
       } else if (response.statusCode == 204) {
         setState(() {
-         dailyGoal = 1;
+          dailyGoal = 1;
         });
-      }
-      else {
+      } else {
         // Handle other status codes (e.g., 400, 401, etc.)
         print('Failed to fetch goal data: ${response.statusCode}');
       }
@@ -560,61 +566,67 @@ class _StatisticPageState extends State<StatisticPage> {
                           ],
                         )
                       : index == 1
-    ? Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PieChart(
-                      PieChartData(
-                        startDegreeOffset: 270,
-                        sections: waterIntake >= dailyGoal
-                            ? [
-                                PieChartSectionData(
-                                  value: waterIntake.toDouble(),
-                                  color: Colors.grey,
-                                  radius: 20,
-                                  showTitle: false,
-                                ),
-                              ]
-                            : [
-                                PieChartSectionData(
-                                  value: waterIntake.toDouble(),
-                                  color: Colors.blue,
-                                  radius: 20,
-                                  showTitle: false,
-                                ),
-                                PieChartSectionData(
-                                  value: dailyGoal - waterIntake.toDouble(),
-                                  color: Colors.grey,
-                                  radius: 20,
-                                  showTitle: false,
-                                ),
-                              ],
-                        centerSpaceRadius: 100,
-                      ),
-                    ),
-                    Text(
-                      '${(waterIntake.toDouble())} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
-                      style: CustomTextStyle.poppins3.copyWith(
-                        fontSize: 18,
-                        color: waterIntake.toDouble() >= dailyGoal
-                            ? Colors.blue
-                            : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      )
+                          ? Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          PieChart(
+                                            PieChartData(
+                                              startDegreeOffset: 270,
+                                              sections: waterIntake >= dailyGoal
+                                                  ? [
+                                                      PieChartSectionData(
+                                                        value: waterIntake
+                                                            .toDouble(),
+                                                        color: Colors.blue,
+                                                        radius: 20,
+                                                        showTitle: false,
+                                                      ),
+                                                    ]
+                                                  : [
+                                                      PieChartSectionData(
+                                                        value: waterIntake
+                                                            .toDouble(),
+                                                        color: Colors.blue,
+                                                        radius: 20,
+                                                        showTitle: false,
+                                                      ),
+                                                      PieChartSectionData(
+                                                        value: dailyGoal -
+                                                            waterIntake
+                                                                .toDouble(),
+                                                        color: Colors.grey,
+                                                        radius: 20,
+                                                        showTitle: false,
+                                                      ),
+                                                    ],
+                                              centerSpaceRadius: 100,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${(waterIntake.toDouble())} / $dailyGoal ${_unit == 'ml' ? 'ml' : 'oz'}',
+                                            style: CustomTextStyle.poppins3
+                                                .copyWith(
+                                              fontSize: 18,
+                                              color: waterIntake.toDouble() >=
+                                                      dailyGoal
+                                                  ? Colors.blue
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : index == 2
                               ? Padding(
                                   padding: const EdgeInsets.all(20),
