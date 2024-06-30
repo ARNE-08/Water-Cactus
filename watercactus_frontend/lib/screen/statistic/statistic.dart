@@ -572,11 +572,12 @@ class _StatisticPageState extends State<StatisticPage> {
                   children: [
                     PieChart(
                       PieChartData(
+                        startDegreeOffset: 270,
                         sections: waterIntake >= dailyGoal
                             ? [
                                 PieChartSectionData(
                                   value: waterIntake.toDouble(),
-                                  color: Colors.blue,
+                                  color: Colors.grey,
                                   radius: 20,
                                   showTitle: false,
                                 ),
