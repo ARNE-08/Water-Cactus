@@ -102,7 +102,7 @@ class _EditUnitPageState extends State<EditUnitPage> {
         await _getUnit(token);
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
-          dailyGoal = dynamicList[0]['goal'];
+          dailyGoal = (dynamicList[0]['goal']).toDouble();
           print('dailyGoal when fetch: $dailyGoal');
           (_unit == 'ml')
               ? dailyGoal = _convertWaterUnit(dailyGoal, 'ml')

@@ -63,7 +63,7 @@ class StartPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 20),
-                      Image.asset('assets/cactus.png', width: 300),
+                      Image.asset('assets/Cactus.png', width: 300),
                     ],
                   ), // Example cactus image
                   SizedBox(height: 40),

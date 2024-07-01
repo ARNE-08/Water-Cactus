@@ -300,7 +300,7 @@ class _StatisticPageState extends State<StatisticPage> {
         // print('get unit object: $_unit');
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
-          dailyGoal = dynamicList[0]['goal'];
+          dailyGoal = (dynamicList[0]['goal']).toDouble();
         });
       } else if (response.statusCode == 204) {
         setState(() {

@@ -139,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       Navigator.of(context).pop(); // Close the dialog
                       Navigator.pushNamed(
-                          context, '/login'); // Navigate to the login page
+                          context, '/start'); // Navigate to the login page
                     },
                   ),
                 ],
