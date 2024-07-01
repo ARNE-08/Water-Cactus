@@ -496,33 +496,33 @@ void _showSuccessDialog(BuildContext context, String message) {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 20),
-                              Text('Email address',
-                                  style: CustomTextStyle.poppins4),
-                              const SizedBox(height: 10),
-                              TextField(
-                                controller: _newEmailController,
-                                decoration: InputDecoration(
-                                  hintText: 'new email address',
-                                  hintStyle: CustomTextStyle.poppins6
-                                      .copyWith(color: AppColors.grey),
-                                  prefixIcon: const Icon(Icons.mail,
-                                      color: Colors.white),
-                                  contentPadding:
-                                      const EdgeInsets.only(left: 15),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(50),
-                                    borderSide:
-                                        const BorderSide(color: Colors.white),
-                                  ),
-                                  enabledBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                ),
-                                style: CustomTextStyle.poppins6,
-                              ),
+                              // Text('Email address',
+                              //     style: CustomTextStyle.poppins4),
+                              // const SizedBox(height: 10),
+                              // TextField(
+                              //   controller: _newEmailController,
+                              //   decoration: InputDecoration(
+                              //     hintText: 'new email address',
+                              //     hintStyle: CustomTextStyle.poppins6
+                              //         .copyWith(color: AppColors.grey),
+                              //     prefixIcon: const Icon(Icons.mail,
+                              //         color: Colors.white),
+                              //     contentPadding:
+                              //         const EdgeInsets.only(left: 15),
+                              //     border: OutlineInputBorder(
+                              //       borderRadius: BorderRadius.circular(50),
+                              //       borderSide:
+                              //           const BorderSide(color: Colors.white),
+                              //     ),
+                              //     enabledBorder: const OutlineInputBorder(
+                              //       borderSide: BorderSide(color: Colors.white),
+                              //     ),
+                              //     focusedBorder: const OutlineInputBorder(
+                              //       borderSide: BorderSide(color: Colors.white),
+                              //     ),
+                              //   ),
+                              //   style: CustomTextStyle.poppins6,
+                              // ),
                               const SizedBox(height: 20),
                               Text('Current Password',
                                   style: CustomTextStyle.poppins4),
