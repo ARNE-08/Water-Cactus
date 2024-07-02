@@ -199,13 +199,14 @@ class _HomePageState extends State<HomePage> {
         // Parse the JSON response directly into a list of maps
         print('Succeed to fetch goal data: ${response.statusCode}');
         final Map<String, dynamic> fetchedGoalData = json.decode(response.body);
-        // print('fetched goal data: ${fetchedGoalData['data']}');
+        print('fetched goal data: ${fetchedGoalData['data']}');
         // Store the fetched data in the list
         await _getUnit(token);
         // print('get unit object: $_unit');
         setState(() {
           List<dynamic> dynamicList = fetchedGoalData['data'];
-          dailyGoal = dynamicList[0]['goal'];
+          dailyGoal = (dynamicList[0]['goal']).toDouble();
+          print('This is fetched dailyGoalllll: $dailyGoal');
         });
       } else if (response.statusCode == 204) {
         setState(() {

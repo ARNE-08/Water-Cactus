@@ -55,7 +55,7 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  void addBeverage() async {
+  Future<void> addBeverage() async {
     print('token from add drink: $token');
     print('name: ${_nameController.text}');
     print('bottle_id: $selectedBottleIndex');
@@ -307,11 +307,11 @@ class _AddDrinkPageState extends State<AddDrinkPage> {
                     fixedSize: MaterialStateProperty.all<Size>(Size(140, 50)),
                     backgroundColor: MaterialStateProperty.all<Color>(AppColors.brightBlue),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       // Add your logic here
                       print('Form is valid, proceed further');
-                      addBeverage();
+                      await addBeverage();
                       Navigator.pop(context, true);
                     } else {
                       print('Form is invalid');
